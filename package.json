@@ -1,0 +1,27 @@
+{
+  "name": "@camptocamp/geospatial-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/geojson": "^7946.0.13",
+    "@types/node": "^20.11.0",
+    "lerna": "^8.0.2",
+    "prettier": "^3.2.2",
+    "typedoc": "^0.25.7",
+    "typedoc-plugin-markdown": "^3.17.1",
+    "typedoc-vitepress-theme": "^1.0.0-next.0",
+    "typescript": "^5.3.3",
+    "vitepress": "^1.0.0-rc.36"
+  },
+  "dependencies": {
+    "chroma-js": "^2.4.2"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  }
+}

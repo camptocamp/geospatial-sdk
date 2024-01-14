@@ -1,0 +1,19 @@
+{
+  "name": "@camptocamp/geospatial-sdk-core",
+  "version": "0.0.0",
+  "description": "Core functions and models for the SDK",
+  "author": "Olivia <olivia.guyot@camptocamp.com>",
+  "homepage": "",
+  "license": "MIT",
+  "main": "lib/core.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "node ./__tests__/core.test.js"
+  }
+}
