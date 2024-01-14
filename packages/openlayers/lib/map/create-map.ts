@@ -126,11 +126,20 @@ export function createView(viewModel: MapContextView, map: Map): View {
   return view;
 }
 
+/**
+ * Create an OpenLayers map from a context
+ * @param context
+ */
 export function createMapFromContext(context: MapContext): Map {
   const map = new Map({});
   return resetMapFromContext(map, context);
 }
 
+/**
+ * Resets an OpenLayers map from a context; existing content will be cleared
+ * @param map
+ * @param context
+ */
 export function resetMapFromContext(map: Map, context: MapContext): Map {
   map.setView(createView(context.view, map));
   map.getLayers().clear();

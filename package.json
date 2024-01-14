@@ -6,12 +6,13 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@types/chroma-js": "^2.4.3",
     "@types/geojson": "^7946.0.13",
     "@types/node": "^20.11.0",
     "lerna": "^8.0.2",
     "prettier": "^3.2.2",
     "typedoc": "^0.25.7",
-    "typedoc-plugin-markdown": "^3.17.1",
+    "typedoc-plugin-markdown": "^4.0.0-next.40",
     "typedoc-vitepress-theme": "^1.0.0-next.0",
     "typescript": "^5.3.3",
     "vitepress": "^1.0.0-rc.36"
@@ -20,8 +21,9 @@
     "chroma-js": "^2.4.2"
   },
   "scripts": {
-    "docs:dev": "vitepress dev",
-    "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:dev": "npm run publish-typedoc && vitepress dev docs",
+    "docs:build": "npm run publish-typedoc && vitepress build docs",
+    "docs:preview": "npm run publish-typedoc && vitepress preview docs",
+    "publish-typedoc": "typedoc --options typedoc.json"
   }
 }
