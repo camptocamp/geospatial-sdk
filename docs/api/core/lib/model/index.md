@@ -6,17 +6,21 @@
 
 ### Interfaces
 
-- [MapContext](interfaces/MapContext.md)
-- [MapContextLayerWms](interfaces/MapContextLayerWms.md)
-- [MapContextLayerWmts](interfaces/MapContextLayerWmts.md)
-- [MapContextView](interfaces/MapContextView.md)
+| Interface | Description |
+| :------ | :------ |
+| [MapContext](interfaces/MapContext.md) | - |
+| [MapContextLayerWms](interfaces/MapContextLayerWms.md) | - |
+| [MapContextLayerWmts](interfaces/MapContextLayerWmts.md) | - |
+| [MapContextView](interfaces/MapContextView.md) | - |
 
 ### Type Aliases
 
-- [Coordinate](type-aliases/Coordinate.md)
-- [Extent](type-aliases/Extent.md)
-- [MapContextLayer](type-aliases/MapContextLayer.md)
-- [MapContextLayerGeojson](type-aliases/MapContextLayerGeojson.md)
+| Type alias | Description |
+| :------ | :------ |
+| [Coordinate](type-aliases/Coordinate.md) | - |
+| [Extent](type-aliases/Extent.md) | Min X, min Y, max X, max Y |
+| [MapContextLayer](type-aliases/MapContextLayer.md) | - |
+| [MapContextLayerGeojson](type-aliases/MapContextLayerGeojson.md) | - |
 
 ***
 

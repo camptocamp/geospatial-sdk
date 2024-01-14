@@ -1,26 +1,30 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / StyleByGeometryType
 
-# Type alias: StyleByGeometryType
+# StyleByGeometryType
 
-> **StyleByGeometryType**: `Object`
+```ts
+type StyleByGeometryType: Object;
+```
 
 ## Type declaration
 
 ### line
 
-> **line**: `Style` \| `Style`[]
+```ts
+line: Style | Style[];
+```
 
 ### point
 
-> **point**: `Style` \| `Style`[]
+```ts
+point: Style | Style[];
+```
 
 ### polygon
 
-> **polygon**: `Style` \| `Style`[]
-
-## Source
-
-packages/openlayers/lib/map/styles.ts:11
+```ts
+polygon: Style | Style[];
+```
 
 ***
 

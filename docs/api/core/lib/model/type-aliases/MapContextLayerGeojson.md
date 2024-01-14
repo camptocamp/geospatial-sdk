@@ -1,12 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContextLayerGeojson
 
-# Type alias: MapContextLayerGeojson
+# MapContextLayerGeojson
 
-> **MapContextLayerGeojson**: `LayerGeojsonWithUrl` \| `LayerGeojsonWithData`
-
-## Source
-
-packages/core/lib/model/map-context.ts:38
+```ts
+type MapContextLayerGeojson: LayerGeojsonWithUrl | LayerGeojsonWithData;
+```
 
 ***
 

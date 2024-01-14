@@ -1,62 +1,52 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContextView
 
-# Interface: MapContextView
+# MapContextView
 
 ## Properties
 
 ### center
 
-> **center**: [`Coordinate`](../type-aliases/Coordinate.md)
+```ts
+center: Coordinate;
+```
 
 Expressed in longitude/latitude
-
-#### Source
-
-packages/core/lib/model/map-context.ts:62
 
 ***
 
 ### extent?
 
-> **extent**?: [`Extent`](../type-aliases/Extent.md)
+```ts
+extent?: Extent;
+```
 
 Expressed in longitude/latitude
-
-#### Source
-
-packages/core/lib/model/map-context.ts:64
 
 ***
 
 ### maxExtent?
 
-> **maxExtent**?: [`Extent`](../type-aliases/Extent.md)
+```ts
+maxExtent?: Extent;
+```
 
 Expressed in longitude/latitude
-
-#### Source
-
-packages/core/lib/model/map-context.ts:66
 
 ***
 
 ### maxZoom?
 
-> **maxZoom**?: `number`
-
-#### Source
-
-packages/core/lib/model/map-context.ts:65
+```ts
+maxZoom?: number;
+```
 
 ***
 
 ### zoom
 
-> **zoom**: `number`
-
-#### Source
-
-packages/core/lib/model/map-context.ts:63
+```ts
+zoom: number;
+```
 
 ***
 

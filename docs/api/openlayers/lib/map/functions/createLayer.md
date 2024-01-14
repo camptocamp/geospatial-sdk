@@ -1,8 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / createLayer
 
-# Function: createLayer()
+# createLayer()
 
-> **createLayer**(`layerModel`): `Layer`
+```ts
+createLayer(layerModel): Layer
+```
 
 ## Parameters
 
@@ -11,10 +13,6 @@
 ## Returns
 
 `Layer`
-
-## Source
-
-packages/openlayers/lib/map/create-map.ts:24
 
 ***
 

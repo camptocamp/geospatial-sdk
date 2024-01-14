@@ -1,8 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / createMapFromContext
 
-# Function: createMapFromContext()
+# createMapFromContext()
 
-> **createMapFromContext**(`context`): `Map`
+```ts
+createMapFromContext(context): Map
+```
 
 Create an OpenLayers map from a context
 
@@ -13,10 +15,6 @@ Create an OpenLayers map from a context
 ## Returns
 
 `Map`
-
-## Source
-
-packages/openlayers/lib/map/create-map.ts:133
 
 ***
 

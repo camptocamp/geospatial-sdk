@@ -6,7 +6,9 @@
 
 ### Functions
 
-- [removeSearchParams](functions/removeSearchParams.md)
+| Function | Description |
+| :------ | :------ |
+| [removeSearchParams](functions/removeSearchParams.md) | Removes the given search params from the URL completely; this is case-insensitive |
 
 ***
 

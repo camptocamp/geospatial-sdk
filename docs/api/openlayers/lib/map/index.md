@@ -6,20 +6,26 @@
 
 ### Interfaces
 
-- [CreateStyleOptions](interfaces/CreateStyleOptions.md)
+| Interface | Description |
+| :------ | :------ |
+| [CreateStyleOptions](interfaces/CreateStyleOptions.md) | - |
 
 ### Type Aliases
 
-- [StyleByGeometryType](type-aliases/StyleByGeometryType.md)
+| Type alias | Description |
+| :------ | :------ |
+| [StyleByGeometryType](type-aliases/StyleByGeometryType.md) | - |
 
 ### Functions
 
-- [createLayer](functions/createLayer.md)
-- [createMapFromContext](functions/createMapFromContext.md)
-- [createView](functions/createView.md)
-- [defaultHighlightStyle](functions/defaultHighlightStyle.md)
-- [defaultStyle](functions/defaultStyle.md)
-- [resetMapFromContext](functions/resetMapFromContext.md)
+| Function | Description |
+| :------ | :------ |
+| [createLayer](functions/createLayer.md) | - |
+| [createMapFromContext](functions/createMapFromContext.md) | Create an OpenLayers map from a context |
+| [createView](functions/createView.md) | - |
+| [defaultHighlightStyle](functions/defaultHighlightStyle.md) | - |
+| [defaultStyle](functions/defaultStyle.md) | - |
+| [resetMapFromContext](functions/resetMapFromContext.md) | Resets an OpenLayers map from a context; existing content will be cleared |
 
 ***
 

@@ -1,8 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / defaultStyle
 
-# Function: defaultStyle()
+# defaultStyle()
 
-> **defaultStyle**(`arg0`, `arg1`): `void` \| `Style` \| `Style`[]
+```ts
+defaultStyle(arg0, arg1): void | Style | Style[]
+```
 
 ## Parameters
 
@@ -13,10 +15,6 @@
 ## Returns
 
 `void` \| `Style` \| `Style`[]
-
-## Source
-
-packages/openlayers/lib/map/styles.ts:92
 
 ***
 

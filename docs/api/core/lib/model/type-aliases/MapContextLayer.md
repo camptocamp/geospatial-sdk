@@ -1,12 +1,15 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContextLayer
 
-# Type alias: MapContextLayer
+# MapContextLayer
 
-> **MapContextLayer**: [`MapContextLayerWms`](../interfaces/MapContextLayerWms.md) \| [`MapContextLayerWmts`](../interfaces/MapContextLayerWmts.md) \| `MapContextLayerWfs` \| `MapContextLayerXyz` \| [`MapContextLayerGeojson`](MapContextLayerGeojson.md)
-
-## Source
-
-packages/core/lib/model/map-context.ts:42
+```ts
+type MapContextLayer: 
+  | MapContextLayerWms
+  | MapContextLayerWmts
+  | MapContextLayerWfs
+  | MapContextLayerXyz
+  | MapContextLayerGeojson;
+```
 
 ***
 

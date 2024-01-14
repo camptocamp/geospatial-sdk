@@ -1,14 +1,12 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / Extent
 
-# Type alias: Extent
+# Extent
 
-> **Extent**: [`number`, `number`, `number`, `number`]
+```ts
+type Extent: [number, number, number, number];
+```
 
 Min X, min Y, max X, max Y
-
-## Source
-
-packages/core/lib/model/map-context.ts:54
 
 ***
 

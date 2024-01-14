@@ -1,7 +1,0 @@
-{
-  // Comments are supported, like tsconfig.json
-  "entryPoints": ["./packages/**/index.ts"],
-  "out": "./docs/api",
-  "basePath": "./",
-  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"]
-}

@@ -1,8 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/utils](../index.md) / removeSearchParams
 
-# Function: removeSearchParams()
+# removeSearchParams()
 
-> **removeSearchParams**(`url`, `searchParams`): `string`
+```ts
+removeSearchParams(url, searchParams): string
+```
 
 Removes the given search params from the URL completely; this is case-insensitive
 
@@ -15,10 +17,6 @@ Removes the given search params from the URL completely; this is case-insensitiv
 ## Returns
 
 `string`
-
-## Source
-
-packages/core/lib/utils/url.ts:6
 
 ***
 

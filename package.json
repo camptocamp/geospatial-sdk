@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
+    "docs",
     "packages/*"
   ],
   "devDependencies": {
@@ -11,19 +12,15 @@
     "@types/node": "^20.11.0",
     "lerna": "^8.0.2",
     "prettier": "^3.2.2",
-    "typedoc": "^0.25.7",
-    "typedoc-plugin-markdown": "^4.0.0-next.40",
-    "typedoc-vitepress-theme": "^1.0.0-next.0",
-    "typescript": "^5.3.3",
-    "vitepress": "^1.0.0-rc.36"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "chroma-js": "^2.4.2"
   },
   "scripts": {
-    "docs:dev": "npm run publish-typedoc && vitepress dev docs",
-    "docs:build": "npm run publish-typedoc && vitepress build docs",
-    "docs:preview": "npm run publish-typedoc && vitepress preview docs",
+    "docs:dev": "npm run docs:dev --workspace docs",
+    "docs:build": "npm run docs:build --workspace docs",
+    "docs:preview": "npm run docs:preview --workspace docs",
     "publish-typedoc": "typedoc --options typedoc.json"
   }
 }

@@ -1,12 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / Coordinate
 
-# Type alias: Coordinate
+# Coordinate
 
-> **Coordinate**: [`number`, `number`]
-
-## Source
-
-packages/core/lib/model/map-context.ts:49
+```ts
+type Coordinate: [number, number];
+```
 
 ***
 

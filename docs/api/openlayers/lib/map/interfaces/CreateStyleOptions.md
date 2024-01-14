@@ -1,26 +1,22 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / CreateStyleOptions
 
-# Interface: CreateStyleOptions
+# CreateStyleOptions
 
 ## Properties
 
 ### color
 
-> **color**: `string`
-
-#### Source
-
-packages/openlayers/lib/map/styles.ts:7
+```ts
+color: string;
+```
 
 ***
 
 ### isFocused?
 
-> **isFocused**?: `boolean`
-
-#### Source
-
-packages/openlayers/lib/map/styles.ts:8
+```ts
+isFocused?: boolean;
+```
 
 ***
 

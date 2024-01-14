@@ -1,8 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / createView
 
-# Function: createView()
+# createView()
 
-> **createView**(`viewModel`, `map`): `View`
+```ts
+createView(viewModel, map): View
+```
 
 ## Parameters
 
@@ -13,10 +15,6 @@
 ## Returns
 
 `View`
-
-## Source
-
-packages/openlayers/lib/map/create-map.ts:108
 
 ***
 

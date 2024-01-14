@@ -1,36 +1,30 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContextLayerWms
 
-# Interface: MapContextLayerWms
+# MapContextLayerWms
 
 ## Properties
 
 ### name
 
-> **name**: `string`
-
-#### Source
-
-packages/core/lib/model/map-context.ts:7
+```ts
+name: string;
+```
 
 ***
 
 ### type
 
-> **type**: `"wms"`
-
-#### Source
-
-packages/core/lib/model/map-context.ts:5
+```ts
+type: "wms";
+```
 
 ***
 
 ### url
 
-> **url**: `string`
-
-#### Source
-
-packages/core/lib/model/map-context.ts:6
+```ts
+url: string;
+```
 
 ***
 

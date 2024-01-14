@@ -1,10 +1,12 @@
-# @camptocamp/geospatial-sdk
+# API Reference
 
 ## Modules
 
-- [core/lib/model](core/lib/model/index.md)
-- [core/lib/utils](core/lib/utils/index.md)
-- [openlayers/lib/map](openlayers/lib/map/index.md)
+| Module | Description |
+| :------ | :------ |
+| [core/lib/model](core/lib/model/index.md) | - |
+| [core/lib/utils](core/lib/utils/index.md) | - |
+| [openlayers/lib/map](openlayers/lib/map/index.md) | - |
 
 ***
 

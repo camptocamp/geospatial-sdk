@@ -1,8 +1,10 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / resetMapFromContext
 
-# Function: resetMapFromContext()
+# resetMapFromContext()
 
-> **resetMapFromContext**(`map`, `context`): `Map`
+```ts
+resetMapFromContext(map, context): Map
+```
 
 Resets an OpenLayers map from a context; existing content will be cleared
 
@@ -15,10 +17,6 @@ Resets an OpenLayers map from a context; existing content will be cleared
 ## Returns
 
 `Map`
-
-## Source
-
-packages/openlayers/lib/map/create-map.ts:143
 
 ***
 

@@ -1,26 +1,22 @@
 [@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContext
 
-# Interface: MapContext
+# MapContext
 
 ## Properties
 
 ### layers
 
-> **layers**: [`MapContextLayer`](../type-aliases/MapContextLayer.md)[]
-
-#### Source
-
-packages/core/lib/model/map-context.ts:70
+```ts
+layers: MapContextLayer[];
+```
 
 ***
 
 ### view
 
-> **view**: [`MapContextView`](MapContextView.md)
-
-#### Source
-
-packages/core/lib/model/map-context.ts:71
+```ts
+view: MapContextView;
+```
 
 ***
 
