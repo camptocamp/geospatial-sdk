@@ -1,6 +1,6 @@
 {
   "name": "@camptocamp/geospatial-sdk-core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Core functions and models for the SDK",
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "",
