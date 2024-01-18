@@ -10,7 +10,8 @@
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "",
   "license": "MIT",
-  "main": "lib/openlayers.js",
+  "main": "index.ts",
+  "type": "module",
   "directories": {
     "lib": "lib"
   },

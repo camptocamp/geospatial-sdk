@@ -5,7 +5,8 @@
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "",
   "license": "MIT",
-  "main": "lib/core.js",
+  "main": "index.ts",
+  "type": "module",
   "directories": {
     "lib": "lib"
   },

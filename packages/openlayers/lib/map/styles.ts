@@ -14,7 +14,7 @@ export type StyleByGeometryType = {
   point: Style | Style[];
 };
 
-function createGeometryStyles(
+export function createGeometryStyles(
   options: CreateStyleOptions,
 ): StyleByGeometryType {
   const { color, isFocused } = options;
@@ -62,7 +62,7 @@ function createGeometryStyles(
   };
 }
 
-function createStyleFunction(
+export function createStyleFunction(
   styleByGeometryType: StyleByGeometryType,
 ): StyleFunction {
   return (feature: FeatureLike): Style | Style[] => {

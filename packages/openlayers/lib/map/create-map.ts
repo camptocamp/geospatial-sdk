@@ -70,7 +70,7 @@ export function createLayer(layerModel: MapContextLayer): Layer {
         style,
       });
     case "geojson": {
-      if ("url" in layerModel) {
+      if (layerModel.url !== undefined) {
         return new VectorLayer({
           source: new VectorSource({
             format: new GeoJSON(),
@@ -112,7 +112,7 @@ export function createView(viewModel: MapContextView, map: Map): View {
     : [0, 0];
   const view = new View({
     center,
-    zoom,
+    zoom: zoom ?? 0,
     maxZoom,
     extent: maxExtent,
     multiWorld: false,

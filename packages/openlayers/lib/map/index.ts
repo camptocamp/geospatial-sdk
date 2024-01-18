@@ -1,2 +1,2 @@
 export * from "./styles";
-export * from "./create-map";
+export { createMapFromContext, resetMapFromContext } from "./create-map";
