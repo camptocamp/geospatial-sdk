@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContextLayer
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayer
 
 # MapContextLayer
 
@@ -10,6 +10,10 @@ type MapContextLayer:
   | MapContextLayerXyz
   | MapContextLayerGeojson;
 ```
+
+## Source
+
+[packages/core/lib/model/map-context.ts:39](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L39)
 
 ***
 

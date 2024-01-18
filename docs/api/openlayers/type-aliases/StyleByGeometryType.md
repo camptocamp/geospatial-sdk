@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../../../index.md) / [openlayers/lib/map](../index.md) / StyleByGeometryType
+[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / StyleByGeometryType
 
 # StyleByGeometryType
 
@@ -25,6 +25,10 @@ point: Style | Style[];
 ```ts
 polygon: Style | Style[];
 ```
+
+## Source
+
+[packages/openlayers/lib/map/styles.ts:11](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/openlayers/lib/map/styles.ts#L11)
 
 ***
 

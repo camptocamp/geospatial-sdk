@@ -4,9 +4,8 @@
 
 | Module | Description |
 | :------ | :------ |
-| [core/lib/model](core/lib/model/index.md) | - |
-| [core/lib/utils](core/lib/utils/index.md) | - |
-| [openlayers/lib/map](openlayers/lib/map/index.md) | - |
+| [core](core/index.md) | - |
+| [openlayers](openlayers/index.md) | - |
 
 ***
 

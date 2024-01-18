@@ -1,11 +1,11 @@
 {
-  "entryPoints": ["../packages/**/index.ts"],
+  "entryPoints": ["../packages/*/index.ts"],
   "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
   "githubPages": false,
   "readme": "none",
   "indexFormat": "table",
   "useCodeBlocks": true,
-  "disableSources": true,
+  "disableSources": false,
   "textContentMappings": {
     "title.indexPage": "API Reference",
     "title.memberPage": "{name}"

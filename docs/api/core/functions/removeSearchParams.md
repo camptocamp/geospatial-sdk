@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/utils](../index.md) / removeSearchParams
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / removeSearchParams
 
 # removeSearchParams()
 
@@ -17,6 +17,10 @@ Removes the given search params from the URL completely; this is case-insensitiv
 ## Returns
 
 `string`
+
+## Source
+
+[packages/core/lib/utils/url.ts:6](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/utils/url.ts#L6)
 
 ***
 

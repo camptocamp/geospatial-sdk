@@ -1,6 +1,6 @@
-[@camptocamp/geospatial-sdk](../../../index.md) / openlayers/lib/map
+[@camptocamp/geospatial-sdk](../index.md) / openlayers
 
-# openlayers/lib/map
+# openlayers
 
 ## Index
 
@@ -20,9 +20,9 @@
 
 | Function | Description |
 | :------ | :------ |
-| [createLayer](functions/createLayer.md) | - |
+| [createGeometryStyles](functions/createGeometryStyles.md) | - |
 | [createMapFromContext](functions/createMapFromContext.md) | Create an OpenLayers map from a context |
-| [createView](functions/createView.md) | - |
+| [createStyleFunction](functions/createStyleFunction.md) | - |
 | [defaultHighlightStyle](functions/defaultHighlightStyle.md) | - |
 | [defaultStyle](functions/defaultStyle.md) | - |
 | [resetMapFromContext](functions/resetMapFromContext.md) | Resets an OpenLayers map from a context; existing content will be cleared |

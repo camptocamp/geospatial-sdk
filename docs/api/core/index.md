@@ -1,6 +1,6 @@
-[@camptocamp/geospatial-sdk](../../../index.md) / core/lib/model
+[@camptocamp/geospatial-sdk](../index.md) / core
 
-# core/lib/model
+# core
 
 ## Index
 
@@ -9,8 +9,10 @@
 | Interface | Description |
 | :------ | :------ |
 | [MapContext](interfaces/MapContext.md) | - |
+| [MapContextLayerWfs](interfaces/MapContextLayerWfs.md) | - |
 | [MapContextLayerWms](interfaces/MapContextLayerWms.md) | - |
 | [MapContextLayerWmts](interfaces/MapContextLayerWmts.md) | - |
+| [MapContextLayerXyz](interfaces/MapContextLayerXyz.md) | - |
 | [MapContextView](interfaces/MapContextView.md) | - |
 
 ### Type Aliases
@@ -21,6 +23,13 @@
 | [Extent](type-aliases/Extent.md) | Min X, min Y, max X, max Y |
 | [MapContextLayer](type-aliases/MapContextLayer.md) | - |
 | [MapContextLayerGeojson](type-aliases/MapContextLayerGeojson.md) | - |
+
+### Functions
+
+| Function | Description |
+| :------ | :------ |
+| [deepFreeze](functions/deepFreeze.md) | - |
+| [removeSearchParams](functions/removeSearchParams.md) | Removes the given search params from the URL completely; this is case-insensitive |
 
 ***
 

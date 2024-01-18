@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / Extent
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / Extent
 
 # Extent
 
@@ -7,6 +7,10 @@ type Extent: [number, number, number, number];
 ```
 
 Min X, min Y, max X, max Y
+
+## Source
+
+[packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L51)
 
 ***
 

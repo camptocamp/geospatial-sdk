@@ -1,10 +1,14 @@
-[@camptocamp/geospatial-sdk](../../../../index.md) / [core/lib/model](../index.md) / MapContextLayerGeojson
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerGeojson
 
 # MapContextLayerGeojson
 
 ```ts
 type MapContextLayerGeojson: LayerGeojsonWithUrl | LayerGeojsonWithData;
 ```
+
+## Source
+
+[packages/core/lib/model/map-context.ts:37](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L37)
 
 ***
 
