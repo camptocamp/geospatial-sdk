@@ -1,6 +1,5 @@
 import { GeocodingResult } from "../model";
-import { GeocodeResponse } from "@p-j/geocodejson-types";
-import { Feature, FeatureCollection, Geometry } from "geojson";
+import { Geometry } from "geojson";
 
 interface DataGouvFrResponseItem {
   type: "Feature";
