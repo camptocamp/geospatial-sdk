@@ -22,9 +22,13 @@
     "test": "vitest"
   },
   "devDependencies": {
+    "@types/chroma-js": "^2.4.3",
     "ol": "^8.2.0"
   },
   "peerDependencies": {
     "ol": ">6.x"
+  },
+  "dependencies": {
+    "chroma-js": "^2.4.2"
   }
 }

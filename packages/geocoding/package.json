@@ -1,0 +1,32 @@
+{
+  "name": "@camptocamp/geospatial-sdk-geocoding",
+  "version": "0.0.1",
+  "description": "Geocoding-related components",
+  "keywords": [
+    "geocoding"
+  ],
+  "author": "Olivia <olivia.guyot@camptocamp.com>",
+  "homepage": "https://github.com/jahow/geospatial-sdk#readme",
+  "license": "MIT",
+  "main": "index.ts",
+  "type": "module",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jahow/geospatial-sdk.git"
+  },
+  "scripts": {
+    "test": "vitest"
+  },
+  "bugs": {
+    "url": "https://github.com/jahow/geospatial-sdk/issues"
+  },
+  "devDependencies": {
+    "@p-j/geocodejson-types": "^4.1.2"
+  }
+}
