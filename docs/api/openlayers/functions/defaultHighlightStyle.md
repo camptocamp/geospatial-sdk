@@ -18,7 +18,7 @@ defaultHighlightStyle(arg0, arg1): void | Style | Style[]
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:98](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/openlayers/lib/map/styles.ts#L98)
+[packages/openlayers/lib/map/styles.ts:98](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L98)
 
 ***
 

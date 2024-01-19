@@ -5,6 +5,7 @@
 | Module | Description |
 | :------ | :------ |
 | [core](core/index.md) | - |
+| [geocoding](geocoding/index.md) | - |
 | [openlayers](openlayers/index.md) | - |
 
 ***

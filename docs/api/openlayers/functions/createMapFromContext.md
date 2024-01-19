@@ -18,7 +18,7 @@ Create an OpenLayers map from a context
 
 ## Source
 
-[packages/openlayers/lib/map/create-map.ts:133](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/openlayers/lib/map/create-map.ts#L133)
+[packages/openlayers/lib/map/create-map.ts:133](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/create-map.ts#L133)
 
 ***
 

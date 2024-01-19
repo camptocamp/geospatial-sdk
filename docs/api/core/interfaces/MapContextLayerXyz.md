@@ -12,7 +12,7 @@ type: "xyz";
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:22](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L22)
+[packages/core/lib/model/map-context.ts:22](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L22)
 
 ***
 
@@ -24,7 +24,7 @@ url: string;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:23](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L23)
+[packages/core/lib/model/map-context.ts:23](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L23)
 
 ***
 

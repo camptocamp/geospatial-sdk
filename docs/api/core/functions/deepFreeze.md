@@ -20,7 +20,7 @@ deepFreeze<U>(obj): U
 
 ## Source
 
-[packages/core/lib/utils/freeze.ts:1](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/utils/freeze.ts#L1)
+[packages/core/lib/utils/freeze.ts:1](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/utils/freeze.ts#L1)
 
 ***
 

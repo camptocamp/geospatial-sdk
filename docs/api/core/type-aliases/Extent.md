@@ -10,7 +10,7 @@ Min X, min Y, max X, max Y
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L51)
+[packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L51)
 
 ***
 

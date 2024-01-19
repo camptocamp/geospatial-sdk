@@ -16,7 +16,7 @@ createGeometryStyles(options): StyleByGeometryType
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:17](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/openlayers/lib/map/styles.ts#L17)
+[packages/openlayers/lib/map/styles.ts:17](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L17)
 
 ***
 

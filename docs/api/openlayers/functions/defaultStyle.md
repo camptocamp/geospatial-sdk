@@ -18,7 +18,7 @@ defaultStyle(arg0, arg1): void | Style | Style[]
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:92](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/openlayers/lib/map/styles.ts#L92)
+[packages/openlayers/lib/map/styles.ts:92](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L92)
 
 ***
 

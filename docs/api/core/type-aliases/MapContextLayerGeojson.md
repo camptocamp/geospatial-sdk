@@ -8,7 +8,7 @@ type MapContextLayerGeojson: LayerGeojsonWithUrl | LayerGeojsonWithData;
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:37](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L37)
+[packages/core/lib/model/map-context.ts:37](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L37)
 
 ***
 

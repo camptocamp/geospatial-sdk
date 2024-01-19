@@ -8,7 +8,7 @@ type Coordinate: [number, number];
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:46](https://github.com/jahow/geospatial-sdk/blob/dff8168/packages/core/lib/model/map-context.ts#L46)
+[packages/core/lib/model/map-context.ts:46](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L46)
 
 ***
 
