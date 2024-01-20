@@ -1,29 +1,49 @@
 import { FeatureCollection, Geometry } from "geojson";
 
-export interface MapContextLayerWms {
+export type LayerDimensions = Record<string, string>;
+
+export type LayerExtras = Record<string, any>;
+
+export type MapContextBaseLayer = {
+  id?: string | number;
+  version?: string;
+
+  /**
+   * This property can be used to store anything application-specific on layers; as its content may occasionally
+   * be serialized to JSON for change detection purposes, it is not recommended to store Functions or other
+   * non-serializable entities
+   */
+  extras?: LayerExtras;
+};
+
+export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
   url: string;
   name: string;
+  dimensions?: LayerDimensions;
+  style?: string;
 }
 
-export interface MapContextLayerWmts {
+export interface MapContextLayerWmts extends MapContextBaseLayer {
   type: "wmts";
   url: string;
   name: string;
+  dimensions?: LayerDimensions;
+  style?: string;
 }
 
-export interface MapContextLayerWfs {
+export interface MapContextLayerWfs extends MapContextBaseLayer {
   type: "wfs";
   url: string;
   name: string;
 }
 
-export interface MapContextLayerXyz {
+export interface MapContextLayerXyz extends MapContextBaseLayer {
   type: "xyz";
   url: string;
 }
 
-interface LayerGeojson {
+interface LayerGeojson extends MapContextBaseLayer {
   type: "geojson";
 }
 interface LayerGeojsonWithUrl extends LayerGeojson {
