@@ -12,7 +12,7 @@ color: string;
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:7](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L7)
+[packages/openlayers/lib/map/styles.ts:7](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/styles.ts#L7)
 
 ***
 
@@ -24,7 +24,7 @@ isFocused?: boolean;
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:8](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L8)
+[packages/openlayers/lib/map/styles.ts:8](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/styles.ts#L8)
 
 ***
 

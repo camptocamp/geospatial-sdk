@@ -4,23 +4,26 @@ import {
   MapContext,
   MapContextLayer,
   MapContextLayerGeojson,
+  MapContextLayerWfs,
+  MapContextLayerWms,
+  MapContextLayerXyz,
   MapContextView,
 } from "../lib/model";
 import { deepFreeze } from "../lib/utils";
 
-export const MAP_CTX_LAYER_XYZ_FIXTURE: MapContextLayer = deepFreeze({
+export const MAP_CTX_LAYER_XYZ_FIXTURE: MapContextLayerXyz = deepFreeze({
   type: "xyz",
   url: "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 });
-export const MAP_CTX_LAYER_WMS_FIXTURE: MapContextLayer = deepFreeze({
+export const MAP_CTX_LAYER_WMS_FIXTURE: MapContextLayerWms = deepFreeze({
   type: "wms",
   url: "https://www.geograndest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WMS",
   name: "commune_actuelle_3857",
 });
-export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayer = deepFreeze({
+export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayerWfs = deepFreeze({
   type: "wfs",
   url: "https://www.geograndest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WFS&VERSION=1.1.0",
-  name: "ms:commune_actuelle_3857",
+  featureType: "ms:commune_actuelle_3857",
 });
 export const MAP_CTX_LAYER_GEOJSON_FIXTURE: MapContextLayerGeojson = deepFreeze(
   {

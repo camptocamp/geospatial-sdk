@@ -20,7 +20,7 @@ Resets an OpenLayers map from a context; existing content will be cleared
 
 ## Source
 
-[packages/openlayers/lib/map/create-map.ts:143](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/create-map.ts#L143)
+[packages/openlayers/lib/map/create-map.ts:143](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/create-map.ts#L143)
 
 ***
 

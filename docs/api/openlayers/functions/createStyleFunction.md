@@ -16,7 +16,7 @@ createStyleFunction(styleByGeometryType): StyleFunction
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L65)
+[packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/styles.ts#L65)
 
 ***
 

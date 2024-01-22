@@ -28,7 +28,7 @@ polygon: Style | Style[];
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:11](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/openlayers/lib/map/styles.ts#L11)
+[packages/openlayers/lib/map/styles.ts:11](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/styles.ts#L11)
 
 ***
 

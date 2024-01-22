@@ -13,7 +13,7 @@ type MapContextLayer:
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:39](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L39)
+[packages/core/lib/model/map-context.ts:59](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L59)
 
 ***
 

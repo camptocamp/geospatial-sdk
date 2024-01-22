@@ -14,7 +14,7 @@ Expressed in longitude/latitude
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:59](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L59)
+[packages/core/lib/model/map-context.ts:79](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L79)
 
 ***
 
@@ -28,7 +28,7 @@ Expressed in longitude/latitude
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:61](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L61)
+[packages/core/lib/model/map-context.ts:81](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L81)
 
 ***
 
@@ -42,7 +42,7 @@ Expressed in longitude/latitude
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:63](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L63)
+[packages/core/lib/model/map-context.ts:83](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L83)
 
 ***
 
@@ -54,7 +54,7 @@ maxZoom?: number;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:62](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L62)
+[packages/core/lib/model/map-context.ts:82](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L82)
 
 ***
 
@@ -66,7 +66,7 @@ zoom?: number;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:60](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/core/lib/model/map-context.ts#L60)
+[packages/core/lib/model/map-context.ts:80](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L80)
 
 ***
 

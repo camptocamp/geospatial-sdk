@@ -6,7 +6,7 @@ export type LayerExtras = Record<string, any>;
 
 export type MapContextBaseLayer = {
   id?: string | number;
-  version?: string;
+  version?: number;
 
   /**
    * This property can be used to store anything application-specific on layers; as its content may occasionally
@@ -35,7 +35,7 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
 export interface MapContextLayerWfs extends MapContextBaseLayer {
   type: "wfs";
   url: string;
-  name: string;
+  featureType: string;
 }
 
 export interface MapContextLayerXyz extends MapContextBaseLayer {

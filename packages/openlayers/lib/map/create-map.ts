@@ -60,7 +60,7 @@ export function createLayer(layerModel: MapContextLayer): Layer {
             urlObj.searchParams.set("version", "1.1.0");
             urlObj.searchParams.set("request", "GetFeature");
             urlObj.searchParams.set("outputFormat", "application/json");
-            urlObj.searchParams.set("typename", layerModel.name);
+            urlObj.searchParams.set("typename", layerModel.featureType);
             urlObj.searchParams.set("srsname", "EPSG:3857");
             urlObj.searchParams.set("bbox", `${extent.join(",")},EPSG:3857`);
             return urlObj.toString();

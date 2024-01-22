@@ -60,7 +60,7 @@ type?: "locations" | "featuresearch" | "layers";
 
 ## Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:21](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/geocoding/lib/providers/geoadmin.provider.ts#L21)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:21](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/geocoding/lib/providers/geoadmin.provider.ts#L21)
 
 ***
 

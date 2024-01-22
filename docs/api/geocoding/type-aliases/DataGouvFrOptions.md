@@ -36,7 +36,7 @@ type?: "housenumber" | "street" | "locality" | "municipality";
 
 ## Source
 
-[packages/geocoding/lib/providers/data-gouv-fr.provider.ts:46](https://github.com/jahow/geospatial-sdk/blob/52083ac/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L46)
+[packages/geocoding/lib/providers/data-gouv-fr.provider.ts:46](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L46)
 
 ***
 

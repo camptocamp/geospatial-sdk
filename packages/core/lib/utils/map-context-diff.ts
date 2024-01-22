@@ -1,4 +1,54 @@
-import { MapContext, MapContextDiff } from "../model";
+import {
+  MapContext,
+  MapContextDiff,
+  MapContextLayer,
+  MapContextLayerPositioned,
+  MapContextLayerReordered,
+  MapContextView,
+} from "../model";
+
+export function getLayerHash(
+  layer: MapContextLayer,
+  includeExtras = false,
+): string {
+  function getHash(input: unknown): string {
+    if (input instanceof Object) {
+      const obj: Record<string, string> = {};
+      const keys = Object.keys(input).sort();
+      for (const key of keys) {
+        if (!includeExtras && key === "extras") continue;
+        obj[key] = getHash(input[key as keyof typeof input]);
+      }
+      const hash = JSON.stringify(obj)
+        .split("")
+        .reduce((prev, curr) => (prev << 5) - prev + curr.charCodeAt(0), 0);
+      return (hash >>> 0).toString();
+    } else {
+      return JSON.stringify(input);
+    }
+  }
+  return getHash(layer);
+}
+
+export function isLayerSame(
+  layerA: MapContextLayer,
+  layerB: MapContextLayer,
+): boolean {
+  if ("id" in layerA && "id" in layerB) {
+    return layerA.id == layerB.id;
+  }
+  return getLayerHash(layerA) === getLayerHash(layerB);
+}
+
+export function isLayerSameAndUnchanged(
+  layerA: MapContextLayer,
+  layerB: MapContextLayer,
+): boolean {
+  if ("id" in layerA && "id" in layerB) {
+    return layerA.id == layerB.id && layerA.version == layerB.version;
+  }
+  return getLayerHash(layerA, true) === getLayerHash(layerB, true);
+}
 
 /**
  * The following logic is produced by identifying layers in both context
@@ -22,4 +72,73 @@ import { MapContext, MapContextDiff } from "../model";
 export function computeMapContextDiff(
   nextContext: MapContext,
   previousContext: MapContext,
-): MapContextDiff {}
+): MapContextDiff {
+  function getLayerPosition(
+    layer: MapContextLayer,
+    layers: MapContextLayer[],
+  ): number {
+    for (let i = 0; i < layers.length; i++) {
+      if (isLayerSame(layers[i], layer)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const layersChanged: MapContextLayerPositioned[] = [];
+  const layersReordered: MapContextLayerReordered[] = [];
+  const layersRemoved: MapContextLayerPositioned[] = [];
+  const layersAdded: MapContextLayerPositioned[] = [];
+  const viewChanges: MapContextView = {};
+
+  // loop on prev context layers (for removed layers)
+  for (let i = 0; i < previousContext.layers.length; i++) {
+    const layer = previousContext.layers[i];
+    const nextPosition = getLayerPosition(layer, nextContext.layers);
+    const prevPosition = getLayerPosition(layer, previousContext.layers);
+    if (nextPosition === -1) {
+      layersRemoved.push({ layer, position: prevPosition });
+    }
+  }
+
+  // loop on next context layers (for added & updated)
+  for (let i = 0; i < nextContext.layers.length; i++) {
+    const layer = nextContext.layers[i];
+    const prevPosition = getLayerPosition(layer, previousContext.layers);
+    if (prevPosition === -1) {
+      layersAdded.push({ layer, position: i });
+    } else {
+      const prevLayer = previousContext.layers[prevPosition];
+      if (!isLayerSameAndUnchanged(layer, prevLayer)) {
+        layersChanged.push({ layer, position: i });
+      }
+    }
+  }
+
+  // look for moved layers
+  const prevLayersFiltered = previousContext.layers.filter(
+    (l) => !layersRemoved.find(({ layer }) => l === layer),
+  );
+  const nextLayersFiltered = nextContext.layers.filter(
+    (l) => !layersAdded.find(({ layer }) => l === layer),
+  );
+  for (let i = 0; i < nextLayersFiltered.length; i++) {
+    const layer = nextLayersFiltered[i];
+    const prevPosition = getLayerPosition(layer, prevLayersFiltered);
+    if (i !== prevPosition) {
+      layersReordered.push({
+        layer,
+        newPosition: getLayerPosition(layer, nextContext.layers),
+        previousPosition: getLayerPosition(layer, previousContext.layers),
+      });
+    }
+  }
+
+  return {
+    layersAdded,
+    layersChanged,
+    layersRemoved,
+    layersReordered,
+    viewChanges,
+  };
+}
