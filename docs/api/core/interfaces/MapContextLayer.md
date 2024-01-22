@@ -1,24 +1,8 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerWms
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayer
 
-# MapContextLayerWms
-
-## Extends
-
-- [`MapContextBaseLayer`](MapContextBaseLayer.md)
+# MapContextLayer
 
 ## Properties
-
-### dimensions?
-
-```ts
-dimensions?: LayerDimensions;
-```
-
-#### Source
-
-[packages/core/lib/model/map-context.ts:23](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L23)
-
-***
 
 ### extras?
 
@@ -29,10 +13,6 @@ extras?: LayerExtras;
 This property can be used to store anything application-specific on layers; as its content may occasionally
 be serialized to JSON for change detection purposes, it is not recommended to store Functions or other
 non-serializable entities
-
-#### Inherited from
-
-[`core.MapContextBaseLayer.extras`](MapContextBaseLayer.md#extras)
 
 #### Source
 
@@ -46,44 +26,21 @@ non-serializable entities
 id?: string | number;
 ```
 
-#### Inherited from
-
-[`core.MapContextBaseLayer.id`](MapContextBaseLayer.md#id)
-
 #### Source
 
 [packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L8)
 
 ***
 
-### name
-
-```ts
-name: string;
-```
-
-#### Source
-
-[packages/core/lib/model/map-context.ts:22](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L22)
-
-***
-
-### style?
-
-```ts
-style?: string;
-```
-
-#### Source
-
-[packages/core/lib/model/map-context.ts:24](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L24)
-
-***
-
 ### type
 
 ```ts
-type: "wms";
+type: 
+  | "wms"
+  | "wmts"
+  | "wfs"
+  | "xyz"
+  | "geojson";
 ```
 
 #### Source
@@ -92,10 +49,10 @@ type: "wms";
 
 ***
 
-### url
+### url?
 
 ```ts
-url: string;
+url?: string;
 ```
 
 #### Source
@@ -109,10 +66,6 @@ url: string;
 ```ts
 version?: number;
 ```
-
-#### Inherited from
-
-[`core.MapContextBaseLayer.version`](MapContextBaseLayer.md#version)
 
 #### Source
 

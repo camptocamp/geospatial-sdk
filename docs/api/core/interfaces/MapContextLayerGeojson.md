@@ -1,12 +1,20 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerXyz
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerGeojson
 
-# MapContextLayerXyz
-
-## Extends
-
-- [`MapContextBaseLayer`](MapContextBaseLayer.md)
+# MapContextLayerGeojson
 
 ## Properties
+
+### data?
+
+```ts
+data?: string | FeatureCollection<null | Geometry, GeoJsonProperties>;
+```
+
+#### Source
+
+[packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L51)
+
+***
 
 ### extras?
 
@@ -17,10 +25,6 @@ extras?: LayerExtras;
 This property can be used to store anything application-specific on layers; as its content may occasionally
 be serialized to JSON for change detection purposes, it is not recommended to store Functions or other
 non-serializable entities
-
-#### Inherited from
-
-[`core.MapContextBaseLayer.extras`](MapContextBaseLayer.md#extras)
 
 #### Source
 
@@ -34,10 +38,6 @@ non-serializable entities
 id?: string | number;
 ```
 
-#### Inherited from
-
-[`core.MapContextBaseLayer.id`](MapContextBaseLayer.md#id)
-
 #### Source
 
 [packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L8)
@@ -47,24 +47,24 @@ id?: string | number;
 ### type
 
 ```ts
-type: "xyz";
+type: "geojson";
 ```
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:42](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L42)
+[packages/core/lib/model/map-context.ts:47](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L47)
 
 ***
 
-### url
+### url?
 
 ```ts
-url: string;
+url?: string;
 ```
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:43](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L43)
+[packages/core/lib/model/map-context.ts:50](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L50)
 
 ***
 
@@ -73,10 +73,6 @@ url: string;
 ```ts
 version?: number;
 ```
-
-#### Inherited from
-
-[`core.MapContextBaseLayer.version`](MapContextBaseLayer.md#version)
 
 #### Source
 

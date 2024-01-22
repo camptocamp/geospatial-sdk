@@ -8,11 +8,11 @@ export interface CreateStyleOptions {
   isFocused?: boolean;
 }
 
-export type StyleByGeometryType = {
+export interface StyleByGeometryType {
   line: Style | Style[];
   polygon: Style | Style[];
   point: Style | Style[];
-};
+}
 
 export function createGeometryStyles(
   options: CreateStyleOptions,

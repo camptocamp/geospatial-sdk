@@ -9,12 +9,7 @@
 | Interface | Description |
 | :------ | :------ |
 | [CreateStyleOptions](interfaces/CreateStyleOptions.md) | - |
-
-### Type Aliases
-
-| Type alias | Description |
-| :------ | :------ |
-| [StyleByGeometryType](type-aliases/StyleByGeometryType.md) | - |
+| [StyleByGeometryType](interfaces/StyleByGeometryType.md) | - |
 
 ### Functions
 

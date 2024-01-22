@@ -8,7 +8,7 @@ type LayerExtras: Record<string, any>;
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:5](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L5)
+[packages/core/lib/model/map-context.ts:5](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L5)
 
 ***
 

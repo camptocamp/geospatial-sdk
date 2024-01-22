@@ -12,7 +12,7 @@ layers: MapContextLayer[];
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:87](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L87)
+[packages/core/lib/model/map-context.ts:94](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L94)
 
 ***
 
@@ -24,7 +24,7 @@ view: MapContextView;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:88](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L88)
+[packages/core/lib/model/map-context.ts:95](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L95)
 
 ***
 

@@ -18,7 +18,7 @@ export type GeoadminResponse = FeatureCollection;
  * @property origins Defaults to 'zipcode,gg25'; only applies when type is 'locations'
  * @property features A list of technical layer names; only applies when type is 'featuresearch'
  */
-export type GeoadminOptions = {
+export interface GeoadminOptions {
   type?: "locations" | "featuresearch" | "layers";
   sr?: "21781" | "2056" | "4326" | "3857";
   origins?: Array<
@@ -33,7 +33,7 @@ export type GeoadminOptions = {
   limit?: number;
   lang?: "de" | "fr" | "it" | "rm" | "en";
   features?: string[];
-};
+}
 
 export function queryGeoadmin(
   input: string,

@@ -4,12 +4,12 @@
 
 ## Index
 
-### Type Aliases
+### Interfaces
 
-| Type alias | Description |
+| Interface | Description |
 | :------ | :------ |
-| [DataGouvFrOptions](type-aliases/DataGouvFrOptions.md) | Reference documentation: https://adresse.data.gouv.fr/api-doc/adresse |
-| [GeoadminOptions](type-aliases/GeoadminOptions.md) | Reference documentation: https://api3.geo.admin.ch/services/sdiservices.html#search |
+| [DataGouvFrOptions](interfaces/DataGouvFrOptions.md) | Reference documentation: https://adresse.data.gouv.fr/api-doc/adresse |
+| [GeoadminOptions](interfaces/GeoadminOptions.md) | Reference documentation: https://api3.geo.admin.ch/services/sdiservices.html#search |
 
 ### Functions
 

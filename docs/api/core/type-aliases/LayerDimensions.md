@@ -8,7 +8,7 @@ type LayerDimensions: Record<string, string>;
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:3](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L3)
+[packages/core/lib/model/map-context.ts:3](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L3)
 
 ***
 

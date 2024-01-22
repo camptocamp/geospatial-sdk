@@ -12,11 +12,11 @@ createGeometryStyles(options): StyleByGeometryType
 
 ## Returns
 
-[`StyleByGeometryType`](../type-aliases/StyleByGeometryType.md)
+[`StyleByGeometryType`](../interfaces/StyleByGeometryType.md)
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:17](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/styles.ts#L17)
+[packages/openlayers/lib/map/styles.ts:17](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L17)
 
 ***
 

@@ -8,7 +8,7 @@ createStyleFunction(styleByGeometryType): StyleFunction
 
 ## Parameters
 
-• **styleByGeometryType**: [`StyleByGeometryType`](../type-aliases/StyleByGeometryType.md)
+• **styleByGeometryType**: [`StyleByGeometryType`](../interfaces/StyleByGeometryType.md)
 
 ## Returns
 
@@ -16,7 +16,7 @@ createStyleFunction(styleByGeometryType): StyleFunction
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/openlayers/lib/map/styles.ts#L65)
+[packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L65)
 
 ***
 

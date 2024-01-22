@@ -4,7 +4,7 @@ export type LayerDimensions = Record<string, string>;
 
 export type LayerExtras = Record<string, any>;
 
-export type MapContextBaseLayer = {
+export interface MapContextBaseLayer {
   id?: string | number;
   version?: number;
 
@@ -14,7 +14,7 @@ export type MapContextBaseLayer = {
    * non-serializable entities
    */
   extras?: LayerExtras;
-};
+}
 
 export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
@@ -54,8 +54,15 @@ interface LayerGeojsonWithData extends LayerGeojson {
   data: FeatureCollection<Geometry | null> | string;
   url?: never;
 }
+
+/**
+ * @interface
+ */
 export type MapContextLayerGeojson = LayerGeojsonWithUrl | LayerGeojsonWithData;
 
+/**
+ * @interface
+ */
 export type MapContextLayer =
   | MapContextLayerWms
   | MapContextLayerWmts

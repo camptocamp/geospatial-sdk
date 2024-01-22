@@ -33,7 +33,7 @@ Determining whether layers have changed is done like so:
 
 ## Source
 
-[packages/core/lib/utils/map-context-diff.ts:72](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/utils/map-context-diff.ts#L72)
+[packages/core/lib/utils/map-context-diff.ts:72](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/utils/map-context-diff.ts#L72)
 
 ***
 

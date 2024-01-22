@@ -10,7 +10,7 @@ queryGeoadmin(input, options?): Promise<GeocodingResult[]>
 
 • **input**: `string`
 
-• **options?**: [`GeoadminOptions`](../type-aliases/GeoadminOptions.md)
+• **options?**: [`GeoadminOptions`](../interfaces/GeoadminOptions.md)
 
 ## Returns
 
@@ -18,7 +18,7 @@ queryGeoadmin(input, options?): Promise<GeocodingResult[]>
 
 ## Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:38](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/geocoding/lib/providers/geoadmin.provider.ts#L38)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:38](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L38)
 
 ***
 

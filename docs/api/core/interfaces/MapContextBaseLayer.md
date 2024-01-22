@@ -1,10 +1,13 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerXyz
+[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextBaseLayer
 
-# MapContextLayerXyz
+# MapContextBaseLayer
 
-## Extends
+## Extended by
 
-- [`MapContextBaseLayer`](MapContextBaseLayer.md)
+- [`MapContextLayerWms`](MapContextLayerWms.md)
+- [`MapContextLayerWmts`](MapContextLayerWmts.md)
+- [`MapContextLayerWfs`](MapContextLayerWfs.md)
+- [`MapContextLayerXyz`](MapContextLayerXyz.md)
 
 ## Properties
 
@@ -18,10 +21,6 @@ This property can be used to store anything application-specific on layers; as i
 be serialized to JSON for change detection purposes, it is not recommended to store Functions or other
 non-serializable entities
 
-#### Inherited from
-
-[`core.MapContextBaseLayer.extras`](MapContextBaseLayer.md#extras)
-
 #### Source
 
 [packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L16)
@@ -34,37 +33,9 @@ non-serializable entities
 id?: string | number;
 ```
 
-#### Inherited from
-
-[`core.MapContextBaseLayer.id`](MapContextBaseLayer.md#id)
-
 #### Source
 
 [packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L8)
-
-***
-
-### type
-
-```ts
-type: "xyz";
-```
-
-#### Source
-
-[packages/core/lib/model/map-context.ts:42](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L42)
-
-***
-
-### url
-
-```ts
-url: string;
-```
-
-#### Source
-
-[packages/core/lib/model/map-context.ts:43](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L43)
 
 ***
 
@@ -73,10 +44,6 @@ url: string;
 ```ts
 version?: number;
 ```
-
-#### Inherited from
-
-[`core.MapContextBaseLayer.version`](MapContextBaseLayer.md#version)
 
 #### Source
 

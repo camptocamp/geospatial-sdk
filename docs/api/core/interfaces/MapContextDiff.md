@@ -21,7 +21,7 @@ layersAdded: MapContextLayerPositioned[];
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:35](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context-diff.ts#L35)
+[packages/core/lib/model/map-context-diff.ts:35](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L35)
 
 ***
 
@@ -33,7 +33,7 @@ layersChanged: MapContextLayerPositioned[];
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:32](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context-diff.ts#L32)
+[packages/core/lib/model/map-context-diff.ts:32](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L32)
 
 ***
 
@@ -45,7 +45,7 @@ layersRemoved: MapContextLayerPositioned[];
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:34](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context-diff.ts#L34)
+[packages/core/lib/model/map-context-diff.ts:34](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L34)
 
 ***
 
@@ -57,7 +57,7 @@ layersReordered: MapContextLayerReordered[];
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:33](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context-diff.ts#L33)
+[packages/core/lib/model/map-context-diff.ts:33](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L33)
 
 ***
 
@@ -69,7 +69,7 @@ viewChanges: MapContextView;
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:36](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context-diff.ts#L36)
+[packages/core/lib/model/map-context-diff.ts:36](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L36)
 
 ***
 

@@ -4,19 +4,19 @@ import { MapContextLayer, MapContextView } from "./map-context";
  * Associates a position to a layer; the position is the index of
  * the layer in the layers array
  */
-export type MapContextLayerPositioned = {
+export interface MapContextLayerPositioned {
   layer: MapContextLayer;
   position: number;
-};
+}
 
 /**
  * Describes a layer being moved to a different position
  */
-export type MapContextLayerReordered = {
+export interface MapContextLayerReordered {
   layer: MapContextLayer;
   newPosition: number;
   previousPosition: number;
-};
+}
 
 /**
  * Describes a delta between two contexts, in order to be

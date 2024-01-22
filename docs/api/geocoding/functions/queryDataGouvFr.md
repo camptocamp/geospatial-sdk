@@ -10,7 +10,7 @@ queryDataGouvFr(input, options?): Promise<GeocodingResult[]>
 
 • **input**: `string`
 
-• **options?**: [`DataGouvFrOptions`](../type-aliases/DataGouvFrOptions.md)
+• **options?**: [`DataGouvFrOptions`](../interfaces/DataGouvFrOptions.md)
 
 ## Returns
 
@@ -18,7 +18,7 @@ queryDataGouvFr(input, options?): Promise<GeocodingResult[]>
 
 ## Source
 
-[packages/geocoding/lib/providers/data-gouv-fr.provider.ts:53](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L53)
+[packages/geocoding/lib/providers/data-gouv-fr.provider.ts:53](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L53)
 
 ***
 

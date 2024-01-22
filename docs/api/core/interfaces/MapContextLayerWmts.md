@@ -4,7 +4,7 @@
 
 ## Extends
 
-- [`MapContextBaseLayer`](../type-aliases/MapContextBaseLayer.md)
+- [`MapContextBaseLayer`](MapContextBaseLayer.md)
 
 ## Properties
 
@@ -16,7 +16,7 @@ dimensions?: LayerDimensions;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:31](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L31)
+[packages/core/lib/model/map-context.ts:31](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L31)
 
 ***
 
@@ -32,11 +32,11 @@ non-serializable entities
 
 #### Inherited from
 
-`MapContextBaseLayer.extras`
+[`core.MapContextBaseLayer.extras`](MapContextBaseLayer.md#extras)
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L16)
+[packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L16)
 
 ***
 
@@ -48,11 +48,11 @@ id?: string | number;
 
 #### Inherited from
 
-`MapContextBaseLayer.id`
+[`core.MapContextBaseLayer.id`](MapContextBaseLayer.md#id)
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L8)
+[packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L8)
 
 ***
 
@@ -64,7 +64,7 @@ name: string;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:30](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L30)
+[packages/core/lib/model/map-context.ts:30](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L30)
 
 ***
 
@@ -76,7 +76,7 @@ style?: string;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:32](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L32)
+[packages/core/lib/model/map-context.ts:32](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L32)
 
 ***
 
@@ -88,7 +88,7 @@ type: "wmts";
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:28](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L28)
+[packages/core/lib/model/map-context.ts:28](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L28)
 
 ***
 
@@ -100,7 +100,7 @@ url: string;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:29](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L29)
+[packages/core/lib/model/map-context.ts:29](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L29)
 
 ***
 
@@ -112,11 +112,11 @@ version?: number;
 
 #### Inherited from
 
-`MapContextBaseLayer.version`
+[`core.MapContextBaseLayer.version`](MapContextBaseLayer.md#version)
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context.ts#L9)
+[packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L9)
 
 ***
 

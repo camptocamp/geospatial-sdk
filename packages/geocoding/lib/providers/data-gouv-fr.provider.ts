@@ -43,12 +43,12 @@ const baseUrl = "https://api-adresse.data.gouv.fr/search/";
  * @property cityCode
  * @property limit Default value 15
  */
-export type DataGouvFrOptions = {
+export interface DataGouvFrOptions {
   type?: "housenumber" | "street" | "locality" | "municipality";
   postCode?: string;
   cityCode?: string;
   limit?: number;
-};
+}
 
 export function queryDataGouvFr(
   input: string,

@@ -9,7 +9,12 @@
 | Interface | Description |
 | :------ | :------ |
 | [MapContext](interfaces/MapContext.md) | - |
+| [MapContextBaseLayer](interfaces/MapContextBaseLayer.md) | - |
 | [MapContextDiff](interfaces/MapContextDiff.md) | Describes a delta between two contexts, in order to be |
+| [MapContextLayer](interfaces/MapContextLayer.md) | - |
+| [MapContextLayerGeojson](interfaces/MapContextLayerGeojson.md) | - |
+| [MapContextLayerPositioned](interfaces/MapContextLayerPositioned.md) | Associates a position to a layer; the position is the index of |
+| [MapContextLayerReordered](interfaces/MapContextLayerReordered.md) | Describes a layer being moved to a different position |
 | [MapContextLayerWfs](interfaces/MapContextLayerWfs.md) | - |
 | [MapContextLayerWms](interfaces/MapContextLayerWms.md) | - |
 | [MapContextLayerWmts](interfaces/MapContextLayerWmts.md) | - |
@@ -24,11 +29,6 @@
 | [Extent](type-aliases/Extent.md) | Min X, min Y, max X, max Y |
 | [LayerDimensions](type-aliases/LayerDimensions.md) | - |
 | [LayerExtras](type-aliases/LayerExtras.md) | - |
-| [MapContextBaseLayer](type-aliases/MapContextBaseLayer.md) | - |
-| [MapContextLayer](type-aliases/MapContextLayer.md) | - |
-| [MapContextLayerGeojson](type-aliases/MapContextLayerGeojson.md) | - |
-| [MapContextLayerPositioned](type-aliases/MapContextLayerPositioned.md) | Associates a position to a layer; the position is the index of |
-| [MapContextLayerReordered](type-aliases/MapContextLayerReordered.md) | Describes a layer being moved to a different position |
 
 ### Functions
 

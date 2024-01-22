@@ -2,14 +2,10 @@
 
 # MapContextLayerPositioned
 
-```ts
-type MapContextLayerPositioned: Object;
-```
-
 Associates a position to a layer; the position is the index of
 the layer in the layers array
 
-## Type declaration
+## Properties
 
 ### layer
 
@@ -17,15 +13,21 @@ the layer in the layers array
 layer: MapContextLayer;
 ```
 
+#### Source
+
+[packages/core/lib/model/map-context-diff.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L8)
+
+***
+
 ### position
 
 ```ts
 position: number;
 ```
 
-## Source
+#### Source
 
-[packages/core/lib/model/map-context-diff.ts:7](https://github.com/jahow/geospatial-sdk/blob/b3c3686/packages/core/lib/model/map-context-diff.ts#L7)
+[packages/core/lib/model/map-context-diff.ts:9](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L9)
 
 ***
 
