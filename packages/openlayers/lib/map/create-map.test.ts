@@ -15,13 +15,13 @@ import {
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
   MAP_CTX_LAYER_XYZ_FIXTURE,
-} from "@camptocamp/geospatial-sdk-core/fixtures/map-context.fixtures";
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures";
 import {
   MapContext,
   MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWms,
-} from "@camptocamp/geospatial-sdk-core";
+} from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer";
 import {
   createLayer,

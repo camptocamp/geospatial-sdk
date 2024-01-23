@@ -1,5 +1,5 @@
 {
-  "name": "@camptocamp/geospatial-sdk-openlayers",
+  "name": "@geospatial-sdk/openlayers",
   "version": "0.0.2",
   "description": "OpenLayers-related utilities",
   "keywords": [

@@ -1,5 +1,5 @@
 {
-  "name": "@camptocamp/geospatial-sdk-geocoding",
+  "name": "@geospatial-sdk/geocoding",
   "version": "0.0.2",
   "description": "Geocoding-related components",
   "keywords": [

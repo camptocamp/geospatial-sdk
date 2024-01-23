@@ -1,5 +1,5 @@
 {
-  "name": "@camptocamp/geospatial-sdk",
+  "name": "geospatial-sdk",
   "version": "0.0.0",
   "private": true,
   "workspaces": [
