@@ -4,7 +4,7 @@
   "description": "Core functions and models for the SDK",
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "main": "index.ts",
   "type": "module",
   "directories": {

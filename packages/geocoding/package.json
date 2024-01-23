@@ -1,15 +1,18 @@
 {
   "name": "@geospatial-sdk/geocoding",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.3-alpha.0+62dae3f",
   "description": "Geocoding-related components",
   "keywords": [
     "geocoding"
   ],
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "https://github.com/jahow/geospatial-sdk#readme",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "main": "index.ts",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib"
   },
@@ -25,5 +28,6 @@
   },
   "bugs": {
     "url": "https://github.com/jahow/geospatial-sdk/issues"
-  }
+  },
+  "gitHead": "62dae3f4a74db9129015b5f9fd127a5b874f4786"
 }
