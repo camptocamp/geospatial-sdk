@@ -1,8 +1,5 @@
-import { BaseProvider } from "./base.provider";
 import { GeocodingResult } from "../model";
 import { BBox, FeatureCollection, Geometry } from "geojson";
-import { b } from "vitest/dist/suite-MFRDkZcV";
-import { Extent } from "@camptocamp/geospatial-sdk-core";
 
 // from https://github.com/geoblocks/ga-search
 const baseUrl = "https://api3.geo.admin.ch/rest/services/api/SearchServer";
