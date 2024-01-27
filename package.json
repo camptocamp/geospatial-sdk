@@ -9,6 +9,10 @@
   "devDependencies": {
     "@types/geojson": "^7946.0.13",
     "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.20.1",
     "jsdom": "^23.2.0",
     "lerna": "^8.0.2",
     "prettier": "^3.2.2",
@@ -17,10 +21,14 @@
     "vitest": "^1.2.1"
   },
   "scripts": {
-    "docs:dev": "npm run docs:dev --workspace docs",
     "docs:build": "npm run docs:build --workspace docs",
+    "docs:dev": "npm run docs:dev --workspace docs",
     "docs:preview": "npm run docs:preview --workspace docs",
+    "format:check": "prettier -c **/*.{js,ts,md,json,vue}",
+    "format:write": "prettier -w **/*.{js,ts,md,json,vue}",
+    "lint": "eslint **/*.{js,ts,vue}",
     "publish-typedoc": "typedoc --options typedoc.json",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   }
 }
