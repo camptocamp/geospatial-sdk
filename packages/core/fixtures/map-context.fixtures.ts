@@ -2,7 +2,6 @@ import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures";
 import {
   Extent,
   MapContext,
-  MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWfs,
   MapContextLayerWms,

@@ -45,7 +45,7 @@ export function queryGeoadmin(
   };
   const finalOptions = options ? { ...baseOptions, ...options } : baseOptions;
 
-  let url = new URL(baseUrl);
+  const url = new URL(baseUrl);
   url.searchParams.set("geometryFormat", "geojson");
   url.searchParams.set("type", finalOptions.type!);
   url.searchParams.set("searchText", input);

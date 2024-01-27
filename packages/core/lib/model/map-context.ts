@@ -2,7 +2,7 @@ import { FeatureCollection, Geometry } from "geojson";
 
 export type LayerDimensions = Record<string, string>;
 
-export type LayerExtras = Record<string, any>;
+export type LayerExtras = Record<string, unknown>;
 
 export interface MapContextBaseLayer {
   id?: string | number;
