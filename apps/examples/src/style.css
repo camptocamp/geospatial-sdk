@@ -4,35 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-
-body, html {
-    height: 100%;
-    margin: 0;
-    padding: 0;
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-@layer code-editor {
-    .cm-editor {
-        color: white;
-        background-color: transparent;
-    }
-
-    .cm-editor .cm-content {
-        caret-color: #0e9;
-    }
-
-    .cm-editor.cm-focused .cm-cursor {
-        border-left-color: #0e9;
-    }
-
-    .cm-editor.cm-focused .cm-selectionBackground,
-    ::selection {
-        background-color: transparent;
-    }
-
-    .cm-gutters {
-        @apply bg-gray-900;
-        @apply text-slate-300;
-        border: none;
-    }
+@layer components {
+  a {
+    @apply text-sky-700 underline;
+  }
+  a:hover {
+    @apply text-sky-900;
+  }
 }

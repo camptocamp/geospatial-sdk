@@ -22,7 +22,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="mapRoot" class="w-[800px] h-[500px]" data-cy="example01"></div>
+  <div ref="mapRoot" class="w-full h-full"></div>
 </template>
-
-<style scoped></style>
