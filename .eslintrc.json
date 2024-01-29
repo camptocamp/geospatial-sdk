@@ -28,5 +28,5 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": 1
   },
-  "ignorePatterns": ["**/*.test.ts"]
+  "ignorePatterns": ["**/*.test.ts", "apps"]
 }
