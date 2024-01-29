@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / LayerDimensions
+[geospatial-sdk](../../index.md) / [core](../index.md) / LayerDimensions
 
 # LayerDimensions
 
@@ -8,7 +8,7 @@ type LayerDimensions: Record<string, string>;
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:3](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L3)
+[packages/core/lib/model/map-context.ts:3](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L3)
 
 ***
 

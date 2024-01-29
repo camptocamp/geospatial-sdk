@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../index.md) / core
+[geospatial-sdk](../index.md) / core
 
 # core
 

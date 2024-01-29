@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerPositioned
+[geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerPositioned
 
 # MapContextLayerPositioned
 
@@ -15,7 +15,7 @@ layer: MapContextLayer;
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L8)
+[packages/core/lib/model/map-context-diff.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L8)
 
 ***
 
@@ -27,7 +27,7 @@ position: number;
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:9](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L9)
+[packages/core/lib/model/map-context-diff.ts:9](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L9)
 
 ***
 

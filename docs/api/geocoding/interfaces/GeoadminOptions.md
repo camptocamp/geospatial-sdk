@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [geocoding](../index.md) / GeoadminOptions
+[geospatial-sdk](../../index.md) / [geocoding](../index.md) / GeoadminOptions
 
 # GeoadminOptions
 
@@ -16,7 +16,7 @@ A list of technical layer names; only applies when type is 'featuresearch'
 
 #### Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:35](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L35)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:32](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L32)
 
 ***
 
@@ -35,7 +35,7 @@ Default is 'en'
 
 #### Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:34](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L34)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:31](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L31)
 
 ***
 
@@ -49,7 +49,7 @@ Default value is 50 for 'locations', 20 for 'featuresearch', 30 for 'layers'
 
 #### Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:33](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L33)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:30](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L30)
 
 ***
 
@@ -70,7 +70,7 @@ Defaults to 'zipcode,gg25'; only applies when type is 'locations'
 
 #### Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:24](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L24)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:21](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L21)
 
 ***
 
@@ -84,7 +84,7 @@ Defaults to 4326
 
 #### Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:23](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L23)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:20](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L20)
 
 ***
 
@@ -98,7 +98,7 @@ Default is 'locations'
 
 #### Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:22](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L22)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:19](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L19)
 
 ***
 

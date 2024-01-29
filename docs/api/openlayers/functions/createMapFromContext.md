@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / createMapFromContext
+[geospatial-sdk](../../index.md) / [openlayers](../index.md) / createMapFromContext
 
 # createMapFromContext()
 
@@ -18,7 +18,7 @@ Create an OpenLayers map from a context
 
 ## Source
 
-[packages/openlayers/lib/map/create-map.ts:133](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/create-map.ts#L133)
+[packages/openlayers/lib/map/create-map.ts:133](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/create-map.ts#L133)
 
 ***
 

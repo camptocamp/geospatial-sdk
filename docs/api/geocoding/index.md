@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../index.md) / geocoding
+[geospatial-sdk](../index.md) / geocoding
 
 # geocoding
 

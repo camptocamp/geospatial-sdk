@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / createStyleFunction
+[geospatial-sdk](../../index.md) / [openlayers](../index.md) / createStyleFunction
 
 # createStyleFunction()
 
@@ -16,7 +16,7 @@ createStyleFunction(styleByGeometryType): StyleFunction
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L65)
+[packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L65)
 
 ***
 

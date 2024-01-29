@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / CreateStyleOptions
+[geospatial-sdk](../../index.md) / [openlayers](../index.md) / CreateStyleOptions
 
 # CreateStyleOptions
 
@@ -12,7 +12,7 @@ color: string;
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:7](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L7)
+[packages/openlayers/lib/map/styles.ts:7](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L7)
 
 ***
 
@@ -24,7 +24,7 @@ isFocused?: boolean;
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L8)
+[packages/openlayers/lib/map/styles.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L8)
 
 ***
 

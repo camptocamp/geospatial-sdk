@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / Coordinate
+[geospatial-sdk](../../index.md) / [core](../index.md) / Coordinate
 
 # Coordinate
 
@@ -8,7 +8,7 @@ type Coordinate: [number, number];
 
 ## Source
 
-[packages/core/lib/model/map-context.ts:73](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L73)
+[packages/core/lib/model/map-context.ts:73](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L73)
 
 ***
 

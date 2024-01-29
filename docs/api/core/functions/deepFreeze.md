@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / deepFreeze
+[geospatial-sdk](../../index.md) / [core](../index.md) / deepFreeze
 
 # deepFreeze()
 
@@ -20,7 +20,7 @@ deepFreeze<U>(obj): U
 
 ## Source
 
-[packages/core/lib/utils/freeze.ts:1](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/utils/freeze.ts#L1)
+[packages/core/lib/utils/freeze.ts:1](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/utils/freeze.ts#L1)
 
 ***
 

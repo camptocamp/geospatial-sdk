@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / StyleByGeometryType
+[geospatial-sdk](../../index.md) / [openlayers](../index.md) / StyleByGeometryType
 
 # StyleByGeometryType
 
@@ -12,7 +12,7 @@ line: Style | Style[];
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:12](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L12)
+[packages/openlayers/lib/map/styles.ts:12](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L12)
 
 ***
 
@@ -24,7 +24,7 @@ point: Style | Style[];
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:14](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L14)
+[packages/openlayers/lib/map/styles.ts:14](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L14)
 
 ***
 
@@ -36,7 +36,7 @@ polygon: Style | Style[];
 
 #### Source
 
-[packages/openlayers/lib/map/styles.ts:13](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L13)
+[packages/openlayers/lib/map/styles.ts:13](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L13)
 
 ***
 

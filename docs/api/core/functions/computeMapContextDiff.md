@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / computeMapContextDiff
+[geospatial-sdk](../../index.md) / [core](../index.md) / computeMapContextDiff
 
 # computeMapContextDiff()
 
@@ -33,7 +33,7 @@ Determining whether layers have changed is done like so:
 
 ## Source
 
-[packages/core/lib/utils/map-context-diff.ts:72](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/utils/map-context-diff.ts#L72)
+[packages/core/lib/utils/map-context-diff.ts:72](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/utils/map-context-diff.ts#L72)
 
 ***
 

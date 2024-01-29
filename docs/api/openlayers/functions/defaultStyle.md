@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / defaultStyle
+[geospatial-sdk](../../index.md) / [openlayers](../index.md) / defaultStyle
 
 # defaultStyle()
 
@@ -18,7 +18,7 @@ defaultStyle(arg0, arg1): void | Style | Style[]
 
 ## Source
 
-[packages/openlayers/lib/map/styles.ts:92](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/styles.ts#L92)
+[packages/openlayers/lib/map/styles.ts:92](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L92)
 
 ***
 

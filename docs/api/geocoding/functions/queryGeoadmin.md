@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [geocoding](../index.md) / queryGeoadmin
+[geospatial-sdk](../../index.md) / [geocoding](../index.md) / queryGeoadmin
 
 # queryGeoadmin()
 
@@ -18,7 +18,7 @@ queryGeoadmin(input, options?): Promise<GeocodingResult[]>
 
 ## Source
 
-[packages/geocoding/lib/providers/geoadmin.provider.ts:38](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/geoadmin.provider.ts#L38)
+[packages/geocoding/lib/providers/geoadmin.provider.ts:35](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L35)
 
 ***
 

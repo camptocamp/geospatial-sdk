@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerGeojson
+[geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerGeojson
 
 # MapContextLayerGeojson
 
@@ -12,7 +12,7 @@ data?: string | FeatureCollection<null | Geometry, GeoJsonProperties>;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L51)
+[packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L51)
 
 ***
 
@@ -28,7 +28,7 @@ non-serializable entities
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L16)
+[packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L16)
 
 ***
 
@@ -40,7 +40,7 @@ id?: string | number;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L8)
+[packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L8)
 
 ***
 
@@ -52,7 +52,7 @@ type: "geojson";
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:47](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L47)
+[packages/core/lib/model/map-context.ts:47](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L47)
 
 ***
 
@@ -64,7 +64,7 @@ url?: string;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:50](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L50)
+[packages/core/lib/model/map-context.ts:50](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L50)
 
 ***
 
@@ -76,7 +76,7 @@ version?: number;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L9)
+[packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L9)
 
 ***
 

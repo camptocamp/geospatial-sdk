@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerXyz
+[geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerXyz
 
 # MapContextLayerXyz
 
@@ -24,7 +24,7 @@ non-serializable entities
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L16)
+[packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L16)
 
 ***
 
@@ -40,7 +40,7 @@ id?: string | number;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L8)
+[packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L8)
 
 ***
 
@@ -52,7 +52,7 @@ type: "xyz";
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:42](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L42)
+[packages/core/lib/model/map-context.ts:42](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L42)
 
 ***
 
@@ -64,7 +64,7 @@ url: string;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:43](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L43)
+[packages/core/lib/model/map-context.ts:43](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L43)
 
 ***
 
@@ -80,7 +80,7 @@ version?: number;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L9)
+[packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L9)
 
 ***
 

@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [openlayers](../index.md) / resetMapFromContext
+[geospatial-sdk](../../index.md) / [openlayers](../index.md) / resetMapFromContext
 
 # resetMapFromContext()
 
@@ -20,7 +20,7 @@ Resets an OpenLayers map from a context; existing content will be cleared
 
 ## Source
 
-[packages/openlayers/lib/map/create-map.ts:143](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/openlayers/lib/map/create-map.ts#L143)
+[packages/openlayers/lib/map/create-map.ts:143](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/create-map.ts#L143)
 
 ***
 

@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [geocoding](../index.md) / queryDataGouvFr
+[geospatial-sdk](../../index.md) / [geocoding](../index.md) / queryDataGouvFr
 
 # queryDataGouvFr()
 
@@ -18,7 +18,7 @@ queryDataGouvFr(input, options?): Promise<GeocodingResult[]>
 
 ## Source
 
-[packages/geocoding/lib/providers/data-gouv-fr.provider.ts:53](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L53)
+[packages/geocoding/lib/providers/data-gouv-fr.provider.ts:53](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L53)
 
 ***
 

@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContext
+[geospatial-sdk](../../index.md) / [core](../index.md) / MapContext
 
 # MapContext
 
@@ -12,7 +12,7 @@ layers: MapContextLayer[];
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:94](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L94)
+[packages/core/lib/model/map-context.ts:94](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L94)
 
 ***
 
@@ -24,7 +24,7 @@ view: MapContextView;
 
 #### Source
 
-[packages/core/lib/model/map-context.ts:95](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context.ts#L95)
+[packages/core/lib/model/map-context.ts:95](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L95)
 
 ***
 

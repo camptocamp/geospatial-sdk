@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerReordered
+[geospatial-sdk](../../index.md) / [core](../index.md) / MapContextLayerReordered
 
 # MapContextLayerReordered
 
@@ -14,7 +14,7 @@ layer: MapContextLayer;
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:16](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L16)
+[packages/core/lib/model/map-context-diff.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L16)
 
 ***
 
@@ -26,7 +26,7 @@ newPosition: number;
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:17](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L17)
+[packages/core/lib/model/map-context-diff.ts:17](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L17)
 
 ***
 
@@ -38,7 +38,7 @@ previousPosition: number;
 
 #### Source
 
-[packages/core/lib/model/map-context-diff.ts:18](https://github.com/jahow/geospatial-sdk/blob/dbfbbb6/packages/core/lib/model/map-context-diff.ts#L18)
+[packages/core/lib/model/map-context-diff.ts:18](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L18)
 
 ***
 

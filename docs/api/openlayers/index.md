@@ -1,4 +1,4 @@
-[@camptocamp/geospatial-sdk](../index.md) / openlayers
+[geospatial-sdk](../index.md) / openlayers
 
 # openlayers
 
