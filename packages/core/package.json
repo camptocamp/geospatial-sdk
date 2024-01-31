@@ -1,19 +1,22 @@
 {
   "name": "@geospatial-sdk/core",
-  "private": true,
+  "version": "0.0.3-alpha.0+62dae3f",
   "description": "Core functions and models for the SDK",
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "",
   "license": "BSD-3-Clause",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "type": "module",
   "directories": {
     "lib": "lib"
   },
   "files": [
-    "lib"
+    "lib",
+    "dist"
   ],
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsc"
   }
 }

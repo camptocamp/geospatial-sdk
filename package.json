@@ -7,6 +7,9 @@
   ],
   "type": "module",
   "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
     "@types/geojson": "^7946.0.13",
     "@types/node": "^20.11.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
@@ -29,6 +32,10 @@
     "lint": "eslint **/*.{js,ts,vue}",
     "publish-typedoc": "typedoc --options typedoc.json",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "lerna run build"
+  },
+  "dependencies": {
+    "@geospatial-sdk/core": "*"
   }
 }

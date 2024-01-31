@@ -2,7 +2,7 @@ import {
   MapContext,
   MapContextLayer,
   MapContextView,
-} from "@geospatial-sdk/core/lib/model";
+} from "@geospatial-sdk/core";
 import Map from "ol/Map";
 import View from "ol/View";
 import Layer from "ol/layer/Layer";
@@ -16,7 +16,7 @@ import Feature from "ol/Feature";
 import Geometry from "ol/geom/Geometry";
 import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import { removeSearchParams } from "@geospatial-sdk/core/lib/utils";
+import { removeSearchParams } from "@geospatial-sdk/core";
 import { defaultStyle } from "./styles";
 
 const geosjonFormat = new GeoJSON();

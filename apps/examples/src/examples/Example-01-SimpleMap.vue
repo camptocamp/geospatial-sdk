@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createMapFromContext } from '@geospatial-sdk/openlayers'
+import { createMapFromContext } from '@geospatial-sdk/openlayers/dist'
 import { onMounted, ref } from 'vue'
 
 const mapRoot = ref<HTMLElement>()
