@@ -1,6 +1,6 @@
 {
   "name": "@geospatial-sdk/core",
-  "version": "0.0.3-alpha.0+62dae3f",
+  "version": "0.0.4",
   "description": "Core functions and models for the SDK",
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "",
