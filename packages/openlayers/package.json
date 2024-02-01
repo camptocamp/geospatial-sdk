@@ -1,6 +1,6 @@
 {
   "name": "@geospatial-sdk/openlayers",
-  "version": "0.0.4",
+  "version": "0.0.5-alpha.0",
   "description": "OpenLayers-related utilities",
   "keywords": [
     "ol",
@@ -35,7 +35,7 @@
     "ol": ">6.x"
   },
   "dependencies": {
-    "@geospatial-sdk/core": "^0.0.4",
+    "@geospatial-sdk/core": "^0.0.5-alpha.0",
     "chroma-js": "^2.4.2"
   },
   "gitHead": "62dae3f4a74db9129015b5f9fd127a5b874f4786"
