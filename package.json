@@ -33,7 +33,8 @@
     "publish-typedoc": "typedoc --options typedoc.json",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "@geospatial-sdk/core": "*"

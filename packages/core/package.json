@@ -8,6 +8,9 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib"
   },
@@ -18,5 +21,6 @@
   "scripts": {
     "test": "vitest",
     "build": "tsc"
-  }
+  },
+  "gitHead": "99dbb945a303b96e576a02a02bc0590785456bd3"
 }
