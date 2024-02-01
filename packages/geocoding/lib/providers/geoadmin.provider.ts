@@ -78,6 +78,12 @@ export function queryGeoadmin(
     );
 }
 
+export function sayHello() {
+  console.log("hello")
+  return "hello";
+}
+
+
 function bboxToGeometry(extent: BBox): Geometry {
   const [minX, minY, maxX, maxY] = extent;
   return {

@@ -8,7 +8,8 @@
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "https://github.com/jahow/geospatial-sdk#readme",
   "license": "BSD-3-Clause",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -17,14 +18,16 @@
     "lib": "lib"
   },
   "files": [
-    "lib"
+    "lib",
+    "dist"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jahow/geospatial-sdk.git"
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsc"
   },
   "bugs": {
     "url": "https://github.com/jahow/geospatial-sdk/issues"
