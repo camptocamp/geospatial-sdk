@@ -5,7 +5,7 @@ const baseUrl = "https://secure.geonames.org/searchJSON";
 
 /**
  * Reference documentation: http://www.geonames.org/export/geonames-search.html
- * @property lang Place name and country name will be returned in the specified language. Default is English.
+ * @property lang Default is English. Either "local" or iso2 country code should be used
  * @property maxRows The maximal number of rows in the document returned by the service. Default is 100
  * @property country Default is all countries. The country parameter may occur more than once, example: country=FR&country=GP
  * @property style verbosity of returned xml document, default = MEDIUM
@@ -15,11 +15,10 @@ const baseUrl = "https://secure.geonames.org/searchJSON";
  */
 
 export interface GeonamesOptions {
-    lang?: "de" | "fr" | "it" | "rm" | "en";
+    lang?: string;
     maxRows?: number;
     country?: string | string[]; // Now supports multiple countries
     style?: "SHORT" | "MEDIUM" | "LONG" | "FULL";
-    type?: "json" | "xml" | "rdf";
     username: string;
     east?: number;
     west?: number;
@@ -45,7 +44,6 @@ export function queryGeonames(
         lang: "en",
         maxRows: 10,
         style: "FULL",
-        type: "json",
         username: "gn_ui",
     };
 
@@ -62,7 +60,7 @@ export function queryGeonames(
     }
     finalOptions.lang && url.searchParams.set("lang", finalOptions.lang);
     finalOptions.style && url.searchParams.set("style", finalOptions.style);
-    finalOptions.type && url.searchParams.set("type", finalOptions.type);
+    url.searchParams.set("type", "json");
 
     if (finalOptions.east !== undefined && finalOptions.west !== undefined &&
         finalOptions.north !== undefined && finalOptions.south !== undefined &&
