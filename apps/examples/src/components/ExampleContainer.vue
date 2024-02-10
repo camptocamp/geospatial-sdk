@@ -15,13 +15,13 @@ function showCode(event) {
 </script>
 
 <template>
-  <div :id="exampleId" :data-cy="exampleId" class="relative">
+  <div :id="exampleId" :data-cy="exampleId" class="relative my-6">
     <div class="flex flex-row justify-between mb-3">
       <h2>{{ props.exampleName }}</h2>
       <div>
-        <a href @click="showPreview">Preview</a>
+        <a class="p-2" href @click="showPreview">Preview</a>
         |
-        <a href @click="showCode">Code</a>
+        <a class="p-2" href @click="showCode">Code</a>
       </div>
     </div>
     <div
@@ -44,17 +44,15 @@ function showCode(event) {
   top: 0;
   bottom: 0;
   width: calc(50vw - 350px - 50px);
-  //background-size: 50px 100%;
-  //background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 100;
 }
 .fade-side.left {
   right: calc(100% + 50px);
   background-image: linear-gradient(-90deg, transparent 0%, rgba(255, 255, 255, 95%) 400px);
-  //background-position: right;
 }
 .fade-side.right {
   left: calc(100% + 50px);
   background-image: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 95%) 400px);
-  //background-position: left;
 }
 </style>

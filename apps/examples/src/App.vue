@@ -2,6 +2,8 @@
 import ExampleContainer from '@/components/ExampleContainer.vue'
 import Example01SimpleMap from '@/examples/Example-01-SimpleMap.vue'
 import Example01SimpleMapRaw from '@/examples/Example-01-SimpleMap.vue?raw'
+import ExampleGeocoding from '@/examples/Example-Geocoding.vue'
+import ExampleGeocodingRaw from '@/examples/Example-Geocoding.vue?raw'
 import { onMounted } from 'vue'
 import hljs from 'highlight.js'
 
@@ -20,6 +22,13 @@ onMounted(() => {
       :source-code="Example01SimpleMapRaw"
     >
       <Example01SimpleMap></Example01SimpleMap>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 2: geocoding"
+      example-id="example02"
+      :source-code="ExampleGeocodingRaw"
+    >
+      <ExampleGeocoding></ExampleGeocoding>
     </ExampleContainer>
   </div>
 </template>
