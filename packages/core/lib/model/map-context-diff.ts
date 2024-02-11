@@ -23,10 +23,10 @@ export interface MapContextLayerReordered {
  * applied to an existing map.
  *
  * For positions to be correct the order of operations should be:
- * 1. change layers
- * 2. remove layers
- * 3. add layers
- * 4. move layers
+ * 1. remove layers
+ * 2. add layers
+ * 3. move layers
+ * 4. change layers
  */
 export interface MapContextDiff {
   layersChanged: MapContextLayerPositioned[];
