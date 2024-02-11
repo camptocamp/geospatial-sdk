@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import ExampleContainer from '@/components/ExampleContainer.vue'
-import Example01SimpleMap from '@/examples/Example-01-SimpleMap.vue'
-import Example01SimpleMapRaw from '@/examples/Example-01-SimpleMap.vue?raw'
+import ExampleSimpleMap from '@/examples/Example-SimpleMap.vue'
+import ExampleSimpleMapRaw from '@/examples/Example-SimpleMap.vue?raw'
+import ExampleMapAddRemoveLayers from '@/examples/Example-MapAddRemoveLayers.vue'
+import ExampleMapAddRemoveLayersRaw from '@/examples/Example-MapAddRemoveLayers.vue?raw'
 import ExampleGeocoding from '@/examples/Example-Geocoding.vue'
 import ExampleGeocodingRaw from '@/examples/Example-Geocoding.vue?raw'
 import { onMounted } from 'vue'
@@ -19,13 +21,20 @@ onMounted(() => {
     <ExampleContainer
       example-name="Example 1: simple map"
       example-id="example01"
-      :source-code="Example01SimpleMapRaw"
+      :source-code="ExampleSimpleMapRaw"
     >
-      <Example01SimpleMap></Example01SimpleMap>
+      <ExampleSimpleMap></ExampleSimpleMap>
     </ExampleContainer>
     <ExampleContainer
-      example-name="Example 2: geocoding"
+      example-name="Example 2: add and remove layers"
       example-id="example02"
+      :source-code="ExampleMapAddRemoveLayersRaw"
+    >
+      <ExampleMapAddRemoveLayers></ExampleMapAddRemoveLayers>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 3: geocoding"
+      example-id="example03"
       :source-code="ExampleGeocodingRaw"
     >
       <ExampleGeocoding></ExampleGeocoding>

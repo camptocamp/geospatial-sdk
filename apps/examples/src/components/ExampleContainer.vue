@@ -31,7 +31,7 @@ function showCode(event) {
       <div class="w-[700px] rounded overflow-hidden" ref="root"><slot></slot></div>
       <pre
         class="w-[700px] h-full overflow-auto text-sm rounded"
-      ><code class="ts">{{ sourceCode }}</code></pre>
+      ><code class="ts h-full">{{ sourceCode }}</code></pre>
     </div>
     <div class="fade-side left"></div>
     <div class="fade-side right"></div>

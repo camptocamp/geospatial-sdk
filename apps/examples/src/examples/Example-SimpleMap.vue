@@ -5,19 +5,21 @@ import { onMounted, ref } from 'vue'
 const mapRoot = ref<HTMLElement>()
 
 onMounted(() => {
-  const map = createMapFromContext({
-    layers: [
-      {
-        type: 'xyz',
-        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+  createMapFromContext(
+    {
+      layers: [
+        {
+          type: 'xyz',
+          url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+        }
+      ],
+      view: {
+        zoom: 5,
+        center: [6, 48.5]
       }
-    ],
-    view: {
-      zoom: 5,
-      center: [6, 48.5]
-    }
-  })
-  map.setTarget(mapRoot.value)
+    },
+    mapRoot.value
+  )
 })
 </script>
 
