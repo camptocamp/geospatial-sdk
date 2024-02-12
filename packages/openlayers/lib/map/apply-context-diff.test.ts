@@ -1,0 +1,291 @@
+import {
+  MapContext,
+  MapContextDiff,
+  MapContextLayer,
+} from "@geospatial-sdk/core";
+import {
+  SAMPLE_CONTEXT,
+  SAMPLE_LAYER1,
+  SAMPLE_LAYER2,
+  SAMPLE_LAYER3,
+  SAMPLE_LAYER4,
+  SAMPLE_LAYER5,
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures";
+import Map from "ol/Map";
+import { createLayer, createMapFromContext } from "./create-map";
+import { applyContextDiffToMap } from "./apply-context-diff";
+import { beforeEach } from "vitest";
+import BaseLayer from "ol/layer/Base";
+
+function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
+  const reference = createLayer(layerModel) as any;
+  expect(reference).toBeInstanceOf(layer.constructor);
+  const refSource = reference.getSource() as any;
+  const layerSource = layer.getSource() as any;
+  expect(reference.getSource()).toBeInstanceOf(layer.getSource()?.constructor);
+  if (typeof refSource?.getUrl === "function") {
+    expect(layerSource?.getUrl).toBeTypeOf("function");
+  } else if (typeof refSource?.getUrls !== "undefined") {
+    expect(refSource?.getUrls()).toEqual(layerSource?.getUrls());
+  } else if (typeof refSource?.getUrl !== "undefined") {
+    expect(refSource?.getUrl()).toEqual(layerSource?.getUrl());
+  }
+}
+
+describe("applyContextDiffToMap", () => {
+  let context: MapContext;
+  let diff: MapContextDiff;
+  let map: Map;
+  let layersArray: BaseLayer[];
+
+  beforeEach(() => {
+    context = {
+      ...SAMPLE_CONTEXT,
+      layers: [SAMPLE_LAYER2, SAMPLE_LAYER1],
+    };
+    map = createMapFromContext(context);
+  });
+
+  describe("no change", () => {
+    beforeEach(() => {
+      diff = {
+        layersAdded: [],
+        layersChanged: [],
+        layersRemoved: [],
+        layersReordered: [],
+        viewChanges: {},
+      };
+      applyContextDiffToMap(map, diff);
+      layersArray = map.getLayers().getArray();
+    });
+    it("does not affect the map", () => {
+      expect(layersArray.length).toEqual(2);
+      assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
+      assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
+    });
+  });
+
+  describe("layers added", () => {
+    beforeEach(() => {
+      diff = {
+        layersAdded: [
+          {
+            layer: SAMPLE_LAYER3,
+            position: 0,
+          },
+          {
+            layer: SAMPLE_LAYER4,
+            position: 2,
+          },
+        ],
+        layersChanged: [],
+        layersRemoved: [],
+        layersReordered: [],
+        viewChanges: {},
+      };
+      applyContextDiffToMap(map, diff);
+      layersArray = map.getLayers().getArray();
+    });
+    it("adds the layers to the map", () => {
+      expect(layersArray.length).toEqual(4);
+      assertEqualsToModel(layersArray[0], SAMPLE_LAYER3);
+      assertEqualsToModel(layersArray[1], SAMPLE_LAYER2);
+      assertEqualsToModel(layersArray[2], SAMPLE_LAYER4);
+      assertEqualsToModel(layersArray[3], SAMPLE_LAYER1);
+    });
+  });
+
+  describe("layers removed", () => {
+    beforeEach(() => {
+      diff = {
+        layersAdded: [],
+        layersChanged: [],
+        layersRemoved: [
+          {
+            layer: SAMPLE_LAYER2,
+            position: 0,
+          },
+          {
+            layer: SAMPLE_LAYER1,
+            position: 1,
+          },
+        ],
+        layersReordered: [],
+        viewChanges: {},
+      };
+      applyContextDiffToMap(map, diff);
+    });
+    it("deletes the layers", () => {
+      expect(map.getLayers().getLength()).toEqual(0);
+    });
+  });
+
+  describe("layers changed", () => {
+    beforeEach(() => {
+      diff = {
+        layersAdded: [],
+        layersChanged: [
+          {
+            layer: {
+              ...SAMPLE_LAYER2,
+              url: "http://changed/",
+            } as MapContextLayer,
+            position: 0,
+          },
+          {
+            layer: {
+              ...SAMPLE_LAYER1,
+              url: "http://changed/",
+              extras: {
+                changed: true,
+              },
+            } as MapContextLayer,
+            position: 1,
+          },
+        ],
+        layersRemoved: [],
+        layersReordered: [],
+        viewChanges: {},
+      };
+      applyContextDiffToMap(map, diff);
+      layersArray = map.getLayers().getArray();
+    });
+    it("modifies the layers accordingly", () => {
+      expect(layersArray.length).toEqual(2);
+      assertEqualsToModel(layersArray[0], diff.layersChanged[0].layer);
+      assertEqualsToModel(layersArray[1], diff.layersChanged[1].layer);
+    });
+  });
+
+  describe("reordering", () => {
+    describe("three layers reordered", () => {
+      beforeEach(() => {
+        context = {
+          ...SAMPLE_CONTEXT,
+          layers: [SAMPLE_LAYER1, SAMPLE_LAYER2, SAMPLE_LAYER3],
+        };
+        map = createMapFromContext(context);
+        diff = {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [
+            {
+              layer: SAMPLE_LAYER2,
+              newPosition: 0,
+              previousPosition: 1,
+            },
+            {
+              layer: SAMPLE_LAYER1,
+              newPosition: 1,
+              previousPosition: 0,
+            },
+          ],
+          viewChanges: {},
+        };
+        applyContextDiffToMap(map, diff);
+        layersArray = map.getLayers().getArray();
+      });
+      it("moves the layers accordingly", () => {
+        expect(layersArray.length).toEqual(3);
+        assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
+        assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
+        assertEqualsToModel(layersArray[2], SAMPLE_LAYER3);
+      });
+    });
+
+    describe("four layers reordered", () => {
+      beforeEach(() => {
+        context = {
+          ...SAMPLE_CONTEXT,
+          layers: [SAMPLE_LAYER1, SAMPLE_LAYER3, SAMPLE_LAYER4, SAMPLE_LAYER2],
+        };
+        map = createMapFromContext(context);
+        diff = {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [
+            {
+              layer: SAMPLE_LAYER4,
+              newPosition: 0,
+              previousPosition: 2,
+            },
+            {
+              layer: SAMPLE_LAYER1,
+              newPosition: 2,
+              previousPosition: 0,
+            },
+          ],
+          viewChanges: {},
+        };
+        applyContextDiffToMap(map, diff);
+        layersArray = map.getLayers().getArray();
+      });
+      it("moves the layers accordingly", () => {
+        expect(layersArray.length).toEqual(4);
+        assertEqualsToModel(layersArray[0], SAMPLE_LAYER4);
+        assertEqualsToModel(layersArray[1], SAMPLE_LAYER3);
+        assertEqualsToModel(layersArray[2], SAMPLE_LAYER1);
+        assertEqualsToModel(layersArray[3], SAMPLE_LAYER2);
+      });
+    });
+  });
+
+  describe("combined changes", () => {
+    let changedLayer: MapContextLayer;
+    beforeEach(() => {
+      changedLayer = { ...SAMPLE_LAYER3, extras: { prop: true } };
+      context = {
+        ...context,
+        layers: [SAMPLE_LAYER1, SAMPLE_LAYER5, SAMPLE_LAYER3, SAMPLE_LAYER4],
+      };
+      map = createMapFromContext(context);
+      diff = {
+        layersAdded: [
+          {
+            layer: SAMPLE_LAYER2,
+            position: 0,
+          },
+        ],
+        layersChanged: [
+          {
+            layer: changedLayer,
+            position: 1,
+          },
+        ],
+        layersRemoved: [
+          {
+            layer: SAMPLE_LAYER1,
+            position: 0,
+          },
+          {
+            layer: SAMPLE_LAYER4,
+            position: 3,
+          },
+        ],
+        layersReordered: [
+          {
+            layer: changedLayer,
+            newPosition: 1,
+            previousPosition: 2,
+          },
+          {
+            layer: SAMPLE_LAYER5,
+            newPosition: 2,
+            previousPosition: 1,
+          },
+        ],
+        viewChanges: {},
+      };
+      applyContextDiffToMap(map, diff);
+      layersArray = map.getLayers().getArray();
+    });
+    it("applies all changes", () => {
+      expect(layersArray.length).toEqual(3);
+      assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
+      assertEqualsToModel(layersArray[1], changedLayer);
+      assertEqualsToModel(layersArray[2], SAMPLE_LAYER5);
+    });
+  });
+});

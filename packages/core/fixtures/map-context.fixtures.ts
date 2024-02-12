@@ -2,6 +2,7 @@ import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures";
 import {
   Extent,
   MapContext,
+  MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWfs,
   MapContextLayerWms,
@@ -53,3 +54,39 @@ export const MAP_CTX_FIXTURE: MapContext = deepFreeze({
 export const MAP_CTX_EXTENT_FIXTURE: Extent = [
   171083.69713494915, 6246047.945419401, 476970.39956295764, 6631079.362882684,
 ];
+
+export const SAMPLE_CONTEXT: MapContext = deepFreeze({
+  view: {
+    center: [10, 20],
+    zoom: 3,
+    extent: [40, 50, 60, 70],
+  },
+  layers: [],
+});
+
+export const SAMPLE_LAYER1: MapContextLayerWms = deepFreeze({
+  type: "wms",
+  url: "http://abc.org/wms",
+  name: "myLayer",
+  extras: { myField: "abc" },
+});
+export const SAMPLE_LAYER2: MapContextLayerXyz = deepFreeze({
+  type: "xyz",
+  url: "http://abc.org/tiles",
+  extras: { myField2: "123" },
+});
+export const SAMPLE_LAYER3: MapContextLayerGeojson = deepFreeze({
+  type: "geojson",
+  data: '{ "type": "Feature", "properties": {}}',
+  extras: { myField3: "000" },
+});
+export const SAMPLE_LAYER4: MapContextLayerWfs = deepFreeze({
+  type: "wfs",
+  url: "http://abc.org/wfs",
+  featureType: "myFeatureType",
+  extras: { myField4: "aaa" },
+});
+export const SAMPLE_LAYER5: MapContextLayerXyz = deepFreeze({
+  type: "xyz",
+  url: "http://my.tiles/server",
+});

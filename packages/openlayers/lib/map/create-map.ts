@@ -127,11 +127,17 @@ export function createView(viewModel: MapContextView, map: Map): View {
 }
 
 /**
- * Create an OpenLayers map from a context
+ * Create an OpenLayers map from a context; optionally specify a target (root element) for the map
  * @param context
+ * @param target
  */
-export function createMapFromContext(context: MapContext): Map {
-  const map = new Map({});
+export function createMapFromContext(
+  context: MapContext,
+  target?: string | HTMLElement,
+): Map {
+  const map = new Map({
+    target,
+  });
   return resetMapFromContext(map, context);
 }
 
