@@ -21,7 +21,7 @@ import {
   MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWms,
-} from "@geospatial-sdk/core/dist";
+} from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer";
 import {
   createLayer,

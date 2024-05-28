@@ -8,8 +8,8 @@
   "author": "Olivia <olivia.guyot@camptocamp.com>",
   "homepage": "https://github.com/jahow/geospatial-sdk#readme",
   "license": "BSD-3-Clause",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "dist/lib/index.js",
+  "typings": "dist/lib/index.d.ts",
   "type": "module",
   "publishConfig": {
     "access": "public"
