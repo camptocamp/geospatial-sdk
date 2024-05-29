@@ -43,6 +43,12 @@ describe("MapContextService", () => {
         expect(layer).toBeTruthy();
         expect(layer).toBeInstanceOf(TileLayer);
       });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(1);
+        expect(layer.get("label")).toBeUndefined();
+        expect(layer.getSource()?.getAttributions()).toBeNull();
+      });
       it("create a XYZ source", () => {
         const source = layer.getSource();
         expect(source).toBeInstanceOf(XYZ);
@@ -65,6 +71,13 @@ describe("MapContextService", () => {
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
         expect(layer).toBeInstanceOf(TileLayer);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(false);
+        expect(layer.getOpacity()).toBe(0.5);
+        expect(layer.get("label")).toBe("Communes");
+        // @ts-ignore
+        expect(layer.getSource()?.getAttributions()!()).toEqual(["camptocamp"]);
       });
       it("create a TileWMS source", () => {
         const source = layer.getSource();
@@ -99,6 +112,15 @@ describe("MapContextService", () => {
         expect(layer).toBeTruthy();
         expect(layer).toBeInstanceOf(VectorLayer);
       });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(0.5);
+        expect(layer.get("label")).toBe("Communes");
+        const attributions = layer.getSource()?.getAttributions();
+        expect(attributions).not.toBeNull();
+        // @ts-ignore
+        expect(attributions!()).toEqual(["camptocamp"]);
+      });
       it("create a Vector source", () => {
         const source = layer.getSource();
         expect(source).toBeInstanceOf(VectorSource);
@@ -121,6 +143,11 @@ describe("MapContextService", () => {
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
           expect(layer).toBeInstanceOf(VectorLayer);
+        });
+        it("set correct layer properties", () => {
+          expect(layer.getVisible()).toBe(true);
+          expect(layer.getOpacity()).toBe(0.8);
+          expect(layer.get("label")).toBe("Regions");
         });
         it("create a VectorSource source", () => {
           const source = layer.getSource();
