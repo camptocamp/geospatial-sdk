@@ -5,7 +5,7 @@ import {
   isLayerSame,
   isLayerSameAndUnchanged,
 } from "./map-context";
-import { MapContext, MapContextLayer } from "../model";
+import { MapContext } from "../model";
 import {
   SAMPLE_CONTEXT,
   SAMPLE_LAYER1,
@@ -148,6 +148,15 @@ describe("Map context utils", () => {
             { ...SAMPLE_LAYER1, url: "http://abc.org" },
           ),
         ).toBe(true);
+        expect(
+          isLayerSameAndUnchanged(
+            {
+              ...SAMPLE_LAYER1,
+              opacity: 1,
+            },
+            SAMPLE_LAYER1,
+          ),
+        ).toBe(false);
         expect(isLayerSameAndUnchanged(SAMPLE_LAYER1, SAMPLE_LAYER2)).toBe(
           false,
         );

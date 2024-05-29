@@ -24,28 +24,31 @@ const geosjonFormat = new GeoJSON();
 export function createLayer(layerModel: MapContextLayer): Layer {
   const { type } = layerModel;
   const style = defaultStyle;
+  let layer: Layer;
   switch (type) {
     case "xyz":
-      return new TileLayer({
+      layer = new TileLayer({
         source: new XYZ({
           url: layerModel.url,
         }),
       });
+      break;
     case "wms":
-      return new TileLayer({
+      layer = new TileLayer({
         source: new TileWMS({
           url: removeSearchParams(layerModel.url, ["request", "service"]),
           params: { LAYERS: layerModel.name },
           gutter: 20,
         }),
       });
+      break;
     // TODO: implement when ogc-client can handle wmts
     // case 'wmts':
     //   return new TileLayer({
     //     source: new WMTS(layerModel.options),
     //   })
     case "wfs":
-      return new VectorLayer({
+      layer = new VectorLayer({
         source: new VectorSource({
           format: new GeoJSON(),
           url: function (extent) {
@@ -69,9 +72,10 @@ export function createLayer(layerModel: MapContextLayer): Layer {
         }),
         style,
       });
+      break;
     case "geojson": {
       if (layerModel.url !== undefined) {
-        return new VectorLayer({
+        layer = new VectorLayer({
           source: new VectorSource({
             format: new GeoJSON(),
             url: layerModel.url,
@@ -92,17 +96,27 @@ export function createLayer(layerModel: MapContextLayer): Layer {
           featureProjection: "EPSG:3857",
           dataProjection: "EPSG:4326",
         }) as Feature<Geometry>[];
-        return new VectorLayer({
+        layer = new VectorLayer({
           source: new VectorSource({
             features,
           }),
           style,
         });
       }
+      break;
     }
     default:
       throw new Error(`Unrecognized layer type: ${layerModel.type}`);
   }
+  typeof layerModel.visibility !== "undefined" &&
+    layer.setVisible(layerModel.visibility);
+  typeof layerModel.opacity !== "undefined" &&
+    layer.setOpacity(layerModel.opacity);
+  typeof layerModel.attributions !== "undefined" &&
+    layer.getSource()?.setAttributions(layerModel.attributions);
+  layer.set("label", layerModel.label);
+
+  return layer;
 }
 
 export function createView(viewModel: MapContextView, map: Map): View {
