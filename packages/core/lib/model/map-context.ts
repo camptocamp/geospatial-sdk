@@ -14,6 +14,10 @@ export interface MapContextBaseLayer {
    * non-serializable entities
    */
   extras?: LayerExtras;
+  visibility?: boolean;
+  opacity?: number;
+  label?: string;
+  attributions?: string;
 }
 
 export interface MapContextLayerWms extends MapContextBaseLayer {
