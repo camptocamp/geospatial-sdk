@@ -4,8 +4,8 @@ import debounce from 'lodash.debounce'
 defineProps(['placeholder'])
 const emit = defineEmits(['valueChange'])
 
-const debouncedInput = debounce((event) => {
-  emit('valueChange', event.target.value)
+const debouncedInput = debounce((event: Event) => {
+  emit('valueChange', (event.target as HTMLInputElement).value)
 }, 300)
 </script>
 

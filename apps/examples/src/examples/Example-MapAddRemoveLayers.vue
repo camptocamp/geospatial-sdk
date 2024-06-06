@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import Map from 'ol/Map'
 import { applyContextDiffToMap, createMapFromContext } from '@geospatial-sdk/openlayers'
 import { computeMapContextDiff, getLayerPosition, type MapContextLayer } from '@geospatial-sdk/core'
-import Button from '@/components/Button.vue'
+import ButtonSimple from '@/components/ButtonSimple.vue'
 import { DEFAULT_CONTEXT } from '@/constants'
 
 const Layers: Record<string, MapContextLayer> = {
@@ -54,15 +54,15 @@ function toggleLayer(layer: 'wms1' | 'wms2' | 'xyz') {
 <template>
   <div ref="mapRoot" class="w-full h-full relative">
     <div class="absolute inset-x-4 bottom-4 flex flex-row gap-4 z-50">
-      <Button class="shadow-sm" @click="toggleLayer('wms1')">
+      <ButtonSimple class="shadow-sm" @click="toggleLayer('wms1')">
         {{ layerStates['wms1'] ? 'Remove' : 'Add' }} layer over France
-      </Button>
-      <Button class="shadow-sm" @click="toggleLayer('wms2')">
+      </ButtonSimple>
+      <ButtonSimple class="shadow-sm" @click="toggleLayer('wms2')">
         {{ layerStates['wms2'] ? 'Remove' : 'Add' }} layer over Germany
-      </Button>
-      <Button class="shadow-sm" @click="toggleLayer('xyz')">
+      </ButtonSimple>
+      <ButtonSimple class="shadow-sm" @click="toggleLayer('xyz')">
         {{ layerStates['xyz'] ? 'Remove' : 'Add' }} satellite layer
-      </Button>
+      </ButtonSimple>
     </div>
   </div>
 </template>

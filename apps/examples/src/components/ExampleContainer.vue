@@ -4,11 +4,11 @@ import { ref } from 'vue'
 const props = defineProps(['exampleName', 'exampleId', 'sourceCode'])
 const previewShown = ref(true)
 
-function showPreview(event) {
+function showPreview(event: Event) {
   previewShown.value = true
   event.preventDefault()
 }
-function showCode(event) {
+function showCode(event: Event) {
   previewShown.value = false
   event.preventDefault()
 }
@@ -19,9 +19,9 @@ function showCode(event) {
     <div class="flex flex-row justify-between mb-3">
       <h2>{{ props.exampleName }}</h2>
       <div>
-        <a class="p-2" href @click="showPreview">Preview</a>
+        <a class="p-2" href="" @click="showPreview">Preview</a>
         |
-        <a class="p-2" href @click="showCode">Code</a>
+        <a class="p-2" href="" @click="showCode">Code</a>
       </div>
     </div>
     <div
