@@ -2,10 +2,15 @@
 import TextInput from '@/components/TextInput.vue'
 import ButtonToggle from '@/components/ButtonToggle.vue'
 import { ref } from 'vue'
-import { queryDataGouvFr, queryGeoadmin, queryGeonames } from '@geospatial-sdk/geocoding'
+import {
+  type GeocodingResult,
+  queryDataGouvFr,
+  queryGeoadmin,
+  queryGeonames
+} from '@geospatial-sdk/geocoding'
 
 const provider = ref('Geonames')
-const results = ref([])
+const results = ref<GeocodingResult[]>([])
 const searchText = ref('')
 
 function selectProvider(value: string) {
@@ -15,12 +20,13 @@ function selectProvider(value: string) {
 
 function getQueryFunction() {
   switch (provider.value) {
-    case 'Geonames':
-      return queryGeonames
     case 'Geoadmin':
       return queryGeoadmin
     case 'adresse.data.gouv.fr':
       return queryDataGouvFr
+    case 'Geonames':
+    default:
+      return queryGeonames
   }
 }
 
@@ -49,7 +55,7 @@ async function queryResults(newText: string) {
   <div class="p-1">
     {{ results.length }} results found.
     <ul class="list-disc h-[385px] overflow-auto">
-      <li class="ml-6" v-for="result in results">
+      <li class="ml-6" v-for="result in results" v-bind:key="result.label">
         {{ result.label }}
       </li>
     </ul>

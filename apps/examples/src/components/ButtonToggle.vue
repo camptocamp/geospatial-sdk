@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps({
-  choices: Array,
-  initialValue: String
-})
-const selected = ref(props.initialValue)
+const props = defineProps<{
+  choices: Array<string>
+  initialValue: string
+}>()
+const selected = ref<string>(props.initialValue)
 defineEmits(['select'])
 </script>
 
