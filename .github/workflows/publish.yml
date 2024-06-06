@@ -1,0 +1,31 @@
+name: Publish NPM package @dev version
+
+# This workflow runs whenever a commit is pushed on main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-npm-package:
+    name: Publish NPM package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node & NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Publush canary version of packages
+        run: npx lerna publish --canary --force-publish --dist-tag dev --yes
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
