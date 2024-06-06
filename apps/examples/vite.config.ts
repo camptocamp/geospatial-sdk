@@ -6,7 +6,6 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   plugins: [
     vue(),
-    base: "/geospatial-sdk"
   ],
   resolve: {
     alias: {
@@ -18,5 +17,6 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@geospatial-sdk/geocoding', '@geospatial-sdk/openlayers'],
     exclude: []
-  }
+  },
+  base: "/geospatial-sdk"
 });
