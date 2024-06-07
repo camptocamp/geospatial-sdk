@@ -25,7 +25,7 @@ jobs:
       - name: Install project dependencies
         run: npm ci
 
-      - name: Publush canary version of packages
-        run: npx lerna publish --canary --force-publish --dist-tag dev --yes
+      - name: Publish canary version of packages
+        run: npx lerna publish --canary --force-publish --dist-tag dev --preid dev --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
