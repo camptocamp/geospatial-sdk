@@ -15,6 +15,7 @@ import {
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
   MAP_CTX_LAYER_XYZ_FIXTURE,
+  MAP_CTX_LAYER_OGCAPI_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures";
 import {
   MapContext,
@@ -29,6 +30,7 @@ import {
   createView,
   resetMapFromContext,
 } from "./create-map";
+import {describe} from "vitest";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -62,7 +64,33 @@ describe("MapContextService", () => {
         );
       });
     });
-
+    describe("OGCAPI", () => {
+        beforeEach(() => {
+            layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+            layer = createLayer(layerModel);
+        });
+        it("create a vector tile layer", () => {
+            expect(layer).toBeTruthy();
+            expect(layer).toBeInstanceOf(VectorLayer);
+        });
+        it("set correct layer properties", () => {
+            expect(layer.getVisible()).toBe(true);
+            expect(layer.getOpacity()).toBe(1);
+            expect(layer.get("label")).toBeUndefined();
+            expect(layer.getSource()?.getAttributions()).toBeNull();
+        });
+        it("create a OGCVectorTile source", () => {
+            const source = layer.getSource();
+            expect(source).toBeInstanceOf(VectorSource);
+        });
+        it("set correct url", () => {
+            const source = layer.getSource() as VectorSource;
+            const url = source.getUrl();
+            expect(url).toBe(
+            "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
+            );
+        });
+    });
     describe("WMS", () => {
       beforeEach(() => {
         (layerModel = MAP_CTX_LAYER_WMS_FIXTURE),

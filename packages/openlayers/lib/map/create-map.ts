@@ -18,6 +18,9 @@ import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { removeSearchParams } from "@geospatial-sdk/core";
 import { defaultStyle } from "./styles";
+import VectorTileLayer from "ol/layer/VectorTile";
+import {OGCMapTile, OGCVectorTile} from "ol/source";
+import {MVT} from "ol/format";
 
 const geosjonFormat = new GeoJSON();
 
@@ -33,6 +36,32 @@ export function createLayer(layerModel: MapContextLayer): Layer {
         }),
       });
       break;
+    case "ogcapi":
+      if (layerModel.layerType === 'vectorTiles') {
+        layer = new VectorTileLayer({
+          source: new OGCVectorTile({
+            url: layerModel.url,
+            format: new MVT(),
+          }),
+        })
+        break;
+      } else if (layerModel.layerType === 'mapTiles') {
+        layer = new TileLayer({
+          source: new OGCMapTile({
+            url: layerModel.url,
+          }),
+        })
+        break;
+      } else {
+        layer = new VectorLayer({
+          source: new VectorSource({
+            format: new GeoJSON(),
+            url: layerModel.url,
+          }),
+          style,
+        })
+        break;
+      }
     case "wms":
       layer = new TileLayer({
         source: new TileWMS({
