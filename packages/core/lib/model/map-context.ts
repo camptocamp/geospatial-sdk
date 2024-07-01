@@ -1,4 +1,4 @@
-import exp from "constants";
+
 import { FeatureCollection, Geometry } from "geojson";
 
 export type LayerDimensions = Record<string, string>;
@@ -46,8 +46,10 @@ export interface MapContextLayerWfs extends MapContextBaseLayer {
 export interface MapContextLayerOgcApi extends MapContextBaseLayer{
   type: 'ogcapi'
   url: string
-  name: string
-  layerType: 'feature' | 'vectorTiles' | 'mapTiles' | 'record'
+  collection: string
+  useTiles?: 'vector' | 'map'
+  tileMatrixSet?: string
+  options?: Record<string, string>
 }
 
 export interface MapContextLayerXyz extends MapContextBaseLayer {

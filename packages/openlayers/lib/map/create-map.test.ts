@@ -30,7 +30,6 @@ import {
   createView,
   resetMapFromContext,
 } from "./create-map";
-import {describe} from "vitest";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
