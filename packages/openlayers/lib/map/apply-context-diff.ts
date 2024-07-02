@@ -26,12 +26,13 @@ export function applyContextDiffToMap(
 
   // insert added layers
   for (const layerAdded of contextDiff.layersAdded) {
-    const layer = createLayer(layerAdded.layer);
-    if (layerAdded.position >= layers.getLength()) {
-      layers.push(layer);
-    } else {
-      layers.insertAt(layerAdded.position, layer);
-    }
+    createLayer(layerAdded.layer).then(layer => {
+      if (layerAdded.position >= layers.getLength()) {
+        layers.push(layer);
+      } else {
+        layers.insertAt(layerAdded.position, layer);
+      }
+    });
   }
 
   // move reordered layers (sorted by ascending new position)
@@ -52,7 +53,9 @@ export function applyContextDiffToMap(
   // recreate changed layers
   for (const layerChanged of contextDiff.layersChanged) {
     layers.item(layerChanged.position).dispose();
-    layers.setAt(layerChanged.position, createLayer(layerChanged.layer));
+    createLayer(layerChanged.layer).then(layer => {
+      layers.setAt(layerChanged.position, layer);
+    });
   }
   return map;
 }
