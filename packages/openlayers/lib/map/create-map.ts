@@ -21,9 +21,10 @@ import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
 import {OGCMapTile, OGCVectorTile} from "ol/source";
 import {MVT} from "ol/format";
-import {OgcApiEndpoint} from "@camptocamp/ogc-client";
+import {OgcApiEndpoint, WfsEndpoint} from "@camptocamp/ogc-client";
 
 const geosjonFormat = new GeoJSON();
+const WFS_MAX_FEATURES = 10000;
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
@@ -51,32 +52,32 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     //   return new TileLayer({
     //     source: new WMTS(layerModel.options),
     //   })
-    case "wfs":
-      layer = new VectorLayer({
-        source: new VectorSource({
-          format: new GeoJSON(),
-          url: function (extent) {
-            const urlObj = new URL(
-              removeSearchParams(layerModel.url, [
-                "service",
-                "version",
-                "request",
-              ]),
-            );
-            urlObj.searchParams.set("service", "WFS");
-            urlObj.searchParams.set("version", "1.1.0");
-            urlObj.searchParams.set("request", "GetFeature");
-            urlObj.searchParams.set("outputFormat", "application/json");
-            urlObj.searchParams.set("typename", layerModel.featureType);
-            urlObj.searchParams.set("srsname", "EPSG:3857");
-            urlObj.searchParams.set("bbox", `${extent.join(",")},EPSG:3857`);
-            return urlObj.toString();
-          },
-          strategy: bboxStrategy,
-        }),
+    case "wfs":{
+      const olLayer = new VectorLayer({
         style,
       });
+      new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
+        const featureType =
+            endpoint.getSingleFeatureTypeName() ?? layerModel.name;
+        olLayer.setSource(
+            new VectorSource({
+              format: new GeoJSON(),
+              url: function (extent) {
+                return endpoint.getFeatureUrl(featureType, {
+                  maxFeatures: WFS_MAX_FEATURES,
+                  asJson: true,
+                  outputCrs: "EPSG:3857",
+                  extent: extent as [number, number, number, number],
+                  extentCrs: "EPSG:3857",
+                });
+              },
+              strategy: bboxStrategy,
+            }),
+        );
+      });
+      layer = olLayer;
       break;
+    }
     case "geojson": {
       if (layerModel.url !== undefined) {
         layer = new VectorLayer({
