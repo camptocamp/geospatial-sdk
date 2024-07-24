@@ -18,18 +18,24 @@ import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { removeSearchParams } from "@geospatial-sdk/core";
 import { defaultStyle } from "./styles";
+import VectorTileLayer from "ol/layer/VectorTile";
+import {OGCMapTile, OGCVectorTile} from "ol/source";
+import {MVT} from "ol/format";
+import {OgcApiEndpoint, WfsEndpoint} from "@camptocamp/ogc-client";
 
 const geosjonFormat = new GeoJSON();
+const WFS_MAX_FEATURES = 10000;
 
-export function createLayer(layerModel: MapContextLayer): Layer {
+export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
   const style = defaultStyle;
-  let layer: Layer;
+  let layer: Layer | undefined;
   switch (type) {
     case "xyz":
       layer = new TileLayer({
         source: new XYZ({
           url: layerModel.url,
+          attributions: layerModel.attributions,
         }),
       });
       break;
@@ -39,6 +45,7 @@ export function createLayer(layerModel: MapContextLayer): Layer {
           url: removeSearchParams(layerModel.url, ["request", "service"]),
           params: { LAYERS: layerModel.name },
           gutter: 20,
+          attributions: layerModel.attributions,
         }),
       });
       break;
@@ -47,38 +54,40 @@ export function createLayer(layerModel: MapContextLayer): Layer {
     //   return new TileLayer({
     //     source: new WMTS(layerModel.options),
     //   })
-    case "wfs":
-      layer = new VectorLayer({
-        source: new VectorSource({
-          format: new GeoJSON(),
-          url: function (extent) {
-            const urlObj = new URL(
-              removeSearchParams(layerModel.url, [
-                "service",
-                "version",
-                "request",
-              ]),
-            );
-            urlObj.searchParams.set("service", "WFS");
-            urlObj.searchParams.set("version", "1.1.0");
-            urlObj.searchParams.set("request", "GetFeature");
-            urlObj.searchParams.set("outputFormat", "application/json");
-            urlObj.searchParams.set("typename", layerModel.featureType);
-            urlObj.searchParams.set("srsname", "EPSG:3857");
-            urlObj.searchParams.set("bbox", `${extent.join(",")},EPSG:3857`);
-            return urlObj.toString();
-          },
-          strategy: bboxStrategy,
-        }),
+    case "wfs":{
+      const olLayer = new VectorLayer({
         style,
       });
+      new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
+        const featureType =
+            endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
+        olLayer.setSource(
+            new VectorSource({
+              format: new GeoJSON(),
+              url: function (extent) {
+                return endpoint.getFeatureUrl(featureType, {
+                  maxFeatures: WFS_MAX_FEATURES,
+                  asJson: true,
+                  outputCrs: "EPSG:3857",
+                  extent: extent as [number, number, number, number],
+                  extentCrs: "EPSG:3857",
+                });
+              },
+              strategy: bboxStrategy,
+              attributions: layerModel.attributions,
+            }),
+        );
+      });
+      layer = olLayer;
       break;
+    }
     case "geojson": {
       if (layerModel.url !== undefined) {
         layer = new VectorLayer({
           source: new VectorSource({
             format: new GeoJSON(),
             url: layerModel.url,
+            attributions: layerModel.attributions,
           }),
           style,
         });
@@ -99,6 +108,42 @@ export function createLayer(layerModel: MapContextLayer): Layer {
         layer = new VectorLayer({
           source: new VectorSource({
             features,
+            attributions: layerModel.attributions,
+          }),
+          style,
+        });
+      }
+      break;
+    }
+    case "ogcapi": {
+      const ogcEndpoint = await new OgcApiEndpoint(layerModel.url);
+      let layerUrl: string;
+      if (layerModel.useTiles) {
+        if (layerModel.useTiles === 'vector') {
+          layerUrl = await ogcEndpoint.getVectorTilesetUrl(layerModel.collection, layerModel.tileMatrixSet);
+          layer = new VectorTileLayer({
+            source: new OGCVectorTile({
+              url: layerUrl,
+              format: new MVT(),
+              attributions: layerModel.attributions,
+            }),
+          });
+        } else if (layerModel.useTiles === 'map') {
+          layerUrl = await ogcEndpoint.getMapTilesetUrl(layerModel.collection, layerModel.tileMatrixSet);
+          layer = new TileLayer({
+            source: new OGCMapTile({
+              url: layerUrl,
+              attributions: layerModel.attributions,
+            }),
+          });
+        }
+      } else {
+        layerUrl = await ogcEndpoint.getCollectionItemsUrl(layerModel.collection, layerModel.options);
+        layer = new VectorLayer({
+          source: new VectorSource({
+            format: new GeoJSON(),
+            url: layerUrl,
+            attributions: layerModel.attributions,
           }),
           style,
         });
@@ -107,6 +152,9 @@ export function createLayer(layerModel: MapContextLayer): Layer {
     }
     default:
       throw new Error(`Unrecognized layer type: ${layerModel.type}`);
+  }
+  if (!layer) {
+    throw new Error(`Layer could not be created for type: ${layerModel.type}`);
   }
   typeof layerModel.visibility !== "undefined" &&
     layer.setVisible(layerModel.visibility);
@@ -145,14 +193,14 @@ export function createView(viewModel: MapContextView, map: Map): View {
  * @param context
  * @param target
  */
-export function createMapFromContext(
-  context: MapContext,
-  target?: string | HTMLElement,
-): Map {
+export async function createMapFromContext(
+    context: MapContext,
+    target?: string | HTMLElement,
+): Promise<Map> {
   const map = new Map({
     target,
   });
-  return resetMapFromContext(map, context);
+  return await resetMapFromContext(map, context);
 }
 
 /**
@@ -160,9 +208,12 @@ export function createMapFromContext(
  * @param map
  * @param context
  */
-export function resetMapFromContext(map: Map, context: MapContext): Map {
+export async function resetMapFromContext(map: Map, context: MapContext): Promise<Map> {
   map.setView(createView(context.view, map));
   map.getLayers().clear();
-  context.layers.forEach((layer) => map.addLayer(createLayer(layer)));
+  for (const layerModel of context.layers) {
+    const layer = await createLayer(layerModel);
+    map.addLayer(layer);
+  }
   return map;
 }

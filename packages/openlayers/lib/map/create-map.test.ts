@@ -15,6 +15,7 @@ import {
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
   MAP_CTX_LAYER_XYZ_FIXTURE,
+  MAP_CTX_LAYER_OGCAPI_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures";
 import {
   MapContext,
@@ -35,9 +36,9 @@ describe("MapContextService", () => {
     let layerModel: MapContextLayer, layer: Layer;
 
     describe("XYZ", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         layerModel = MAP_CTX_LAYER_XYZ_FIXTURE;
-        layer = createLayer(layerModel);
+        layer = await createLayer(layerModel);
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -62,11 +63,37 @@ describe("MapContextService", () => {
         );
       });
     });
-
+    describe("OGCAPI", () => {
+        beforeEach(async () => {
+          layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+          layer = await createLayer(layerModel);
+        });
+        it("create a vector tile layer", () => {
+            expect(layer).toBeTruthy();
+            expect(layer).toBeInstanceOf(VectorLayer);
+        });
+        it("set correct layer properties", () => {
+            expect(layer.getVisible()).toBe(true);
+            expect(layer.getOpacity()).toBe(1);
+            expect(layer.get("label")).toBeUndefined();
+            expect(layer.getSource()?.getAttributions()).toBeNull();
+        });
+        it("create a OGCVectorTile source", () => {
+            const source = layer.getSource();
+            expect(source).toBeInstanceOf(VectorSource);
+        });
+        it("set correct url", () => {
+            const source = layer.getSource() as VectorSource;
+            const url = source.getUrl();
+            expect(url).toBe(
+            "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
+            );
+        });
+    });
     describe("WMS", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WMS_FIXTURE),
-          (layer = createLayer(layerModel));
+            (layer = await createLayer(layerModel));
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -104,9 +131,9 @@ describe("MapContextService", () => {
     });
 
     describe("WFS", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WFS_FIXTURE),
-          (layer = createLayer(layerModel));
+            (layer = await createLayer(layerModel));
       });
       it("create a vector layer", () => {
         expect(layer).toBeTruthy();
@@ -116,6 +143,9 @@ describe("MapContextService", () => {
         expect(layer.getVisible()).toBe(true);
         expect(layer.getOpacity()).toBe(0.5);
         expect(layer.get("label")).toBe("Communes");
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorSource);
+
         const attributions = layer.getSource()?.getAttributions();
         expect(attributions).not.toBeNull();
         // @ts-ignore
@@ -129,16 +159,16 @@ describe("MapContextService", () => {
         const source = layer.getSource() as VectorSource;
         const urlLoader = source.getUrl() as Function;
         expect(urlLoader([10, 20, 30, 40])).toBe(
-          "https://www.geograndest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857",
+          "https://www.geograndest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
         );
       });
     });
 
     describe("GEOJSON", () => {
       describe("with inline data", () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
-          layer = createLayer(layerModel);
+          layer = await createLayer(layerModel);
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -162,10 +192,10 @@ describe("MapContextService", () => {
         });
       });
       describe("with inline data as string", () => {
-        beforeEach(() => {
-          layerModel = { ...MAP_CTX_LAYER_GEOJSON_FIXTURE };
+        beforeEach(async () => {
+          layerModel = {...MAP_CTX_LAYER_GEOJSON_FIXTURE};
           layerModel.data = JSON.stringify(layerModel.data);
-          layer = createLayer(layerModel);
+          layer = await createLayer(layerModel);
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -185,7 +215,7 @@ describe("MapContextService", () => {
         });
       });
       describe("with invalid inline data as string", () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           const spy = vi.spyOn(window.console, "warn");
           spy.mockClear();
           layerModel = {
@@ -193,7 +223,7 @@ describe("MapContextService", () => {
             url: undefined,
             data: "blargz",
           };
-          layer = createLayer(layerModel);
+          layer = await createLayer(layerModel);
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -209,9 +239,9 @@ describe("MapContextService", () => {
         });
       });
       describe("with remote file url", () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
-          layer = createLayer(layerModel);
+          layer = await createLayer(layerModel);
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -238,8 +268,8 @@ describe("MapContextService", () => {
     let map: Map;
     describe("from center and zoom", () => {
       const contextModel = MAP_CTX_FIXTURE;
-      beforeEach(() => {
-        map = createMapFromContext(contextModel);
+      beforeEach(async () => {
+        map = await createMapFromContext(contextModel);
         view = createView(contextModel.view, map);
       });
       it("create a view", () => {

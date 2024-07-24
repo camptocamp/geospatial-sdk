@@ -17,8 +17,8 @@ import { applyContextDiffToMap } from "./apply-context-diff";
 import { beforeEach } from "vitest";
 import BaseLayer from "ol/layer/Base";
 
-function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
-  const reference = createLayer(layerModel) as any;
+async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
+  const reference = await createLayer(layerModel) as any;
   expect(reference).toBeInstanceOf(layer.constructor);
   const refSource = reference.getSource() as any;
   const layerSource = layer.getSource() as any;
@@ -38,16 +38,16 @@ describe("applyContextDiffToMap", () => {
   let map: Map;
   let layersArray: BaseLayer[];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     context = {
       ...SAMPLE_CONTEXT,
       layers: [SAMPLE_LAYER2, SAMPLE_LAYER1],
     };
-    map = createMapFromContext(context);
+    map = await createMapFromContext(context);
   });
 
   describe("no change", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       diff = {
         layersAdded: [],
         layersChanged: [],
@@ -55,7 +55,7 @@ describe("applyContextDiffToMap", () => {
         layersReordered: [],
         viewChanges: {},
       };
-      applyContextDiffToMap(map, diff);
+      await applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();
     });
     it("does not affect the map", () => {
@@ -159,12 +159,12 @@ describe("applyContextDiffToMap", () => {
 
   describe("reordering", () => {
     describe("three layers reordered", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         context = {
           ...SAMPLE_CONTEXT,
           layers: [SAMPLE_LAYER1, SAMPLE_LAYER2, SAMPLE_LAYER3],
         };
-        map = createMapFromContext(context);
+        map = await createMapFromContext(context);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -195,12 +195,12 @@ describe("applyContextDiffToMap", () => {
     });
 
     describe("four layers reordered", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         context = {
           ...SAMPLE_CONTEXT,
           layers: [SAMPLE_LAYER1, SAMPLE_LAYER3, SAMPLE_LAYER4, SAMPLE_LAYER2],
         };
-        map = createMapFromContext(context);
+        map = await createMapFromContext(context);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -234,13 +234,13 @@ describe("applyContextDiffToMap", () => {
 
   describe("combined changes", () => {
     let changedLayer: MapContextLayer;
-    beforeEach(() => {
-      changedLayer = { ...SAMPLE_LAYER3, extras: { prop: true } };
+    beforeEach(async () => {
+      changedLayer = {...SAMPLE_LAYER3, extras: {prop: true}};
       context = {
         ...context,
         layers: [SAMPLE_LAYER1, SAMPLE_LAYER5, SAMPLE_LAYER3, SAMPLE_LAYER4],
       };
-      map = createMapFromContext(context);
+      map = await createMapFromContext(context);
       diff = {
         layersAdded: [
           {
