@@ -35,6 +35,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       layer = new TileLayer({
         source: new XYZ({
           url: layerModel.url,
+          attributions: layerModel.attributions,
         }),
       });
       break;
@@ -44,6 +45,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           url: removeSearchParams(layerModel.url, ["request", "service"]),
           params: { LAYERS: layerModel.name },
           gutter: 20,
+          attributions: layerModel.attributions,
         }),
       });
       break;
@@ -58,7 +60,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       });
       new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
         const featureType =
-            endpoint.getSingleFeatureTypeName() ?? layerModel.name;
+            endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
         olLayer.setSource(
             new VectorSource({
               format: new GeoJSON(),
@@ -72,6 +74,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
                 });
               },
               strategy: bboxStrategy,
+              attributions: layerModel.attributions,
             }),
         );
       });
@@ -84,6 +87,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           source: new VectorSource({
             format: new GeoJSON(),
             url: layerModel.url,
+            attributions: layerModel.attributions,
           }),
           style,
         });
@@ -104,6 +108,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         layer = new VectorLayer({
           source: new VectorSource({
             features,
+            attributions: layerModel.attributions,
           }),
           style,
         });
@@ -120,6 +125,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             source: new OGCVectorTile({
               url: layerUrl,
               format: new MVT(),
+              attributions: layerModel.attributions,
             }),
           });
         } else if (layerModel.useTiles === 'map') {
@@ -127,6 +133,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           layer = new TileLayer({
             source: new OGCMapTile({
               url: layerUrl,
+              attributions: layerModel.attributions,
             }),
           });
         }
@@ -136,6 +143,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           source: new VectorSource({
             format: new GeoJSON(),
             url: layerUrl,
+            attributions: layerModel.attributions,
           }),
           style,
         });

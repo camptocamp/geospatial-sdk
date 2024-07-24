@@ -37,7 +37,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@camptocamp/ogc-client": "^1.1.1-dev.a9abcef",
+    "@camptocamp/ogc-client": "1.1.1-dev.9671ef4",
     "@geospatial-sdk/core": "*"
   }
 }

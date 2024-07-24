@@ -40,7 +40,7 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
 export interface MapContextLayerWfs extends MapContextBaseLayer {
   type: "wfs";
   url: string;
-  name: string;
+  featureType: string;
 }
 
 export interface MapContextLayerOgcApi extends MapContextBaseLayer{
