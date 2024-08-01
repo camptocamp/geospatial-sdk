@@ -8,6 +8,7 @@ import {
   SAMPLE_LAYER4,
   SAMPLE_LAYER5,
 } from "../../fixtures/map-context.fixtures";
+import { MapContextView } from "../model";
 
 describe("Context diff utils", () => {
   describe("computeMapContextDiff", () => {
@@ -33,7 +34,7 @@ describe("Context diff utils", () => {
           layersChanged: [],
           layersRemoved: [],
           layersReordered: [],
-          viewChanges: {},
+          viewChanges: MapContextView,
         });
       });
     });
@@ -65,7 +66,7 @@ describe("Context diff utils", () => {
           layersChanged: [],
           layersRemoved: [],
           layersReordered: [],
-          viewChanges: {},
+          viewChanges: MapContextView,
         });
       });
     });
@@ -97,7 +98,7 @@ describe("Context diff utils", () => {
             },
           ],
           layersReordered: [],
-          viewChanges: {},
+          viewChanges: MapContextView,
         });
       });
     });
@@ -132,7 +133,7 @@ describe("Context diff utils", () => {
           ],
           layersRemoved: [],
           layersReordered: [],
-          viewChanges: {},
+          viewChanges: MapContextView,
         });
       });
     });
@@ -167,7 +168,7 @@ describe("Context diff utils", () => {
                 previousPosition: 0,
               },
             ],
-            viewChanges: {},
+            viewChanges: MapContextView,
           });
         });
       });
@@ -211,7 +212,7 @@ describe("Context diff utils", () => {
                 previousPosition: 0,
               },
             ],
-            viewChanges: {},
+            viewChanges: MapContextView,
           });
         });
       });
@@ -267,7 +268,7 @@ describe("Context diff utils", () => {
               previousPosition: 1,
             },
           ],
-          viewChanges: {},
+          viewChanges: MapContextView,
         });
       });
     });

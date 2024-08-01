@@ -33,5 +33,5 @@ export interface MapContextDiff {
   layersReordered: MapContextLayerReordered[];
   layersRemoved: MapContextLayerPositioned[];
   layersAdded: MapContextLayerPositioned[];
-  viewChanges: MapContextView;
+  viewChange?: MapContextView;
 }

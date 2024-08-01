@@ -14,16 +14,17 @@ import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import Feature from "ol/Feature";
 import Geometry from "ol/geom/Geometry";
+import SimpleGeometry from "ol/geom/SimpleGeometry";
 import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { removeSearchParams } from "@geospatial-sdk/core";
 import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
-import {OGCMapTile, OGCVectorTile} from "ol/source";
-import {MVT} from "ol/format";
-import {OgcApiEndpoint, WfsEndpoint} from "@camptocamp/ogc-client";
+import { OGCMapTile, OGCVectorTile } from "ol/source";
+import { MVT } from "ol/format";
+import { OgcApiEndpoint, WfsEndpoint } from "@camptocamp/ogc-client";
 
-const geosjonFormat = new GeoJSON();
+const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
@@ -54,28 +55,28 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     //   return new TileLayer({
     //     source: new WMTS(layerModel.options),
     //   })
-    case "wfs":{
+    case "wfs": {
       const olLayer = new VectorLayer({
         style,
       });
       new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
         const featureType =
-            endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
+          endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
         olLayer.setSource(
-            new VectorSource({
-              format: new GeoJSON(),
-              url: function (extent) {
-                return endpoint.getFeatureUrl(featureType, {
-                  maxFeatures: WFS_MAX_FEATURES,
-                  asJson: true,
-                  outputCrs: "EPSG:3857",
-                  extent: extent as [number, number, number, number],
-                  extentCrs: "EPSG:3857",
-                });
-              },
-              strategy: bboxStrategy,
-              attributions: layerModel.attributions,
-            }),
+          new VectorSource({
+            format: new GeoJSON(),
+            url: function (extent) {
+              return endpoint.getFeatureUrl(featureType, {
+                maxFeatures: WFS_MAX_FEATURES,
+                asJson: true,
+                outputCrs: "EPSG:3857",
+                extent: extent as [number, number, number, number],
+                extentCrs: "EPSG:3857",
+              });
+            },
+            strategy: bboxStrategy,
+            attributions: layerModel.attributions,
+          }),
         );
       });
       layer = olLayer;
@@ -101,7 +102,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             geojson = { type: "FeatureCollection", features: [] };
           }
         }
-        const features = geosjonFormat.readFeatures(geojson, {
+        const features = GEOJSON.readFeatures(geojson, {
           featureProjection: "EPSG:3857",
           dataProjection: "EPSG:4326",
         }) as Feature<Geometry>[];
@@ -119,8 +120,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       const ogcEndpoint = await new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
       if (layerModel.useTiles) {
-        if (layerModel.useTiles === 'vector') {
-          layerUrl = await ogcEndpoint.getVectorTilesetUrl(layerModel.collection, layerModel.tileMatrixSet);
+        if (layerModel.useTiles === "vector") {
+          layerUrl = await ogcEndpoint.getVectorTilesetUrl(
+            layerModel.collection,
+            layerModel.tileMatrixSet,
+          );
           layer = new VectorTileLayer({
             source: new OGCVectorTile({
               url: layerUrl,
@@ -128,8 +132,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               attributions: layerModel.attributions,
             }),
           });
-        } else if (layerModel.useTiles === 'map') {
-          layerUrl = await ogcEndpoint.getMapTilesetUrl(layerModel.collection, layerModel.tileMatrixSet);
+        } else if (layerModel.useTiles === "map") {
+          layerUrl = await ogcEndpoint.getMapTilesetUrl(
+            layerModel.collection,
+            layerModel.tileMatrixSet,
+          );
           layer = new TileLayer({
             source: new OGCMapTile({
               url: layerUrl,
@@ -138,7 +145,10 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           });
         }
       } else {
-        layerUrl = await ogcEndpoint.getCollectionItemsUrl(layerModel.collection, layerModel.options);
+        layerUrl = await ogcEndpoint.getCollectionItemsUrl(
+          layerModel.collection,
+          layerModel.options,
+        );
         layer = new VectorLayer({
           source: new VectorSource({
             format: new GeoJSON(),
@@ -168,22 +178,28 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
 }
 
 export function createView(viewModel: MapContextView, map: Map): View {
-  const { center: centerInViewProj, zoom, maxZoom, maxExtent } = viewModel;
-  const center = centerInViewProj
-    ? fromLonLat(centerInViewProj, "EPSG:3857")
-    : [0, 0];
   const view = new View({
-    center,
-    zoom: zoom ?? 0,
-    maxZoom,
-    extent: maxExtent,
+    ...("maxExtent" in viewModel && { extent: viewModel.maxExtent }),
+    ...("maxZoom" in viewModel && { maxZoom: viewModel.maxZoom }),
     multiWorld: false,
     constrainResolution: true,
   });
-  if (viewModel.extent) {
+  if ("geometry" in viewModel) {
+    const geom = GEOJSON.readGeometry(viewModel.geometry);
+    view.fit(geom as SimpleGeometry, {
+      size: map.getSize(),
+    });
+  } else if ("extent" in viewModel) {
     view.fit(viewModel.extent, {
       size: map.getSize(),
     });
+  } else {
+    const { center: centerInViewProj, zoom } = viewModel;
+    const center = centerInViewProj
+      ? fromLonLat(centerInViewProj, "EPSG:3857")
+      : [0, 0];
+    view.setCenter(center);
+    view.setZoom(zoom !== undefined ? zoom : 0);
   }
   return view;
 }
@@ -194,8 +210,8 @@ export function createView(viewModel: MapContextView, map: Map): View {
  * @param target
  */
 export async function createMapFromContext(
-    context: MapContext,
-    target?: string | HTMLElement,
+  context: MapContext,
+  target?: string | HTMLElement,
 ): Promise<Map> {
   const map = new Map({
     target,
@@ -208,7 +224,10 @@ export async function createMapFromContext(
  * @param map
  * @param context
  */
-export async function resetMapFromContext(map: Map, context: MapContext): Promise<Map> {
+export async function resetMapFromContext(
+  map: Map,
+  context: MapContext,
+): Promise<Map> {
   map.setView(createView(context.view, map));
   map.getLayers().clear();
   for (const layerModel of context.layers) {
