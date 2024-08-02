@@ -12,6 +12,7 @@ import {
   MAP_CTX_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
+  MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE,
   MAP_CTX_LAYER_OGCAPI_FIXTURE,
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
@@ -32,6 +33,8 @@ import {
   resetMapFromContext,
 } from "./create-map";
 import WMTS from "ol/source/WMTS";
+import { VectorTile } from "ol/source";
+import { MapboxVectorLayer } from "ol-mapbox-style";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -289,6 +292,26 @@ describe("MapContextService", () => {
         expect(urls).toEqual([
           "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
         ]);
+      });
+    });
+
+    describe("Maplibre Style", () => {
+      beforeEach(async () => {
+        (layerModel = MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE),
+          (layer = await createLayer(layerModel));
+      });
+      it("create a tile layer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(MapboxVectorLayer);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(1);
+        expect(layer.get("label")).toBeUndefined();
+      });
+      it("create a Vector Tile source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorTile);
       });
     });
   });

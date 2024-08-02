@@ -3,6 +3,7 @@ import {
   Extent,
   MapContext,
   MapContextLayerGeojson,
+  MapContextLayerMapLibreStyle,
   MapContextLayerOgcApi,
   MapContextLayerWfs,
   MapContextLayerWms,
@@ -55,6 +56,12 @@ export const MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE: MapContextLayerGeojson =
   deepFreeze({
     type: "geojson",
     url: "https://my.host.com/data/regions.json",
+  });
+export const MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE: MapContextLayerMapLibreStyle =
+  deepFreeze({
+    type: "maplibre-style",
+    styleUrl: "http://my.host.com/maplibre/style.json",
+    accessToken: "abcdefgh",
   });
 
 export const MAP_CTX_VIEW_FIXTURE: MapContextView = deepFreeze({
