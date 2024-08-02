@@ -20,6 +20,8 @@ export async function createViewFromLayer(
     return await getWmtsLayerExtent(layer);
   } else if (layer.type === "geojson") {
     return computeExtentFromGeojson(layer.data);
+  } else if (layer.type === "wfs") {
+    return await getWfsLayerExtent(layer);
   } else {
     throw new Error(`Unsupported layer type: ${layer.type}`);
   }
@@ -75,4 +77,41 @@ async function getWmtsLayerExtent(layer: any): Promise<ViewByExtent | null> {
         ) as Extent,
       }
     : null;
+}
+
+async function getWfsLayerExtent(layer: any): Promise<ViewByExtent | null> {
+  const endpoint = await new WfsEndpoint(layer.url).isReady();
+  const featureTypeSummary = endpoint.getFeatureTypeSummary(layer.featureType);
+  const boundingBox = featureTypeSummary?.boundingBox;
+  if (!boundingBox) {
+    return null;
+  } else if (Array.isArray(boundingBox)) {
+    return {
+      extent: transformExtent(boundingBox, "EPSG:4326", "EPSG:3857") as Extent,
+    };
+  } else {
+    const lonLatCRS = Object.keys(boundingBox).find((crs) =>
+      LONLAT_CRS_CODES.includes(crs),
+    );
+    if (lonLatCRS) {
+      return {
+        extent: transformExtent(
+          boundingBox[lonLatCRS],
+          "EPSG:4326",
+          "EPSG:3857",
+        ) as Extent,
+      };
+    } else {
+      const availableEPSGCode = Object.keys(boundingBox)[0];
+      register(proj4);
+      const proj = await fromEPSGCode(availableEPSGCode);
+      return {
+        extent: transformExtent(
+          boundingBox[availableEPSGCode],
+          proj,
+          "EPSG:3857",
+        ) as Extent,
+      };
+    }
+  }
 }
