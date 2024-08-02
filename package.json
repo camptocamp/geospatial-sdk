@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@camptocamp/ogc-client": "1.1.1-dev.9671ef4",
-    "@geospatial-sdk/core": "*"
+    "@geospatial-sdk/core": "*",
+    "ol-mapbox-style": "^12.3.4"
   }
 }
