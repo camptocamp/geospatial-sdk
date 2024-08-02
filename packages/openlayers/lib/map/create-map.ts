@@ -19,9 +19,11 @@ import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { removeSearchParams } from "@geospatial-sdk/core";
 import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
-import {OGCMapTile, OGCVectorTile} from "ol/source";
-import {MVT} from "ol/format";
-import {OgcApiEndpoint, WfsEndpoint} from "@camptocamp/ogc-client";
+import { OGCMapTile, OGCVectorTile, Source } from "ol/source";
+import { MVT } from "ol/format";
+import { OgcApiEndpoint, WfsEndpoint } from "@camptocamp/ogc-client";
+import { MapboxVectorLayer } from "ol-mapbox-style";
+import LayerRenderer from "ol/renderer/Layer";
 
 const geosjonFormat = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -54,31 +56,38 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     //   return new TileLayer({
     //     source: new WMTS(layerModel.options),
     //   })
-    case "wfs":{
+    case "wfs": {
       const olLayer = new VectorLayer({
         style,
       });
       new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
         const featureType =
-            endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
+          endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
         olLayer.setSource(
-            new VectorSource({
-              format: new GeoJSON(),
-              url: function (extent) {
-                return endpoint.getFeatureUrl(featureType, {
-                  maxFeatures: WFS_MAX_FEATURES,
-                  asJson: true,
-                  outputCrs: "EPSG:3857",
-                  extent: extent as [number, number, number, number],
-                  extentCrs: "EPSG:3857",
-                });
-              },
-              strategy: bboxStrategy,
-              attributions: layerModel.attributions,
-            }),
+          new VectorSource({
+            format: new GeoJSON(),
+            url: function (extent) {
+              return endpoint.getFeatureUrl(featureType, {
+                maxFeatures: WFS_MAX_FEATURES,
+                asJson: true,
+                outputCrs: "EPSG:3857",
+                extent: extent as [number, number, number, number],
+                extentCrs: "EPSG:3857",
+              });
+            },
+            strategy: bboxStrategy,
+            attributions: layerModel.attributions,
+          }),
         );
       });
       layer = olLayer;
+      break;
+    }
+    case "mapbox-vector": {
+      layer = new MapboxVectorLayer({
+        styleUrl: layerModel.styleUrl,
+        accessToken: layerModel.accessToken,
+      }) as unknown as Layer<Source, LayerRenderer<any>>;
       break;
     }
     case "geojson": {
@@ -119,8 +128,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       const ogcEndpoint = await new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
       if (layerModel.useTiles) {
-        if (layerModel.useTiles === 'vector') {
-          layerUrl = await ogcEndpoint.getVectorTilesetUrl(layerModel.collection, layerModel.tileMatrixSet);
+        if (layerModel.useTiles === "vector") {
+          layerUrl = await ogcEndpoint.getVectorTilesetUrl(
+            layerModel.collection,
+            layerModel.tileMatrixSet,
+          );
           layer = new VectorTileLayer({
             source: new OGCVectorTile({
               url: layerUrl,
@@ -128,8 +140,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               attributions: layerModel.attributions,
             }),
           });
-        } else if (layerModel.useTiles === 'map') {
-          layerUrl = await ogcEndpoint.getMapTilesetUrl(layerModel.collection, layerModel.tileMatrixSet);
+        } else if (layerModel.useTiles === "map") {
+          layerUrl = await ogcEndpoint.getMapTilesetUrl(
+            layerModel.collection,
+            layerModel.tileMatrixSet,
+          );
           layer = new TileLayer({
             source: new OGCMapTile({
               url: layerUrl,
@@ -138,7 +153,10 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           });
         }
       } else {
-        layerUrl = await ogcEndpoint.getCollectionItemsUrl(layerModel.collection, layerModel.options);
+        layerUrl = await ogcEndpoint.getCollectionItemsUrl(
+          layerModel.collection,
+          layerModel.options,
+        );
         layer = new VectorLayer({
           source: new VectorSource({
             format: new GeoJSON(),
@@ -194,8 +212,8 @@ export function createView(viewModel: MapContextView, map: Map): View {
  * @param target
  */
 export async function createMapFromContext(
-    context: MapContext,
-    target?: string | HTMLElement,
+  context: MapContext,
+  target?: string | HTMLElement,
 ): Promise<Map> {
   const map = new Map({
     target,
@@ -208,7 +226,10 @@ export async function createMapFromContext(
  * @param map
  * @param context
  */
-export async function resetMapFromContext(map: Map, context: MapContext): Promise<Map> {
+export async function resetMapFromContext(
+  map: Map,
+  context: MapContext,
+): Promise<Map> {
   map.setView(createView(context.view, map));
   map.getLayers().clear();
   for (const layerModel of context.layers) {
