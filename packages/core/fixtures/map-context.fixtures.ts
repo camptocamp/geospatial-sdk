@@ -2,13 +2,13 @@ import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures";
 import {
   Extent,
   MapContext,
-  MapContextLayer,
   MapContextLayerGeojson,
+  MapContextLayerOgcApi,
   MapContextLayerWfs,
   MapContextLayerWms,
+  MapContextLayerWmts,
   MapContextLayerXyz,
   MapContextView,
-  MapContextLayerOgcApi,
 } from "../lib/model";
 import { deepFreeze } from "../lib/utils";
 
@@ -33,6 +33,11 @@ export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayerWfs = deepFreeze({
   visibility: true,
   attributions: "camptocamp",
   opacity: 0.5,
+});
+export const MAP_CTX_LAYER_WMTS_FIXTURE: MapContextLayerWmts = deepFreeze({
+  type: "wmts",
+  url: "https://www.geograndest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WMTS",
+  name: "commune_actuelle_3857",
 });
 export const MAP_CTX_LAYER_OGCAPI_FIXTURE: MapContextLayerOgcApi = deepFreeze({
   type: "ogcapi",

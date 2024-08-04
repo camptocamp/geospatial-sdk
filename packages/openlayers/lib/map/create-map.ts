@@ -2,6 +2,7 @@ import {
   MapContext,
   MapContextLayer,
   MapContextView,
+  removeSearchParams,
 } from "@geospatial-sdk/core";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -17,12 +18,15 @@ import Geometry from "ol/geom/Geometry";
 import SimpleGeometry from "ol/geom/SimpleGeometry";
 import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import { removeSearchParams } from "@geospatial-sdk/core";
 import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
-import { OGCMapTile, OGCVectorTile } from "ol/source";
+import { OGCMapTile, OGCVectorTile, WMTS } from "ol/source";
 import { MVT } from "ol/format";
-import { OgcApiEndpoint, WfsEndpoint } from "@camptocamp/ogc-client";
+import {
+  OgcApiEndpoint,
+  WfsEndpoint,
+  WmtsEndpoint,
+} from "@camptocamp/ogc-client";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -50,11 +54,37 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         }),
       });
       break;
-    // TODO: implement when ogc-client can handle wmts
-    // case 'wmts':
-    //   return new TileLayer({
-    //     source: new WMTS(layerModel.options),
-    //   })
+    case "wmts": {
+      const olLayer = new TileLayer({});
+      const endpoint = new WmtsEndpoint(layerModel.url);
+      endpoint.isReady().then(async (endpoint) => {
+        const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
+        const layer = endpoint.getLayerByName(layerName);
+        const matrixSet = layer.matrixSets[0];
+        const tileGrid = await endpoint.getOpenLayersTileGrid(layer.name);
+        if (tileGrid === null) {
+          console.warn("A WMTS tile grid could not be created", layerModel);
+          return;
+        }
+        const resourceUrl = layer.resourceLinks[0];
+        const dimensions = endpoint.getDefaultDimensions(layer.name);
+        olLayer.setSource(
+          new WMTS({
+            layer: layer.name,
+            style: layer.defaultStyle,
+            matrixSet: matrixSet.identifier,
+            format: resourceUrl.format,
+            url: resourceUrl.url,
+            requestEncoding: resourceUrl.encoding,
+            tileGrid,
+            projection: matrixSet.crs,
+            dimensions,
+            attributions: layerModel.attributions,
+          }),
+        );
+      });
+      return olLayer;
+    }
     case "wfs": {
       const olLayer = new VectorLayer({
         style,
@@ -161,7 +191,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       break;
     }
     default:
-      throw new Error(`Unrecognized layer type: ${layerModel.type}`);
+      throw new Error(`Unrecognized layer type: ${JSON.stringify(layerModel)}`);
   }
   if (!layer) {
     throw new Error(`Layer could not be created for type: ${layerModel.type}`);
