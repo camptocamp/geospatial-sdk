@@ -1,13 +1,18 @@
 import { createViewFromLayer } from "./view";
-import { WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 import { transformExtent } from "ol/proj";
+import {
+  MapContextLayerGeojson,
+  MapContextLayerWfs,
+  MapContextLayerWms,
+  MapContextLayerWmts,
+} from "../model";
 
 vitest.mock("@camptocamp/ogc-client", () => ({
   WmsEndpoint: class {
-    constructor(private url) {}
+    constructor() {}
     isReady() {
       return Promise.resolve({
-        getLayerByName: (name) => {
+        getLayerByName: (name: string) => {
           if (name.includes("error")) {
             throw new Error("Something went wrong");
           }
@@ -38,13 +43,26 @@ vitest.mock("@camptocamp/ogc-client", () => ({
     }
   },
   WmtsEndpoint: class {
-    constructor(private url) {}
+    constructor() {}
     isReady() {
       return Promise.resolve({
         getSingleLayerName: () => "layerName",
-        getLayerByName: (name) => ({
+        getLayerByName: (name: string) => ({
           latLonBoundingBox: [1, 2.6, 3.3, 4.2],
         }),
+      });
+    }
+  },
+  WfsEndpoint: class {
+    constructor(private url: string) {}
+    isReady() {
+      return Promise.resolve({
+        getFeatureTypeSummary: (featureType: string) => {
+          return {
+            name: featureType,
+            boundingBox: [1.33, 48.81, 4.3, 51.1],
+          };
+        },
       });
     }
   },
@@ -53,7 +71,11 @@ vitest.mock("@camptocamp/ogc-client", () => ({
 describe("view", () => {
   describe("createViewFromLayer", () => {
     it("should return view for WMS layer", async () => {
-      const layer = { type: "wms", name: "mock_4326", url: "http://mock/wms" };
+      const layer = {
+        type: "wms",
+        name: "mock_4326",
+        url: "http://mock/wms",
+      } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
       expect(view).toEqual({
         extent: transformExtent([1, 2.6, 3.3, 4.2], "EPSG:4326", "EPSG:3857"),
@@ -61,10 +83,26 @@ describe("view", () => {
     });
 
     it("should return view for WMTS layer", async () => {
-      const layer = { type: "wmts", name: "mock", url: "http://mock/wmts" };
+      const layer = {
+        type: "wmts",
+        name: "mock",
+        url: "http://mock/wmts",
+      } as MapContextLayerWmts;
       const view = await createViewFromLayer(layer);
       expect(view).toEqual({
         extent: transformExtent([1, 2.6, 3.3, 4.2], "EPSG:4326", "EPSG:3857"),
+      });
+    });
+
+    it("should return view for WFS layer", async () => {
+      const layer = {
+        type: "wfs",
+        featureType: "mock",
+        url: "http://mock/wfs",
+      } as MapContextLayerWfs;
+      const view = await createViewFromLayer(layer);
+      expect(view).toEqual({
+        extent: [1.33, 48.81, 4.3, 51.1],
       });
     });
 
@@ -72,7 +110,7 @@ describe("view", () => {
       const layer = {
         type: "geojson",
         data: { type: "FeatureCollection", features: [] },
-      };
+      } as MapContextLayerGeojson;
       const view = await createViewFromLayer(layer);
       expect(view).toEqual({
         geometry: { type: "FeatureCollection", features: [] },
@@ -80,7 +118,7 @@ describe("view", () => {
     });
 
     it("should throw error for unsupported layer type", async () => {
-      const layer = { type: "unsupported" };
+      const layer = { type: "unsupported" } as any;
       await expect(createViewFromLayer(layer)).rejects.toThrow(
         "Unsupported layer type: unsupported",
       );

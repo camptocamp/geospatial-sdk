@@ -8,7 +8,7 @@ import {
   SAMPLE_LAYER4,
   SAMPLE_LAYER5,
 } from "../../fixtures/map-context.fixtures";
-import { MapContextView } from "../model";
+import { describe } from "vitest";
 
 describe("Context diff utils", () => {
   describe("computeMapContextDiff", () => {
@@ -34,7 +34,6 @@ describe("Context diff utils", () => {
           layersChanged: [],
           layersRemoved: [],
           layersReordered: [],
-          viewChanges: MapContextView,
         });
       });
     });
@@ -66,7 +65,6 @@ describe("Context diff utils", () => {
           layersChanged: [],
           layersRemoved: [],
           layersReordered: [],
-          viewChanges: MapContextView,
         });
       });
     });
@@ -98,7 +96,6 @@ describe("Context diff utils", () => {
             },
           ],
           layersReordered: [],
-          viewChanges: MapContextView,
         });
       });
     });
@@ -133,7 +130,6 @@ describe("Context diff utils", () => {
           ],
           layersRemoved: [],
           layersReordered: [],
-          viewChanges: MapContextView,
         });
       });
     });
@@ -168,7 +164,6 @@ describe("Context diff utils", () => {
                 previousPosition: 0,
               },
             ],
-            viewChanges: MapContextView,
           });
         });
       });
@@ -212,9 +207,38 @@ describe("Context diff utils", () => {
                 previousPosition: 0,
               },
             ],
-            viewChanges: MapContextView,
           });
         });
+      });
+    });
+
+    describe("view changes", () => {
+      beforeEach(() => {
+        contextOld = {
+          ...SAMPLE_CONTEXT,
+          view: {
+            center: [0, 0],
+            zoom: 1,
+          },
+        };
+        contextNew = {
+          ...SAMPLE_CONTEXT,
+          view: {
+            center: [1, 1],
+            zoom: 2,
+          },
+        };
+      });
+      it("outputs the correct diff", () => {
+        diff = computeMapContextDiff(contextNew, contextOld);
+        expect(diff).toEqual({
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [],
+          viewChanges: { ...contextNew.view },
+        });
+        expect(diff.viewChanges).not.toBe(contextNew.view); // the object reference should be different
       });
     });
 
@@ -229,6 +253,9 @@ describe("Context diff utils", () => {
         contextNew = {
           ...SAMPLE_CONTEXT,
           layers: [SAMPLE_LAYER2, changedLayer, SAMPLE_LAYER5],
+          view: {
+            extent: [0, 1, 2, 3],
+          },
         };
       });
       it("outputs the correct diff", () => {
@@ -268,7 +295,9 @@ describe("Context diff utils", () => {
               previousPosition: 1,
             },
           ],
-          viewChanges: MapContextView,
+          viewChanges: {
+            extent: [0, 1, 2, 3],
+          },
         });
       });
     });

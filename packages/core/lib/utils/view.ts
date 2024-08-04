@@ -1,5 +1,5 @@
 import { transformExtent } from "ol/proj";
-import { WmsEndpoint, WmtsEndpoint, WfsEndpoint } from "@camptocamp/ogc-client";
+import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 import { LONLAT_CRS_CODES } from "../constant/projections";
 import { fromEPSGCode, register } from "ol/proj/proj4";
 import proj4 from "proj4";
@@ -85,33 +85,8 @@ async function getWfsLayerExtent(layer: any): Promise<ViewByExtent | null> {
   const boundingBox = featureTypeSummary?.boundingBox;
   if (!boundingBox) {
     return null;
-  } else if (Array.isArray(boundingBox)) {
-    return {
-      extent: transformExtent(boundingBox, "EPSG:4326", "EPSG:3857") as Extent,
-    };
-  } else {
-    const lonLatCRS = Object.keys(boundingBox).find((crs) =>
-      LONLAT_CRS_CODES.includes(crs),
-    );
-    if (lonLatCRS) {
-      return {
-        extent: transformExtent(
-          boundingBox[lonLatCRS],
-          "EPSG:4326",
-          "EPSG:3857",
-        ) as Extent,
-      };
-    } else {
-      const availableEPSGCode = Object.keys(boundingBox)[0];
-      register(proj4);
-      const proj = await fromEPSGCode(availableEPSGCode);
-      return {
-        extent: transformExtent(
-          boundingBox[availableEPSGCode],
-          proj,
-          "EPSG:3857",
-        ) as Extent,
-      };
-    }
   }
+  return {
+    extent: boundingBox,
+  };
 }

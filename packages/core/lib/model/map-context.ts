@@ -93,8 +93,7 @@ export type Extent = [number, number, number, number];
 
 /**
  * @property center Expressed in longitude/latitude
- * @property extent Expressed in longitude/latitude
- * @property maxExtent Expressed in longitude/latitude
+ * @property zoom
  */
 export interface ViewByZoomAndCenter {
   center: Coordinate;
@@ -102,28 +101,19 @@ export interface ViewByZoomAndCenter {
 }
 
 /**
- * @property center Expressed in longitude/latitude
  * @property extent Expressed in longitude/latitude
- * @property maxExtent Expressed in longitude/latitude
  */
 export interface ViewByExtent {
   extent: Extent;
 }
 
 /**
- * @property center Expressed in longitude/latitude
- * @property extent Expressed in longitude/latitude
- * @property maxExtent Expressed in longitude/latitude
+ * @property geometry Expressed in longitude/latitude
  */
 export interface ViewByGeometry {
   geometry: Geometry;
 }
 
-/**
- * @property center Expressed in longitude/latitude
- * @property extent Expressed in longitude/latitude
- * @property maxExtent Expressed in longitude/latitude
- */
 export type MapContextView = (
   | ViewByZoomAndCenter
   | ViewByExtent

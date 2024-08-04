@@ -4,7 +4,6 @@ import {
   MapContextLayer,
   MapContextLayerPositioned,
   MapContextLayerReordered,
-  MapContextView,
 } from "../model";
 import { isLayerSame, isLayerSameAndUnchanged } from "./map-context";
 import { getHash } from "./hash";
@@ -92,9 +91,9 @@ export function computeMapContextDiff(
     }
   }
 
-  const viewChange =
+  const viewChanges =
     getHash(nextContext.view) !== getHash(previousContext.view)
-      ? nextContext.view
+      ? { ...nextContext.view }
       : undefined;
 
   return {
@@ -102,6 +101,6 @@ export function computeMapContextDiff(
     layersChanged,
     layersRemoved,
     layersReordered,
-    ...(viewChange && { viewChange }),
+    ...(viewChanges && { viewChanges }),
   };
 }

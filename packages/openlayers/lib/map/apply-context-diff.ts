@@ -66,33 +66,33 @@ export async function applyContextDiffToMap(
     });
   }
 
-  if ("viewChange" in contextDiff) {
-    const { viewChange } = contextDiff;
+  if ("viewChanges" in contextDiff) {
+    const { viewChanges } = contextDiff;
     const view = map.getView();
-    if (!viewChange) {
+    if (!viewChanges) {
       return map;
     }
-    if ("geometry" in viewChange) {
-      const geom = GEOJSON.readGeometry(viewChange.geometry);
+    if ("geometry" in viewChanges) {
+      const geom = GEOJSON.readGeometry(viewChanges.geometry);
       view.fit(geom as SimpleGeometry, {
         size: map.getSize(),
       });
-    } else if ("extent" in viewChange) {
-      view.fit(viewChange.extent, {
+    } else if ("extent" in viewChanges) {
+      view.fit(viewChanges.extent, {
         size: map.getSize(),
       });
     } else {
-      const { center: centerInViewProj, zoom } = viewChange;
+      const { center: centerInViewProj, zoom } = viewChanges;
       const center = centerInViewProj
         ? fromLonLat(centerInViewProj, "EPSG:3857")
         : [0, 0];
       view.setCenter(center);
       view.setZoom(zoom);
-      if (viewChange.maxZoom) {
-        view.setMaxZoom(viewChange.maxZoom);
+      if (viewChanges.maxZoom) {
+        view.setMaxZoom(viewChanges.maxZoom);
       }
       // TODO: factorize this better
-      // if (viewChange.maxExtent) {
+      // if (viewChanges.maxExtent) {
       //   map.setView(new View({
       //
       //   }))
