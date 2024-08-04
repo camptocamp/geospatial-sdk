@@ -32,11 +32,11 @@ let layerStates = ref({
   xyz: false
 })
 
-onMounted(() => {
-  map = createMapFromContext(context, mapRoot.value)
+onMounted(async () => {
+  map = await createMapFromContext(context, mapRoot.value)
 })
 
-function toggleLayer(layer: 'wms1' | 'wms2' | 'xyz') {
+async function toggleLayer(layer: 'wms1' | 'wms2' | 'xyz') {
   let newContext = { ...context, layers: [...context.layers] }
   const enabled = layerStates.value[layer]
   if (!enabled) {
@@ -45,7 +45,7 @@ function toggleLayer(layer: 'wms1' | 'wms2' | 'xyz') {
     const layerPos = getLayerPosition(context, Layers[layer])
     newContext.layers.splice(layerPos, 1)
   }
-  applyContextDiffToMap(map, computeMapContextDiff(newContext, context))
+  await applyContextDiffToMap(map, computeMapContextDiff(newContext, context))
   layerStates.value[layer] = !enabled
   context = newContext
 }
