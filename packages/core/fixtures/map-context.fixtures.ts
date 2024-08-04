@@ -35,9 +35,9 @@ export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayerWfs = deepFreeze({
   opacity: 0.5,
 });
 export const MAP_CTX_LAYER_OGCAPI_FIXTURE: MapContextLayerOgcApi = deepFreeze({
-    type: "ogcapi",
-    url: "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
-    collection: "airports",
+  type: "ogcapi",
+  url: "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
+  collection: "airports",
 });
 export const MAP_CTX_LAYER_GEOJSON_FIXTURE: MapContextLayerGeojson =
   deepFreeze<MapContextLayerGeojson>({

@@ -18,7 +18,7 @@ import { beforeEach } from "vitest";
 import BaseLayer from "ol/layer/Base";
 
 async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
-  const reference = await createLayer(layerModel) as any;
+  const reference = (await createLayer(layerModel)) as any;
   expect(reference).toBeInstanceOf(layer.constructor);
   const refSource = reference.getSource() as any;
   const layerSource = layer.getSource() as any;
@@ -235,7 +235,7 @@ describe("applyContextDiffToMap", () => {
   describe("combined changes", () => {
     let changedLayer: MapContextLayer;
     beforeEach(async () => {
-      changedLayer = {...SAMPLE_LAYER3, extras: {prop: true}};
+      changedLayer = { ...SAMPLE_LAYER3, extras: { prop: true } };
       context = {
         ...context,
         layers: [SAMPLE_LAYER1, SAMPLE_LAYER5, SAMPLE_LAYER3, SAMPLE_LAYER4],

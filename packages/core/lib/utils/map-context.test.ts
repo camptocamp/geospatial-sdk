@@ -1,16 +1,20 @@
 import { describe } from "vitest";
 import {
-    addLayerToContext, changeLayerPositionInContext,
-    getLayerHash,
-    getLayerPosition,
-    isLayerSame,
-    isLayerSameAndUnchanged, removeLayerFromContext, replaceLayerInContext,
+  addLayerToContext,
+  changeLayerPositionInContext,
+  getLayerHash,
+  getLayerPosition,
+  isLayerSame,
+  isLayerSameAndUnchanged,
+  removeLayerFromContext,
+  replaceLayerInContext,
 } from "./map-context";
 import { MapContext } from "../model";
 import {
-    SAMPLE_CONTEXT,
-    SAMPLE_LAYER1,
-    SAMPLE_LAYER2, SAMPLE_LAYER3,
+  SAMPLE_CONTEXT,
+  SAMPLE_LAYER1,
+  SAMPLE_LAYER2,
+  SAMPLE_LAYER3,
 } from "../../fixtures/map-context.fixtures";
 
 describe("Map context utils", () => {
@@ -318,10 +322,14 @@ describe("Map context utils", () => {
       };
       const newLayer = { ...SAMPLE_LAYER2, name: "newLayer" };
       const newContext = addLayerToContext(context, newLayer, 1);
-      expect(newContext.layers).toEqual([SAMPLE_LAYER1, newLayer, SAMPLE_LAYER2]);
+      expect(newContext.layers).toEqual([
+        SAMPLE_LAYER1,
+        newLayer,
+        SAMPLE_LAYER2,
+      ]);
     });
   });
-  describe("removeLayerFromContext", ()  =>{
+  describe("removeLayerFromContext", () => {
     it("removes a layer from the context", () => {
       const context: MapContext = {
         ...SAMPLE_CONTEXT,
@@ -333,24 +341,32 @@ describe("Map context utils", () => {
   });
   describe("replaceLayerInContext", () => {
     it("replaces a layer in the context", () => {
-         const context: MapContext = {
-            ...SAMPLE_CONTEXT,
-            layers: [SAMPLE_LAYER1, SAMPLE_LAYER2],
-        };
-        const replacementLayer = { ...SAMPLE_LAYER3};
-        const existingLayer = { ...SAMPLE_LAYER1};
-        const newContext = replaceLayerInContext(context, existingLayer, replacementLayer);
-        expect(newContext.layers).toEqual([replacementLayer, SAMPLE_LAYER2]);
+      const context: MapContext = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER1, SAMPLE_LAYER2],
+      };
+      const replacementLayer = { ...SAMPLE_LAYER3 };
+      const existingLayer = { ...SAMPLE_LAYER1 };
+      const newContext = replaceLayerInContext(
+        context,
+        existingLayer,
+        replacementLayer,
+      );
+      expect(newContext.layers).toEqual([replacementLayer, SAMPLE_LAYER2]);
     });
   });
   describe("changeLayerPositionInContext", () => {
-     it("changes the position of a layer in the context", () => {
-        const context: MapContext = {
-            ...SAMPLE_CONTEXT,
-            layers: [SAMPLE_LAYER1, SAMPLE_LAYER2],
-        };
-        const newContext = changeLayerPositionInContext(context, SAMPLE_LAYER1, 1);
-        expect(newContext.layers).toEqual([SAMPLE_LAYER2, SAMPLE_LAYER1]);
-     });
+    it("changes the position of a layer in the context", () => {
+      const context: MapContext = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER1, SAMPLE_LAYER2],
+      };
+      const newContext = changeLayerPositionInContext(
+        context,
+        SAMPLE_LAYER1,
+        1,
+      );
+      expect(newContext.layers).toEqual([SAMPLE_LAYER2, SAMPLE_LAYER1]);
+    });
   });
 });

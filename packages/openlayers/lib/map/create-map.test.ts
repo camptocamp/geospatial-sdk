@@ -64,36 +64,36 @@ describe("MapContextService", () => {
       });
     });
     describe("OGCAPI", () => {
-        beforeEach(async () => {
-          layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
-          layer = await createLayer(layerModel);
-        });
-        it("create a vector tile layer", () => {
-            expect(layer).toBeTruthy();
-            expect(layer).toBeInstanceOf(VectorLayer);
-        });
-        it("set correct layer properties", () => {
-            expect(layer.getVisible()).toBe(true);
-            expect(layer.getOpacity()).toBe(1);
-            expect(layer.get("label")).toBeUndefined();
-            expect(layer.getSource()?.getAttributions()).toBeNull();
-        });
-        it("create a OGCVectorTile source", () => {
-            const source = layer.getSource();
-            expect(source).toBeInstanceOf(VectorSource);
-        });
-        it("set correct url", () => {
-            const source = layer.getSource() as VectorSource;
-            const url = source.getUrl();
-            expect(url).toBe(
-            "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
-            );
-        });
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+        layer = await createLayer(layerModel);
+      });
+      it("create a vector tile layer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(VectorLayer);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(1);
+        expect(layer.get("label")).toBeUndefined();
+        expect(layer.getSource()?.getAttributions()).toBeNull();
+      });
+      it("create a OGCVectorTile source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorSource);
+      });
+      it("set correct url", () => {
+        const source = layer.getSource() as VectorSource;
+        const url = source.getUrl();
+        expect(url).toBe(
+          "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
+        );
+      });
     });
     describe("WMS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WMS_FIXTURE),
-            (layer = await createLayer(layerModel));
+          (layer = await createLayer(layerModel));
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -133,7 +133,7 @@ describe("MapContextService", () => {
     describe("WFS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WFS_FIXTURE),
-            (layer = await createLayer(layerModel));
+          (layer = await createLayer(layerModel));
       });
       it("create a vector layer", () => {
         expect(layer).toBeTruthy();
@@ -193,7 +193,7 @@ describe("MapContextService", () => {
       });
       describe("with inline data as string", () => {
         beforeEach(async () => {
-          layerModel = {...MAP_CTX_LAYER_GEOJSON_FIXTURE};
+          layerModel = { ...MAP_CTX_LAYER_GEOJSON_FIXTURE };
           layerModel.data = JSON.stringify(layerModel.data);
           layer = await createLayer(layerModel);
         });
