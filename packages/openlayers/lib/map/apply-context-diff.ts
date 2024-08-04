@@ -1,7 +1,7 @@
 import Map from "ol/Map";
 import { MapContextDiff } from "@geospatial-sdk/core";
 import { createLayer } from "./create-map";
-import { fromLonLat } from "ol/proj";
+import { fromLonLat, transformExtent } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
 import SimpleGeometry from "ol/geom/SimpleGeometry";
 
@@ -69,6 +69,7 @@ export async function applyContextDiffToMap(
   if ("viewChanges" in contextDiff) {
     const { viewChanges } = contextDiff;
     const view = map.getView();
+    const projection = view.getProjection();
     if (!viewChanges) {
       return map;
     }
@@ -78,13 +79,13 @@ export async function applyContextDiffToMap(
         size: map.getSize(),
       });
     } else if ("extent" in viewChanges) {
-      view.fit(viewChanges.extent, {
+      view.fit(transformExtent(viewChanges.extent, "EPSG:4326", projection), {
         size: map.getSize(),
       });
     } else {
       const { center: centerInViewProj, zoom } = viewChanges;
       const center = centerInViewProj
-        ? fromLonLat(centerInViewProj, "EPSG:3857")
+        ? fromLonLat(centerInViewProj, projection)
         : [0, 0];
       view.setCenter(center);
       view.setZoom(zoom);

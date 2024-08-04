@@ -1,5 +1,4 @@
 import { createViewFromLayer } from "./view";
-import { transformExtent } from "ol/proj";
 import {
   MapContextLayerGeojson,
   MapContextLayerWfs,
@@ -78,7 +77,7 @@ describe("view", () => {
       } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
       expect(view).toEqual({
-        extent: transformExtent([1, 2.6, 3.3, 4.2], "EPSG:4326", "EPSG:3857"),
+        extent: [1, 2.6, 3.3, 4.2],
       });
     });
 
@@ -90,7 +89,7 @@ describe("view", () => {
       } as MapContextLayerWmts;
       const view = await createViewFromLayer(layer);
       expect(view).toEqual({
-        extent: transformExtent([1, 2.6, 3.3, 4.2], "EPSG:4326", "EPSG:3857"),
+        extent: [1, 2.6, 3.3, 4.2],
       });
     });
 
@@ -109,11 +108,31 @@ describe("view", () => {
     it("should return view for GeoJSON layer", async () => {
       const layer = {
         type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
+        data: {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Point",
+                coordinates: [125.6, 10.1],
+              },
+            },
+            {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Point",
+                coordinates: [100, 200],
+              },
+            },
+          ],
+        },
       } as MapContextLayerGeojson;
       const view = await createViewFromLayer(layer);
       expect(view).toEqual({
-        geometry: { type: "FeatureCollection", features: [] },
+        extent: [100, 10.1, 125.6, 200],
       });
     });
 

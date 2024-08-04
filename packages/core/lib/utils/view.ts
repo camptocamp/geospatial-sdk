@@ -2,14 +2,21 @@ import { transformExtent } from "ol/proj";
 import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 import { LONLAT_CRS_CODES } from "../constant/projections";
 import { fromEPSGCode, register } from "ol/proj/proj4";
+import GeoJSON from "ol/format/GeoJSON";
+import { extend } from "ol/extent";
+import Feature from "ol/Feature";
 import proj4 from "proj4";
 import {
   Extent,
   MapContextLayer,
+  MapContextLayerWms,
+  MapContextLayerWmts,
   MapContextView,
   ViewByExtent,
-  ViewByGeometry,
 } from "../model";
+import { FeatureCollection, Geometry } from "geojson";
+
+const GEOJSON = new GeoJSON();
 
 export async function createViewFromLayer(
   layer: MapContextLayer,
@@ -18,7 +25,7 @@ export async function createViewFromLayer(
     return await getWmsLayerExtent(layer);
   } else if (layer.type === "wmts") {
     return await getWmtsLayerExtent(layer);
-  } else if (layer.type === "geojson") {
+  } else if (layer.type === "geojson" && layer.data) {
     return computeExtentFromGeojson(layer.data);
   } else if (layer.type === "wfs") {
     return await getWfsLayerExtent(layer);
@@ -27,13 +34,27 @@ export async function createViewFromLayer(
   }
 }
 
-function computeExtentFromGeojson(data: any): ViewByGeometry {
+function computeExtentFromGeojson(
+  data: FeatureCollection<Geometry | null> | string,
+): ViewByExtent {
+  const geojson = typeof data === "string" ? JSON.parse(data) : data;
+  const features = GEOJSON.readFeatures(geojson) as Feature[];
+  const extent = features.reduce(
+    (prev, curr) => {
+      const geom = curr.getGeometry();
+      if (!geom) return prev;
+      return extend(prev, geom.getExtent()) as Extent;
+    },
+    [Infinity, Infinity, -Infinity, -Infinity] as Extent,
+  ) as Extent;
   return {
-    geometry: data,
+    extent,
   };
 }
 
-async function getWmsLayerExtent(layer: any): Promise<ViewByExtent | null> {
+async function getWmsLayerExtent(
+  layer: MapContextLayerWms,
+): Promise<ViewByExtent | null> {
   const endpoint = await new WmsEndpoint(layer.url).isReady();
   const { boundingBoxes } = endpoint.getLayerByName(layer.name);
   if (!Object.keys(boundingBoxes).length) {
@@ -44,11 +65,7 @@ async function getWmsLayerExtent(layer: any): Promise<ViewByExtent | null> {
   );
   if (lonLatCRS) {
     return {
-      extent: transformExtent(
-        boundingBoxes[lonLatCRS],
-        "EPSG:4326",
-        "EPSG:3857",
-      ) as Extent,
+      extent: boundingBoxes[lonLatCRS] as Extent,
     };
   } else {
     const availableEPSGCode = Object.keys(boundingBoxes)[0];
@@ -58,23 +75,21 @@ async function getWmsLayerExtent(layer: any): Promise<ViewByExtent | null> {
       extent: transformExtent(
         boundingBoxes[availableEPSGCode],
         proj,
-        "EPSG:3857",
+        "EPSG:4326",
       ) as Extent,
     };
   }
 }
 
-async function getWmtsLayerExtent(layer: any): Promise<ViewByExtent | null> {
+async function getWmtsLayerExtent(
+  layer: MapContextLayerWmts,
+): Promise<ViewByExtent | null> {
   const endpoint = await new WmtsEndpoint(layer.url).isReady();
   const layerName = endpoint.getSingleLayerName() ?? layer.name;
   const wmtsLayer = endpoint.getLayerByName(layerName);
   return wmtsLayer.latLonBoundingBox
     ? {
-        extent: transformExtent(
-          wmtsLayer.latLonBoundingBox,
-          "EPSG:4326",
-          "EPSG:3857",
-        ) as Extent,
+        extent: wmtsLayer.latLonBoundingBox as Extent,
       }
     : null;
 }
