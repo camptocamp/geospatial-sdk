@@ -1,26 +1,11 @@
 import { MapContext, MapContextLayer } from "../model";
+import { getHash } from "./hash";
 
 export function getLayerHash(
   layer: MapContextLayer,
   includeExtras = false,
 ): string {
-  function getHash(input: unknown): string {
-    if (input instanceof Object) {
-      const obj: Record<string, string> = {};
-      const keys = Object.keys(input).sort();
-      for (const key of keys) {
-        if (!includeExtras && key === "extras") continue;
-        obj[key] = getHash(input[key as keyof typeof input]);
-      }
-      const hash = JSON.stringify(obj)
-        .split("")
-        .reduce((prev, curr) => (prev << 5) - prev + curr.charCodeAt(0), 0);
-      return (hash >>> 0).toString();
-    } else {
-      return JSON.stringify(input);
-    }
-  }
-  return getHash(layer);
+  return getHash(layer, includeExtras ? [] : ["extras"]);
 }
 
 export function isLayerSame(
@@ -64,7 +49,7 @@ export function addLayerToContext(
   layerModel: MapContextLayer,
   position?: number,
 ): MapContext {
-  const newContext = { ...context, layers: [...context.layers]};
+  const newContext = { ...context, layers: [...context.layers] };
   if (position !== undefined) {
     newContext.layers.splice(position, 0, layerModel);
   } else {
@@ -82,15 +67,15 @@ export function addLayerToContext(
  */
 
 export function removeLayerFromContext(
-    context: MapContext,
-    layerModel: MapContextLayer,
-    ): MapContext {
-    const newContext = { ...context, layers: [...context.layers] };
-    const position = getLayerPosition(context, layerModel);
-    if (position >= 0) {
-        newContext.layers.splice(position, 1);
-    }
-    return newContext;
+  context: MapContext,
+  layerModel: MapContextLayer,
+): MapContext {
+  const newContext = { ...context, layers: [...context.layers] };
+  const position = getLayerPosition(context, layerModel);
+  if (position >= 0) {
+    newContext.layers.splice(position, 1);
+  }
+  return newContext;
 }
 
 /**

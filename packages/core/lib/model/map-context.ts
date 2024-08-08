@@ -1,4 +1,3 @@
-
 import { FeatureCollection, Geometry } from "geojson";
 
 export type LayerDimensions = Record<string, string>;
@@ -43,13 +42,13 @@ export interface MapContextLayerWfs extends MapContextBaseLayer {
   featureType: string;
 }
 
-export interface MapContextLayerOgcApi extends MapContextBaseLayer{
-  type: 'ogcapi'
-  url: string
-  collection: string
-  useTiles?: 'vector' | 'map'
-  tileMatrixSet?: string
-  options?: Record<string, string>
+export interface MapContextLayerOgcApi extends MapContextBaseLayer {
+  type: "ogcapi";
+  url: string;
+  collection: string;
+  useTiles?: "vector" | "map";
+  tileMatrixSet?: string;
+  options?: Record<string, string>;
 }
 
 export interface MapContextLayerXyz extends MapContextBaseLayer {
@@ -83,7 +82,7 @@ export type MapContextLayer =
   | MapContextLayerWfs
   | MapContextLayerXyz
   | MapContextLayerGeojson
-  | MapContextLayerOgcApi
+  | MapContextLayerOgcApi;
 
 export type Coordinate = [number, number];
 
@@ -94,16 +93,35 @@ export type Extent = [number, number, number, number];
 
 /**
  * @property center Expressed in longitude/latitude
- * @property extent Expressed in longitude/latitude
- * @property maxExtent Expressed in longitude/latitude
+ * @property zoom
  */
-export interface MapContextView {
-  center?: Coordinate;
-  zoom?: number;
-  extent?: Extent;
+export interface ViewByZoomAndCenter {
+  center: Coordinate;
+  zoom: number;
+}
+
+/**
+ * @property extent Expressed in longitude/latitude
+ */
+export interface ViewByExtent {
+  extent: Extent;
+}
+
+/**
+ * @property geometry Expressed in longitude/latitude
+ */
+export interface ViewByGeometry {
+  geometry: Geometry;
+}
+
+export type MapContextView = (
+  | ViewByZoomAndCenter
+  | ViewByExtent
+  | ViewByGeometry
+) & {
   maxZoom?: number;
   maxExtent?: Extent;
-}
+};
 
 export interface MapContext {
   layers: MapContextLayer[];

@@ -4,9 +4,9 @@ import {
   MapContextLayer,
   MapContextLayerPositioned,
   MapContextLayerReordered,
-  MapContextView,
 } from "../model";
 import { isLayerSame, isLayerSameAndUnchanged } from "./map-context";
+import { getHash } from "./hash";
 
 /**
  * The following logic is produced by identifying layers in both context
@@ -47,7 +47,6 @@ export function computeMapContextDiff(
   const layersReordered: MapContextLayerReordered[] = [];
   const layersRemoved: MapContextLayerPositioned[] = [];
   const layersAdded: MapContextLayerPositioned[] = [];
-  const viewChanges: MapContextView = {};
 
   // loop on prev context layers (for removed layers)
   for (let i = 0; i < previousContext.layers.length; i++) {
@@ -92,11 +91,16 @@ export function computeMapContextDiff(
     }
   }
 
+  const viewChanges =
+    getHash(nextContext.view) !== getHash(previousContext.view)
+      ? { ...nextContext.view }
+      : undefined;
+
   return {
     layersAdded,
     layersChanged,
     layersRemoved,
     layersReordered,
-    viewChanges,
+    ...(viewChanges && { viewChanges }),
   };
 }

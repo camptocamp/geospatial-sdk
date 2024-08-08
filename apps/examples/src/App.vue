@@ -6,6 +6,8 @@ import ExampleMapAddRemoveLayers from '@/examples/Example-MapAddRemoveLayers.vue
 import ExampleMapAddRemoveLayersRaw from '@/examples/Example-MapAddRemoveLayers.vue?raw'
 import ExampleGeocoding from '@/examples/Example-Geocoding.vue'
 import ExampleGeocodingRaw from '@/examples/Example-Geocoding.vue?raw'
+import ExampleZoomToLayer from '@/examples/Example-ZoomToLayer.vue'
+import ExampleZoomToLayerRaw from '@/examples/Example-ZoomToLayer.vue?raw'
 import { onMounted } from 'vue'
 import hljs from 'highlight.js'
 
@@ -33,8 +35,15 @@ onMounted(() => {
       <ExampleMapAddRemoveLayers></ExampleMapAddRemoveLayers>
     </ExampleContainer>
     <ExampleContainer
-      example-name="Example 3: geocoding"
+      example-name="Example 3: zoom to layers"
       example-id="example03"
+      :source-code="ExampleZoomToLayerRaw"
+    >
+      <ExampleZoomToLayer></ExampleZoomToLayer>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 4: geocoding"
+      example-id="example04"
       :source-code="ExampleGeocodingRaw"
     >
       <ExampleGeocoding></ExampleGeocoding>

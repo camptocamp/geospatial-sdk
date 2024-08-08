@@ -1,3 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+import WMTSTileGrid from "ol/tilegrid/WMTS";
+
 export class WmtsEndpoint {
   constructor(private url) {}
   isReady() {
@@ -8,8 +13,56 @@ export class WmtsEndpoint {
         }
         return {
           name,
-          latLonBoundingBox: [1.33, 48.81, 4.3, 51.1],
+          title: "SG00066",
+          abstract: "",
+          styles: [
+            {
+              title: "Default Style",
+              name: "default",
+            },
+          ],
+          resourceLinks: [
+            {
+              format: "image/jpgpng",
+              url: "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
+              encoding: "REST",
+            },
+            {
+              encoding: "KVP",
+              url: "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest?",
+              format: "image/jpgpng",
+            },
+          ],
+          matrixSets: [
+            {
+              identifier: "default028mm",
+              crs: "urn:ogc:def:crs:EPSG::2056",
+              limits: [],
+            },
+          ],
+          defaultStyle: "default",
+          latLonBoundingBox: [
+            8.73730142520394, 46.847419134101315, 9.748085959426389,
+            47.53980655003323,
+          ],
+          dimensions: [],
         };
+      },
+      getOpenLayersTileGrid() {
+        return new WMTSTileGrid({
+          extent: [
+            8.73730142520394, 46.847419134101315, 9.748085959426389,
+            47.53980655003323,
+          ],
+          origin: [8.73730142520394, 46.847419134101315],
+          resolutions: [1000, 500, 250, 100, 50],
+        });
+      },
+      getDefaultDimensions: () => {
+        return [];
+      },
+      getSingleLayerName: () => {
+        return null;
       },
     });
   }
