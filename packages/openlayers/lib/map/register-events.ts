@@ -17,6 +17,7 @@ import ImageWMS from "ol/source/ImageWMS";
 import Layer from "ol/layer/Layer";
 import { Pixel } from "ol/pixel";
 import type { Feature, FeatureCollection } from "geojson";
+import throttle from "lodash.throttle";
 
 const GEOJSON = new GeoJSON();
 
@@ -81,13 +82,18 @@ export function getFeaturesFromWmsSources(
   ).then((features) => features.flat());
 }
 
+const getFeaturesFromWmsSourcesThrottled = throttle(
+  getFeaturesFromWmsSources,
+  250,
+);
+
 async function readFeaturesAtPixel(
   map: Map,
   event: MapBrowserEvent<PointerEvent>,
 ) {
   return [
     ...getFeaturesFromVectorSources(map, event.pixel),
-    ...(await getFeaturesFromWmsSources(map, event.coordinate)),
+    ...(await getFeaturesFromWmsSourcesThrottled(map, event.coordinate)),
   ];
 }
 
