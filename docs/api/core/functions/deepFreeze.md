@@ -22,6 +22,6 @@ deepFreeze<U>(obj): U
 
 [packages/core/lib/utils/freeze.ts:1](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/utils/freeze.ts#L1)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

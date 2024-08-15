@@ -26,7 +26,7 @@ non-serializable entities
 
 [packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L16)
 
-***
+---
 
 ### featureType
 
@@ -38,7 +38,7 @@ featureType: string;
 
 [packages/core/lib/model/map-context.ts:38](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L38)
 
-***
+---
 
 ### id?
 
@@ -54,7 +54,7 @@ id?: string | number;
 
 [packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L8)
 
-***
+---
 
 ### type
 
@@ -66,7 +66,7 @@ type: "wfs";
 
 [packages/core/lib/model/map-context.ts:36](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L36)
 
-***
+---
 
 ### url
 
@@ -78,7 +78,7 @@ url: string;
 
 [packages/core/lib/model/map-context.ts:37](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L37)
 
-***
+---
 
 ### version?
 
@@ -94,6 +94,6 @@ version?: number;
 
 [packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L9)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

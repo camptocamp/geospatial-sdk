@@ -16,7 +16,7 @@ cityCode?: string;
 
 [packages/geocoding/lib/providers/data-gouv-fr.provider.ts:49](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L49)
 
-***
+---
 
 ### limit?
 
@@ -30,7 +30,7 @@ Default value 15
 
 [packages/geocoding/lib/providers/data-gouv-fr.provider.ts:50](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L50)
 
-***
+---
 
 ### postCode?
 
@@ -42,7 +42,7 @@ postCode?: string;
 
 [packages/geocoding/lib/providers/data-gouv-fr.provider.ts:48](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L48)
 
-***
+---
 
 ### type?
 
@@ -54,6 +54,6 @@ type?: "housenumber" | "street" | "locality" | "municipality";
 
 [packages/geocoding/lib/providers/data-gouv-fr.provider.ts:47](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/data-gouv-fr.provider.ts#L47)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

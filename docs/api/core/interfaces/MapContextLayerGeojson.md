@@ -14,7 +14,7 @@ data?: string | FeatureCollection<null | Geometry, GeoJsonProperties>;
 
 [packages/core/lib/model/map-context.ts:51](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L51)
 
-***
+---
 
 ### extras?
 
@@ -30,7 +30,7 @@ non-serializable entities
 
 [packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L16)
 
-***
+---
 
 ### id?
 
@@ -42,7 +42,7 @@ id?: string | number;
 
 [packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L8)
 
-***
+---
 
 ### type
 
@@ -54,7 +54,7 @@ type: "geojson";
 
 [packages/core/lib/model/map-context.ts:47](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L47)
 
-***
+---
 
 ### url?
 
@@ -66,7 +66,7 @@ url?: string;
 
 [packages/core/lib/model/map-context.ts:50](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L50)
 
-***
+---
 
 ### version?
 
@@ -78,6 +78,6 @@ version?: number;
 
 [packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L9)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

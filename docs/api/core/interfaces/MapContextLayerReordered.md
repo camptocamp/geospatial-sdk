@@ -16,7 +16,7 @@ layer: MapContextLayer;
 
 [packages/core/lib/model/map-context-diff.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L16)
 
-***
+---
 
 ### newPosition
 
@@ -28,7 +28,7 @@ newPosition: number;
 
 [packages/core/lib/model/map-context-diff.ts:17](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L17)
 
-***
+---
 
 ### previousPosition
 
@@ -40,6 +40,6 @@ previousPosition: number;
 
 [packages/core/lib/model/map-context-diff.ts:18](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L18)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

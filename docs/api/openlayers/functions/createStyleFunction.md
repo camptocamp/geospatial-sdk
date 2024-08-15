@@ -18,6 +18,6 @@ createStyleFunction(styleByGeometryType): StyleFunction
 
 [packages/openlayers/lib/map/styles.ts:65](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L65)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

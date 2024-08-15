@@ -14,7 +14,7 @@ line: Style | Style[];
 
 [packages/openlayers/lib/map/styles.ts:12](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L12)
 
-***
+---
 
 ### point
 
@@ -26,7 +26,7 @@ point: Style | Style[];
 
 [packages/openlayers/lib/map/styles.ts:14](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L14)
 
-***
+---
 
 ### polygon
 
@@ -38,6 +38,6 @@ polygon: Style | Style[];
 
 [packages/openlayers/lib/map/styles.ts:13](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L13)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

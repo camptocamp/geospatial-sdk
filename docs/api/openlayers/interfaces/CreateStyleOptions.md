@@ -14,7 +14,7 @@ color: string;
 
 [packages/openlayers/lib/map/styles.ts:7](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L7)
 
-***
+---
 
 ### isFocused?
 
@@ -26,6 +26,6 @@ isFocused?: boolean;
 
 [packages/openlayers/lib/map/styles.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L8)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

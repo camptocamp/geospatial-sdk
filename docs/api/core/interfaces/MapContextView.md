@@ -16,7 +16,7 @@ Expressed in longitude/latitude
 
 [packages/core/lib/model/map-context.ts:86](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L86)
 
-***
+---
 
 ### extent?
 
@@ -30,7 +30,7 @@ Expressed in longitude/latitude
 
 [packages/core/lib/model/map-context.ts:88](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L88)
 
-***
+---
 
 ### maxExtent?
 
@@ -44,7 +44,7 @@ Expressed in longitude/latitude
 
 [packages/core/lib/model/map-context.ts:90](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L90)
 
-***
+---
 
 ### maxZoom?
 
@@ -56,7 +56,7 @@ maxZoom?: number;
 
 [packages/core/lib/model/map-context.ts:89](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L89)
 
-***
+---
 
 ### zoom?
 
@@ -68,6 +68,6 @@ zoom?: number;
 
 [packages/core/lib/model/map-context.ts:87](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L87)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

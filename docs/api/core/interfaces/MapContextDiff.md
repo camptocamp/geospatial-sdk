@@ -6,6 +6,7 @@ Describes a delta between two contexts, in order to be
 applied to an existing map.
 
 For positions to be correct the order of operations should be:
+
 1. change layers
 2. remove layers
 3. add layers
@@ -23,7 +24,7 @@ layersAdded: MapContextLayerPositioned[];
 
 [packages/core/lib/model/map-context-diff.ts:35](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L35)
 
-***
+---
 
 ### layersChanged
 
@@ -35,7 +36,7 @@ layersChanged: MapContextLayerPositioned[];
 
 [packages/core/lib/model/map-context-diff.ts:32](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L32)
 
-***
+---
 
 ### layersRemoved
 
@@ -47,7 +48,7 @@ layersRemoved: MapContextLayerPositioned[];
 
 [packages/core/lib/model/map-context-diff.ts:34](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L34)
 
-***
+---
 
 ### layersReordered
 
@@ -59,7 +60,7 @@ layersReordered: MapContextLayerReordered[];
 
 [packages/core/lib/model/map-context-diff.ts:33](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L33)
 
-***
+---
 
 ### viewChanges
 
@@ -71,6 +72,6 @@ viewChanges: MapContextView;
 
 [packages/core/lib/model/map-context-diff.ts:36](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context-diff.ts#L36)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

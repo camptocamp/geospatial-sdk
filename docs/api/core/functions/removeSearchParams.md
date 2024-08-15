@@ -22,6 +22,6 @@ Removes the given search params from the URL completely; this is case-insensitiv
 
 [packages/core/lib/utils/url.ts:6](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/utils/url.ts#L6)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)
