@@ -119,6 +119,7 @@ describe("MapContextService", () => {
         const source = layer.getSource() as TileWMS;
         const params = source.getParams();
         expect(params.LAYERS).toBe((layerModel as MapContextLayerWms).name);
+        expect(params.STYLES).toBe((layerModel as MapContextLayerWms).style);
       });
       it("set correct url without existing REQUEST and SERVICE params", () => {
         const source = layer.getSource() as TileWMS;

@@ -25,6 +25,7 @@ export const MAP_CTX_LAYER_WMS_FIXTURE: MapContextLayerWms = deepFreeze({
   visibility: false,
   attributions: "camptocamp",
   opacity: 0.5,
+  style: "default",
 });
 export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayerWfs = deepFreeze({
   type: "wfs",
