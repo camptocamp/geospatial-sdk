@@ -29,7 +29,8 @@
   },
   "devDependencies": {
     "@types/chroma-js": "^2.4.3",
-    "ol": "^8.2.0"
+    "ol": "^8.2.0",
+    "ol-mapbox-style": "^12.3.5"
   },
   "peerDependencies": {
     "ol": ">6.x"

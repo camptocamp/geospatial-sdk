@@ -27,6 +27,7 @@ import {
   WfsEndpoint,
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
+import { MapboxVectorLayer } from "ol-mapbox-style";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -112,6 +113,13 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       layer = olLayer;
       break;
     }
+    case "maplibre-style": {
+      layer = new MapboxVectorLayer({
+        styleUrl: layerModel.styleUrl,
+        accessToken: layerModel.accessToken,
+      }) as unknown as Layer;
+      break;
+    }
     case "geojson": {
       if (layerModel.url !== undefined) {
         layer = new VectorLayer({
@@ -147,7 +155,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       break;
     }
     case "ogcapi": {
-      const ogcEndpoint = await new OgcApiEndpoint(layerModel.url);
+      const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
       if (layerModel.useTiles) {
         if (layerModel.useTiles === "vector") {

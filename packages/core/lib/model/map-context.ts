@@ -51,6 +51,13 @@ export interface MapContextLayerOgcApi extends MapContextBaseLayer {
   options?: Record<string, string>;
 }
 
+// Layer pointing to a MapLibre Style spec, see https://maplibre.org/maplibre-style-spec/
+export interface MapContextLayerMapLibreStyle extends MapContextBaseLayer {
+  type: "maplibre-style";
+  styleUrl: string;
+  accessToken?: string;
+}
+
 export interface MapContextLayerXyz extends MapContextBaseLayer {
   type: "xyz";
   url: string;
@@ -82,7 +89,8 @@ export type MapContextLayer =
   | MapContextLayerWfs
   | MapContextLayerXyz
   | MapContextLayerGeojson
-  | MapContextLayerOgcApi;
+  | MapContextLayerOgcApi
+  | MapContextLayerMapLibreStyle;
 
 export type Coordinate = [number, number];
 
