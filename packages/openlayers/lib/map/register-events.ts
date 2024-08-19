@@ -143,7 +143,7 @@ export function listen<T extends keyof MapEventsByType>(
     case MapClickEventType:
       map.on("click", (event) => {
         const coordinate = toLonLat(
-          event.pixel,
+          event.coordinate,
           map.getView().getProjection(),
         ) as [number, number];
         (callback as (event: unknown) => void)({

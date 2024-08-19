@@ -191,7 +191,7 @@ describe("event registration", () => {
     });
     it("registers the event on the map", () => {
       expect(callback).toHaveBeenCalledWith({
-        coordinate: toLonLat([10, 10]),
+        coordinate: toLonLat([123, 123]),
         type: "map-click",
       });
     });
