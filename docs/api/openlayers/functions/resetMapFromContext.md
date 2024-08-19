@@ -22,6 +22,6 @@ Resets an OpenLayers map from a context; existing content will be cleared
 
 [packages/openlayers/lib/map/create-map.ts:143](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/create-map.ts#L143)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

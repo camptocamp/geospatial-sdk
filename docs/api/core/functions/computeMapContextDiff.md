@@ -10,10 +10,12 @@ The following logic is produced by identifying layers in both context
 and determining whether they have been added, removed, changed or reordered.
 
 Identifying layers to determine if they have been added/removed/reordered is done like so:
+
 1. For layers with an `id` property, use non-strict equality on it (e.g. '2' and 2 are equivalent);
 2. For layers without `id`, compute a hash of their base properties _excluding the `extras` property_
 
 Determining whether layers have changed is done like so:
+
 1. For layers with an `id` property, the value of the `version` field is compared;
    if values are different (using non-strict equality), then the layer is considered to have changed; otherwise
    it is considered to have remained the same
@@ -35,6 +37,6 @@ Determining whether layers have changed is done like so:
 
 [packages/core/lib/utils/map-context-diff.ts:72](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/utils/map-context-diff.ts#L72)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

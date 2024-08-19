@@ -8,6 +8,8 @@ import ExampleGeocoding from '@/examples/Example-Geocoding.vue'
 import ExampleGeocodingRaw from '@/examples/Example-Geocoding.vue?raw'
 import ExampleZoomToLayer from '@/examples/Example-ZoomToLayer.vue'
 import ExampleZoomToLayerRaw from '@/examples/Example-ZoomToLayer.vue?raw'
+import ExampleMapEvents from '@/examples/Example-MapEvents.vue'
+import ExampleMapEventsRaw from '@/examples/Example-MapEvents.vue?raw'
 import { onMounted } from 'vue'
 import hljs from 'highlight.js'
 
@@ -42,8 +44,15 @@ onMounted(() => {
       <ExampleZoomToLayer></ExampleZoomToLayer>
     </ExampleContainer>
     <ExampleContainer
-      example-name="Example 4: geocoding"
+      example-name="Example 4: map events"
       example-id="example04"
+      :source-code="ExampleMapEventsRaw"
+    >
+      <ExampleMapEvents></ExampleMapEvents>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 5: geocoding"
+      example-id="example05"
       :source-code="ExampleGeocodingRaw"
     >
       <ExampleGeocoding></ExampleGeocoding>

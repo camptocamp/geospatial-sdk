@@ -9,6 +9,7 @@ import proj4 from "proj4";
 import {
   Extent,
   MapContextLayer,
+  MapContextLayerWfs,
   MapContextLayerWms,
   MapContextLayerWmts,
   MapContextView,
@@ -94,7 +95,9 @@ async function getWmtsLayerExtent(
     : null;
 }
 
-async function getWfsLayerExtent(layer: any): Promise<ViewByExtent | null> {
+async function getWfsLayerExtent(
+  layer: MapContextLayerWfs,
+): Promise<ViewByExtent | null> {
   const endpoint = await new WfsEndpoint(layer.url).isReady();
   const featureTypeSummary = endpoint.getFeatureTypeSummary(layer.featureType);
   const boundingBox = featureTypeSummary?.boundingBox;

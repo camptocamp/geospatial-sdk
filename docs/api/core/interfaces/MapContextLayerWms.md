@@ -18,7 +18,7 @@ dimensions?: LayerDimensions;
 
 [packages/core/lib/model/map-context.ts:23](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L23)
 
-***
+---
 
 ### extras?
 
@@ -38,7 +38,7 @@ non-serializable entities
 
 [packages/core/lib/model/map-context.ts:16](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L16)
 
-***
+---
 
 ### id?
 
@@ -54,7 +54,7 @@ id?: string | number;
 
 [packages/core/lib/model/map-context.ts:8](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L8)
 
-***
+---
 
 ### name
 
@@ -66,7 +66,7 @@ name: string;
 
 [packages/core/lib/model/map-context.ts:22](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L22)
 
-***
+---
 
 ### style?
 
@@ -78,7 +78,7 @@ style?: string;
 
 [packages/core/lib/model/map-context.ts:24](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L24)
 
-***
+---
 
 ### type
 
@@ -90,7 +90,7 @@ type: "wms";
 
 [packages/core/lib/model/map-context.ts:20](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L20)
 
-***
+---
 
 ### url
 
@@ -102,7 +102,7 @@ url: string;
 
 [packages/core/lib/model/map-context.ts:21](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L21)
 
-***
+---
 
 ### version?
 
@@ -118,6 +118,6 @@ version?: number;
 
 [packages/core/lib/model/map-context.ts:9](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/core/lib/model/map-context.ts#L9)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

@@ -49,7 +49,10 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       layer = new TileLayer({
         source: new TileWMS({
           url: removeSearchParams(layerModel.url, ["request", "service"]),
-          params: { LAYERS: layerModel.name },
+          params: {
+            LAYERS: layerModel.name,
+            ...(layerModel.style && { STYLES: layerModel.style }),
+          },
           gutter: 20,
           attributions: layerModel.attributions,
         }),

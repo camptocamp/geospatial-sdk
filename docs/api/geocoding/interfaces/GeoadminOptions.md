@@ -18,12 +18,12 @@ A list of technical layer names; only applies when type is 'featuresearch'
 
 [packages/geocoding/lib/providers/geoadmin.provider.ts:32](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L32)
 
-***
+---
 
 ### lang?
 
 ```ts
-lang?: 
+lang?:
   | "it"
   | "de"
   | "fr"
@@ -37,7 +37,7 @@ Default is 'en'
 
 [packages/geocoding/lib/providers/geoadmin.provider.ts:31](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L31)
 
-***
+---
 
 ### limit?
 
@@ -51,7 +51,7 @@ Default value is 50 for 'locations', 20 for 'featuresearch', 30 for 'layers'
 
 [packages/geocoding/lib/providers/geoadmin.provider.ts:30](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L30)
 
-***
+---
 
 ### origins?
 
@@ -72,7 +72,7 @@ Defaults to 'zipcode,gg25'; only applies when type is 'locations'
 
 [packages/geocoding/lib/providers/geoadmin.provider.ts:21](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L21)
 
-***
+---
 
 ### sr?
 
@@ -86,7 +86,7 @@ Defaults to 4326
 
 [packages/geocoding/lib/providers/geoadmin.provider.ts:20](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L20)
 
-***
+---
 
 ### type?
 
@@ -100,6 +100,6 @@ Default is 'locations'
 
 [packages/geocoding/lib/providers/geoadmin.provider.ts:19](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/geocoding/lib/providers/geoadmin.provider.ts#L19)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)

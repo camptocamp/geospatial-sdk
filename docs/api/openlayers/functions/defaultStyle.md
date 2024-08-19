@@ -20,6 +20,6 @@ defaultStyle(arg0, arg1): void | Style | Style[]
 
 [packages/openlayers/lib/map/styles.ts:92](https://github.com/jahow/geospatial-sdk/blob/eda8b4f/packages/openlayers/lib/map/styles.ts#L92)
 
-***
+---
 
 Generated using [typedoc-plugin-markdown](https://www.npmjs.com/package/typedoc-plugin-markdown) and [TypeDoc](https://typedoc.org/)
