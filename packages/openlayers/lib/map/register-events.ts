@@ -3,8 +3,7 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   MapClickEventType,
-  MapEvent,
-  MapEventType,
+  MapEventsByType,
 } from "@geospatial-sdk/core";
 import { toLonLat } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
@@ -121,24 +120,24 @@ function registerFeatureHoverEvent(map: Map) {
   map.set(FeaturesHoverEventType, true);
 }
 
-export function listen(
+export function listen<T extends keyof MapEventsByType>(
   map: Map,
-  event: MapEventType,
-  callback: (event: MapEvent) => void,
+  eventType: T,
+  callback: (event: MapEventsByType[T]) => void,
 ) {
-  switch (event) {
+  switch (eventType) {
     case FeaturesClickEventType:
       registerFeatureClickEvent(map);
       // we're using a custom event type here so we need to cast to unknown first
-      map.on(event as unknown as MapObjectEventTypes, (event) => {
-        callback(event as unknown as MapEvent);
+      map.on(eventType as unknown as MapObjectEventTypes, (event) => {
+        (callback as (event: unknown) => void)(event);
       });
       break;
     case FeaturesHoverEventType:
       registerFeatureHoverEvent(map);
       // see comment above
-      map.on(event as unknown as MapObjectEventTypes, (event) => {
-        callback(event as unknown as MapEvent);
+      map.on(eventType as unknown as MapObjectEventTypes, (event) => {
+        (callback as (event: unknown) => void)(event);
       });
       break;
     case MapClickEventType:
@@ -147,10 +146,13 @@ export function listen(
           event.pixel,
           map.getView().getProjection(),
         ) as [number, number];
-        callback({ coordinate });
+        (callback as (event: unknown) => void)({
+          type: "map-click",
+          coordinate,
+        });
       });
       break;
     default:
-      throw new Error(`Unrecognized event type: ${event}`);
+      throw new Error(`Unrecognized event type: ${eventType}`);
   }
 }

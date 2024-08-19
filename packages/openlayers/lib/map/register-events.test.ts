@@ -190,7 +190,10 @@ describe("event registration", () => {
       map.dispatchEvent(createMapEvent(map, "click"));
     });
     it("registers the event on the map", () => {
-      expect(callback).toHaveBeenCalledWith({ coordinate: toLonLat([10, 10]) });
+      expect(callback).toHaveBeenCalledWith({
+        coordinate: toLonLat([10, 10]),
+        type: "map-click",
+      });
     });
   });
 });

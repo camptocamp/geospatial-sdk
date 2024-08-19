@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import Map from 'ol/Map'
 import { createMapFromContext, listen } from '@geospatial-sdk/openlayers'
-import type { FeaturesHoverEvent, MapClickEvent, MapContext } from '@geospatial-sdk/core'
+import type { MapContext } from '@geospatial-sdk/core'
 import { DEFAULT_CONTEXT } from '@/constants'
 import Panel from '@/components/Panel.vue'
 import type { Feature } from 'geojson'
@@ -30,8 +30,8 @@ let clickCoordinates = ref<[number, number] | null>(null)
 
 onMounted(async () => {
   map = await createMapFromContext(context, mapRoot.value)
-  listen(map, 'features-hover', (event: FeaturesHoverEvent) => (features.value = event.features))
-  listen(map, 'map-click', (event: MapClickEvent) => (clickCoordinates.value = event.coordinate))
+  listen(map, 'features-hover', (event) => (features.value = event.features))
+  listen(map, 'map-click', (event) => (clickCoordinates.value = event.coordinate))
 })
 </script>
 
