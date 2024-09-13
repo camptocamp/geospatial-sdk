@@ -20,8 +20,10 @@ import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
-import { OGCMapTile, OGCVectorTile, WMTS } from "ol/source";
-import { MVT } from "ol/format";
+import OGCMapTile from "ol/source/OGCMapTile";
+import OGCVectorTile from "ol/source/OGCVectorTile";
+import WMTS from "ol/source/WMTS";
+import MVT from "ol/format/MVT";
 import {
   OgcApiEndpoint,
   WfsEndpoint,
