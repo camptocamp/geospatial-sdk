@@ -137,5 +137,5 @@ export type MapContextView = (
 
 export interface MapContext {
   layers: MapContextLayer[];
-  view: MapContextView;
+  view: MapContextView | null; // a view of "null" means the map will show a default view;
 }

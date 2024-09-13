@@ -70,7 +70,7 @@ export const MAP_CTX_VIEW_FIXTURE: MapContextView = deepFreeze({
   zoom: 9,
 });
 
-export const MAP_CTX_FIXTURE: MapContext = deepFreeze({
+export const MAP_CTX_FIXTURE = deepFreeze({
   layers: [
     MAP_CTX_LAYER_XYZ_FIXTURE,
     MAP_CTX_LAYER_WMS_FIXTURE,

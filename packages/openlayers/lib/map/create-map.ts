@@ -217,7 +217,13 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   return layer;
 }
 
-export function createView(viewModel: MapContextView, map: Map): View {
+export function createView(viewModel: MapContextView | null, map: Map): View {
+  if (viewModel === null) {
+    return new View({
+      center: [0, 0],
+      zoom: 0,
+    });
+  }
   const view = new View({
     ...("maxExtent" in viewModel && { extent: viewModel.maxExtent }),
     ...("maxZoom" in viewModel && { maxZoom: viewModel.maxZoom }),

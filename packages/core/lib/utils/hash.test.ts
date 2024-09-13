@@ -23,4 +23,14 @@ describe("getHash", () => {
     ]);
     expect(hashB).toEqual(hashA);
   });
+  it("stable for null", () => {
+    const hashA = getHash(null);
+    const hashB = getHash(null);
+    expect(hashB).toEqual(hashA);
+  });
+  it("different when casting null to string", () => {
+    const hashA = getHash(null);
+    const hashB = getHash("null");
+    expect(hashB).not.toEqual(hashA);
+  });
 });

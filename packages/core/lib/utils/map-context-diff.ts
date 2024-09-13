@@ -91,16 +91,19 @@ export function computeMapContextDiff(
     }
   }
 
-  const viewChanges =
+  let viewChanges =
     getHash(nextContext.view) !== getHash(previousContext.view)
-      ? { ...nextContext.view }
+      ? nextContext.view
       : undefined;
+  if (viewChanges !== null && viewChanges !== undefined) {
+    viewChanges = { ...viewChanges }; // copy the view to avoid unexpected mutations
+  }
 
   return {
     layersAdded,
     layersChanged,
     layersRemoved,
     layersReordered,
-    ...(viewChanges && { viewChanges }),
+    ...(viewChanges !== undefined && { viewChanges }),
   };
 }

@@ -1,6 +1,6 @@
 import Map from "ol/Map";
 import { MapContextDiff } from "@geospatial-sdk/core";
-import { createLayer } from "./create-map";
+import { createLayer, createView } from "./create-map";
 import { fromLonLat, transformExtent } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
 import SimpleGeometry from "ol/geom/SimpleGeometry";
@@ -66,11 +66,12 @@ export async function applyContextDiffToMap(
     });
   }
 
-  if ("viewChanges" in contextDiff) {
+  if (typeof contextDiff.viewChanges !== "undefined") {
     const { viewChanges } = contextDiff;
     const view = map.getView();
     const projection = view.getProjection();
-    if (!viewChanges) {
+    if (viewChanges === null) {
+      map.setView(createView(viewChanges, map));
       return map;
     }
     if ("geometry" in viewChanges) {
