@@ -26,5 +26,8 @@
   "dependencies": {
     "@camptocamp/ogc-client": "1.1.1-dev.9671ef4",
     "proj4": "^2.9.2"
+  },
+  "devDependencies": {
+    "ol": "^8.2.0"
   }
 }

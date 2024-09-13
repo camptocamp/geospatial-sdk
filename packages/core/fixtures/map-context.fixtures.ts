@@ -115,6 +115,12 @@ export const SAMPLE_LAYER3: MapContextLayerGeojson = deepFreeze({
   type: "geojson",
   data: '{ "type": "Feature", "properties": {}}',
   extras: { myField3: "000" },
+  style: [
+    {
+      "circle-radius": 3,
+      "circle-fill-color": "red",
+    },
+  ],
 });
 export const SAMPLE_LAYER4: MapContextLayerWfs = deepFreeze({
   type: "wfs",
