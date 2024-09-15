@@ -1,4 +1,5 @@
 import { FeatureCollection, Geometry } from "geojson";
+import { VectorStyle } from "./style";
 
 export type LayerDimensions = Record<string, string>;
 
@@ -40,6 +41,7 @@ export interface MapContextLayerWfs extends MapContextBaseLayer {
   type: "wfs";
   url: string;
   featureType: string;
+  style?: VectorStyle;
 }
 
 export interface MapContextLayerOgcApi extends MapContextBaseLayer {
@@ -49,6 +51,7 @@ export interface MapContextLayerOgcApi extends MapContextBaseLayer {
   useTiles?: "vector" | "map";
   tileMatrixSet?: string;
   options?: Record<string, string>;
+  style?: VectorStyle;
 }
 
 // Layer pointing to a MapLibre Style spec, see https://maplibre.org/maplibre-style-spec/
@@ -65,6 +68,7 @@ export interface MapContextLayerXyz extends MapContextBaseLayer {
 
 interface LayerGeojson extends MapContextBaseLayer {
   type: "geojson";
+  style?: VectorStyle;
 }
 interface LayerGeojsonWithUrl extends LayerGeojson {
   url: string;
@@ -133,5 +137,5 @@ export type MapContextView = (
 
 export interface MapContext {
   layers: MapContextLayer[];
-  view: MapContextView;
+  view: MapContextView | null; // a view of "null" means the map will show a default view;
 }

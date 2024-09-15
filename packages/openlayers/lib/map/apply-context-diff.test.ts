@@ -53,7 +53,6 @@ describe("applyContextDiffToMap", () => {
         layersChanged: [],
         layersRemoved: [],
         layersReordered: [],
-        viewChanges: {},
       };
       await applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();
@@ -81,7 +80,6 @@ describe("applyContextDiffToMap", () => {
         layersChanged: [],
         layersRemoved: [],
         layersReordered: [],
-        viewChanges: {},
       };
       applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();
@@ -111,7 +109,6 @@ describe("applyContextDiffToMap", () => {
           },
         ],
         layersReordered: [],
-        viewChanges: {},
       };
       applyContextDiffToMap(map, diff);
     });
@@ -145,7 +142,6 @@ describe("applyContextDiffToMap", () => {
         ],
         layersRemoved: [],
         layersReordered: [],
-        viewChanges: {},
       };
       applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();
@@ -181,7 +177,6 @@ describe("applyContextDiffToMap", () => {
               previousPosition: 0,
             },
           ],
-          viewChanges: {},
         };
         applyContextDiffToMap(map, diff);
         layersArray = map.getLayers().getArray();
@@ -217,7 +212,67 @@ describe("applyContextDiffToMap", () => {
               previousPosition: 0,
             },
           ],
-          viewChanges: {},
+        };
+        applyContextDiffToMap(map, diff);
+        layersArray = map.getLayers().getArray();
+      });
+      it("moves the layers accordingly", () => {
+        expect(layersArray.length).toEqual(4);
+        assertEqualsToModel(layersArray[0], SAMPLE_LAYER4);
+        assertEqualsToModel(layersArray[1], SAMPLE_LAYER3);
+        assertEqualsToModel(layersArray[2], SAMPLE_LAYER1);
+        assertEqualsToModel(layersArray[3], SAMPLE_LAYER2);
+      });
+    });
+  });
+
+  describe("view change", () => {
+    describe("set to default view", () => {
+      beforeEach(async () => {
+        context = {
+          ...SAMPLE_CONTEXT,
+          layers: [SAMPLE_LAYER1, SAMPLE_LAYER2, SAMPLE_LAYER3],
+        };
+        map = await createMapFromContext(context);
+        diff = {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [],
+          viewChanges: null,
+        };
+        applyContextDiffToMap(map, diff);
+      });
+      it("set the view back to default", () => {
+        const view = map.getView();
+        expect(view.getCenter()).toEqual([0, 0]);
+        expect(view.getZoom()).toEqual(0);
+      });
+    });
+
+    describe("four layers reordered", () => {
+      beforeEach(async () => {
+        context = {
+          ...SAMPLE_CONTEXT,
+          layers: [SAMPLE_LAYER1, SAMPLE_LAYER3, SAMPLE_LAYER4, SAMPLE_LAYER2],
+        };
+        map = await createMapFromContext(context);
+        diff = {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [
+            {
+              layer: SAMPLE_LAYER4,
+              newPosition: 0,
+              previousPosition: 2,
+            },
+            {
+              layer: SAMPLE_LAYER1,
+              newPosition: 2,
+              previousPosition: 0,
+            },
+          ],
         };
         applyContextDiffToMap(map, diff);
         layersArray = map.getLayers().getArray();
@@ -276,7 +331,6 @@ describe("applyContextDiffToMap", () => {
             previousPosition: 1,
           },
         ],
-        viewChanges: {},
       };
       applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();

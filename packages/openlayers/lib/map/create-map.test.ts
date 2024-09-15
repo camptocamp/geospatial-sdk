@@ -263,7 +263,9 @@ describe("MapContextService", () => {
         });
         it("set the url to point to the file", () => {
           const source = layer.getSource() as VectorSource;
-          expect(source.getUrl()).toBe(layerModel.url);
+          expect(source.getUrl()).toBe(
+            (layerModel as MapContextLayerGeojson).url,
+          );
         });
       });
     });
@@ -386,7 +388,7 @@ describe("MapContextService", () => {
       let view: View;
       const map = new Map({});
       const mapContext: MapContext = {
-        view: {},
+        view: null,
         layers: [
           MAP_CTX_LAYER_XYZ_FIXTURE,
           MAP_CTX_LAYER_WMS_FIXTURE,

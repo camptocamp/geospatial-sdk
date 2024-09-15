@@ -70,7 +70,7 @@ export const MAP_CTX_VIEW_FIXTURE: MapContextView = deepFreeze({
   zoom: 9,
 });
 
-export const MAP_CTX_FIXTURE: MapContext = deepFreeze({
+export const MAP_CTX_FIXTURE = deepFreeze({
   layers: [
     MAP_CTX_LAYER_XYZ_FIXTURE,
     MAP_CTX_LAYER_WMS_FIXTURE,
@@ -115,6 +115,12 @@ export const SAMPLE_LAYER3: MapContextLayerGeojson = deepFreeze({
   type: "geojson",
   data: '{ "type": "Feature", "properties": {}}',
   extras: { myField3: "000" },
+  style: [
+    {
+      "circle-radius": 3,
+      "circle-fill-color": "red",
+    },
+  ],
 });
 export const SAMPLE_LAYER4: MapContextLayerWfs = deepFreeze({
   type: "wfs",

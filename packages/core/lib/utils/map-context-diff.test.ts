@@ -213,32 +213,87 @@ describe("Context diff utils", () => {
     });
 
     describe("view changes", () => {
-      beforeEach(() => {
-        contextOld = {
-          ...SAMPLE_CONTEXT,
-          view: {
-            center: [0, 0],
-            zoom: 1,
-          },
-        };
-        contextNew = {
-          ...SAMPLE_CONTEXT,
-          view: {
-            center: [1, 1],
-            zoom: 2,
-          },
-        };
-      });
-      it("outputs the correct diff", () => {
-        diff = computeMapContextDiff(contextNew, contextOld);
-        expect(diff).toEqual({
-          layersAdded: [],
-          layersChanged: [],
-          layersRemoved: [],
-          layersReordered: [],
-          viewChanges: { ...contextNew.view },
+      describe("both values", () => {
+        beforeEach(() => {
+          contextOld = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [0, 0],
+              zoom: 1,
+            },
+          };
+          contextNew = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [1, 1],
+              zoom: 2,
+            },
+          };
         });
-        expect(diff.viewChanges).not.toBe(contextNew.view); // the object reference should be different
+        it("outputs the correct diff", () => {
+          diff = computeMapContextDiff(contextNew, contextOld);
+          expect(diff).toEqual({
+            layersAdded: [],
+            layersChanged: [],
+            layersRemoved: [],
+            layersReordered: [],
+            viewChanges: { ...contextNew.view },
+          });
+          expect(diff.viewChanges).not.toBe(contextNew.view); // the object reference should be different
+        });
+      });
+      describe("value to null", () => {
+        beforeEach(() => {
+          contextOld = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [0, 0],
+              zoom: 1,
+            },
+          };
+          contextNew = {
+            ...SAMPLE_CONTEXT,
+            view: null,
+          };
+        });
+        it("outputs the correct diff", () => {
+          diff = computeMapContextDiff(contextNew, contextOld);
+          expect(diff).toEqual({
+            layersAdded: [],
+            layersChanged: [],
+            layersRemoved: [],
+            layersReordered: [],
+            viewChanges: null,
+          });
+        });
+      });
+      describe("null to value", () => {
+        beforeEach(() => {
+          contextOld = {
+            ...SAMPLE_CONTEXT,
+            view: null,
+          };
+          contextNew = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [0, 0],
+              zoom: 1,
+            },
+          };
+        });
+        it("outputs the correct diff", () => {
+          diff = computeMapContextDiff(contextNew, contextOld);
+          expect(diff).toEqual({
+            layersAdded: [],
+            layersChanged: [],
+            layersRemoved: [],
+            layersReordered: [],
+            viewChanges: {
+              center: [0, 0],
+              zoom: 1,
+            },
+          });
+        });
       });
     });
 

@@ -20,8 +20,10 @@ import { fromLonLat } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
-import { OGCMapTile, OGCVectorTile, WMTS } from "ol/source";
-import { MVT } from "ol/format";
+import OGCMapTile from "ol/source/OGCMapTile";
+import OGCVectorTile from "ol/source/OGCVectorTile";
+import WMTS from "ol/source/WMTS";
+import MVT from "ol/format/MVT";
 import {
   OgcApiEndpoint,
   WfsEndpoint,
@@ -34,7 +36,6 @@ const WFS_MAX_FEATURES = 10000;
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
-  const style = defaultStyle;
   let layer: Layer | undefined;
   switch (type) {
     case "xyz":
@@ -91,7 +92,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     }
     case "wfs": {
       const olLayer = new VectorLayer({
-        style,
+        style: layerModel.style ?? defaultStyle,
       });
       new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
         const featureType =
@@ -131,7 +132,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             url: layerModel.url,
             attributions: layerModel.attributions,
           }),
-          style,
+          style: layerModel.style ?? defaultStyle,
         });
       } else {
         let geojson = layerModel.data;
@@ -152,7 +153,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             features,
             attributions: layerModel.attributions,
           }),
-          style,
+          style: layerModel.style ?? defaultStyle,
         });
       }
       break;
@@ -196,7 +197,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             url: layerUrl,
             attributions: layerModel.attributions,
           }),
-          style,
+          style: layerModel.style ?? defaultStyle,
         });
       }
       break;
@@ -218,7 +219,13 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   return layer;
 }
 
-export function createView(viewModel: MapContextView, map: Map): View {
+export function createView(viewModel: MapContextView | null, map: Map): View {
+  if (viewModel === null) {
+    return new View({
+      center: [0, 0],
+      zoom: 0,
+    });
+  }
   const view = new View({
     ...("maxExtent" in viewModel && { extent: viewModel.maxExtent }),
     ...("maxZoom" in viewModel && { maxZoom: viewModel.maxZoom }),
