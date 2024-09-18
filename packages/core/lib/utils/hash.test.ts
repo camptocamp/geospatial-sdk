@@ -33,4 +33,70 @@ describe("getHash", () => {
     const hashB = getHash("null");
     expect(hashB).not.toEqual(hashA);
   });
+  it("stable with identical GeoJSON geometry", () => {
+    const hashA = getHash({
+      geometry: {
+        type: "Polygon",
+        properties: {},
+        coordinates: [
+          [
+            [-10, -10],
+            [-10, 20],
+            [10, 20],
+            [10, -10],
+            [-10, -10],
+          ],
+        ],
+      },
+    });
+    const hashB = getHash({
+      geometry: {
+        type: "Polygon",
+        properties: {},
+        coordinates: [
+          [
+            [-10, -10],
+            [-10, 20],
+            [10, 20],
+            [10, -10],
+            [-10, -10],
+          ],
+        ],
+      },
+    });
+    expect(hashB).toEqual(hashA);
+  });
+  it("different if GeoJSON geometry properties are not in the same order", () => {
+    const hashA = getHash({
+      geometry: {
+        coordinates: [
+          [
+            [-10, -10],
+            [-10, 20],
+            [10, 20],
+            [10, -10],
+            [-10, -10],
+          ],
+        ],
+        type: "Polygon",
+        properties: {},
+      },
+    });
+    const hashB = getHash({
+      geometry: {
+        type: "Polygon",
+        properties: {},
+        coordinates: [
+          [
+            [-10, -10],
+            [-10, 20],
+            [10, 20],
+            [10, -10],
+            [-10, -10],
+          ],
+        ],
+      },
+    });
+    expect(hashB).not.toEqual(hashA);
+  });
 });

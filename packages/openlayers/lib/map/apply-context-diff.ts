@@ -74,8 +74,14 @@ export async function applyContextDiffToMap(
       map.setView(createView(viewChanges, map));
       return map;
     }
+    if (viewChanges.maxZoom) {
+      view.setMaxZoom(viewChanges.maxZoom);
+    }
     if ("geometry" in viewChanges) {
-      const geom = GEOJSON.readGeometry(viewChanges.geometry);
+      const geom = GEOJSON.readGeometry(viewChanges.geometry, {
+        dataProjection: "EPSG:4326",
+        featureProjection: projection,
+      });
       view.fit(geom as SimpleGeometry, {
         size: map.getSize(),
       });
@@ -90,9 +96,6 @@ export async function applyContextDiffToMap(
         : [0, 0];
       view.setCenter(center);
       view.setZoom(zoom);
-      if (viewChanges.maxZoom) {
-        view.setMaxZoom(viewChanges.maxZoom);
-      }
       // TODO: factorize this better
       // if (viewChanges.maxExtent) {
       //   map.setView(new View({
