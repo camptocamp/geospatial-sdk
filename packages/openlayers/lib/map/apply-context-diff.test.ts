@@ -229,11 +229,7 @@ describe("applyContextDiffToMap", () => {
   describe("view change", () => {
     describe("set to default view", () => {
       beforeEach(async () => {
-        context = {
-          ...SAMPLE_CONTEXT,
-          layers: [SAMPLE_LAYER1, SAMPLE_LAYER2, SAMPLE_LAYER3],
-        };
-        map = await createMapFromContext(context);
+        map = await createMapFromContext(SAMPLE_CONTEXT);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -250,39 +246,56 @@ describe("applyContextDiffToMap", () => {
       });
     });
 
-    describe("four layers reordered", () => {
+    describe("set to view with extent", () => {
       beforeEach(async () => {
-        context = {
-          ...SAMPLE_CONTEXT,
-          layers: [SAMPLE_LAYER1, SAMPLE_LAYER3, SAMPLE_LAYER4, SAMPLE_LAYER2],
-        };
-        map = await createMapFromContext(context);
+        map = await createMapFromContext(SAMPLE_CONTEXT);
         diff = {
           layersAdded: [],
           layersChanged: [],
           layersRemoved: [],
-          layersReordered: [
-            {
-              layer: SAMPLE_LAYER4,
-              newPosition: 0,
-              previousPosition: 2,
-            },
-            {
-              layer: SAMPLE_LAYER1,
-              newPosition: 2,
-              previousPosition: 0,
-            },
-          ],
+          layersReordered: [],
+          viewChanges: {
+            extent: [-10, -10, 20, 20],
+          },
         };
         applyContextDiffToMap(map, diff);
-        layersArray = map.getLayers().getArray();
       });
-      it("moves the layers accordingly", () => {
-        expect(layersArray.length).toEqual(4);
-        assertEqualsToModel(layersArray[0], SAMPLE_LAYER4);
-        assertEqualsToModel(layersArray[1], SAMPLE_LAYER3);
-        assertEqualsToModel(layersArray[2], SAMPLE_LAYER1);
-        assertEqualsToModel(layersArray[3], SAMPLE_LAYER2);
+      it("set the view to the given extent, transformed to the view projection", () => {
+        const view = map.getView();
+        expect(view.getCenter()).toEqual([
+          556597.4539663679, 577070.4760648644,
+        ]);
+        expect(view.getZoom()).toEqual(2);
+      });
+    });
+
+    describe("set to view with geometry", () => {
+      beforeEach(async () => {
+        map = await createMapFromContext(SAMPLE_CONTEXT);
+        diff = {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [],
+          viewChanges: {
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [0, 0],
+                [10, 10],
+                [40, 10],
+              ],
+            },
+          },
+        };
+        applyContextDiffToMap(map, diff);
+      });
+      it("set the view to the given extent, transformed to the view projection", () => {
+        const view = map.getView();
+        expect(view.getCenter()).toEqual([
+          2226389.8158654715, 559444.9874289795,
+        ]);
+        expect(view.getZoom()).toEqual(1);
       });
     });
   });
