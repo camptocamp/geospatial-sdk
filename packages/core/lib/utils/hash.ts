@@ -1,5 +1,11 @@
+function isGeoJsonGeometry(object: object) {
+  return "type" in object && "coordinates" in object;
+}
+
 export function getHash(input: unknown, ignoreKeys: string[] = []): string {
-  if (input instanceof Object) {
+  if (input instanceof Object && isGeoJsonGeometry(input)) {
+    return JSON.stringify(input); // do not compute an actual hash as it will take too long
+  } else if (input instanceof Object) {
     const obj: Record<string, string> = {};
     const keys = Object.keys(input).sort();
     for (const key of keys) {
