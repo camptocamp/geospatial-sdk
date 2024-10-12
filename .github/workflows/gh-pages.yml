@@ -43,13 +43,19 @@ jobs:
       - name: Build
         run: npm run build -- --base=/geospatial-sdk
         working-directory: apps/examples
+      - name: Build docs
+        run: npm run docs:build -- --base=/geospatial-sdk/docs
+        working-directory: docs
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Upload artifact
+      - name: Upload artifact (examples)
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload dist folder
           path: apps/examples/dist
+      - name: Upload artifact (docs)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
