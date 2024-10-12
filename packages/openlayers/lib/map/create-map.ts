@@ -30,6 +30,7 @@ import {
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
+import "ol/ol.css";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
