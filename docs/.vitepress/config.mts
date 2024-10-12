@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitepress'
-import typedocSidebar from '../api/typedoc-sidebar.json';
+import {defineConfig} from 'vitepress'
+import typedocSidebar from '../api/typedoc-sidebar.json'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -9,7 +9,8 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'API Reference', link: '/api/' }
+      { text: 'API Reference', link: '/api/' },
+      { text: 'Examples', link: 'https://camptocamp.github.io/geospatial-sdk/',  }
     ],
 
     sidebar: [

@@ -4,6 +4,7 @@
   "scripts": {
     "predocs:dev": "typedoc",
     "docs:dev": "vitepress dev",
+    "predocs:build": "typedoc",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
