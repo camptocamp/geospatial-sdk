@@ -17,7 +17,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@geospatial-sdk/openlayers": "file:../../packages/openlayers",
     "highlight.js": "^11.9.0",
     "lodash.debounce": "^4.0.8",
     "vue": "^3.3.11"

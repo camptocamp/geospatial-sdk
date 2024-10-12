@@ -10,6 +10,8 @@ import ExampleZoomToLayer from '@/examples/Example-ZoomToLayer.vue'
 import ExampleZoomToLayerRaw from '@/examples/Example-ZoomToLayer.vue?raw'
 import ExampleMapEvents from '@/examples/Example-MapEvents.vue'
 import ExampleMapEventsRaw from '@/examples/Example-MapEvents.vue?raw'
+import ExampleCustomElements from '@/examples/Example-CustomElements.vue'
+import ExampleCustomElementsRaw from '@/examples/Example-CustomElements.vue?raw'
 import { onMounted } from 'vue'
 import hljs from 'highlight.js'
 
@@ -56,6 +58,13 @@ onMounted(() => {
       :source-code="ExampleGeocodingRaw"
     >
       <ExampleGeocoding></ExampleGeocoding>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 6: show a map using a custom element"
+      example-id="example06"
+      :source-code="ExampleCustomElementsRaw"
+    >
+      <ExampleCustomElements></ExampleCustomElements>
     </ExampleContainer>
   </div>
 </template>
