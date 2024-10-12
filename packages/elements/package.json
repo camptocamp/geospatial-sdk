@@ -1,0 +1,40 @@
+{
+  "name": "@geospatial-sdk/elements",
+  "version": "0.0.5-alpha.2",
+  "description": "Custom elements provided by the SDK",
+  "keywords": [
+    "web",
+    "components",
+    "custom",
+    "elements",
+    "map"
+  ],
+  "author": "Olivia <olivia.guyot@camptocamp.com>",
+  "homepage": "",
+  "license": "BSD-3-Clause",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "lit": "^3.2.1"
+  },
+  "dependencies": {
+    "@geospatial-sdk/core": "^0.0.5-alpha.2",
+    "@geospatial-sdk/openlayers": "^0.0.5-alpha.2"
+  },
+  "gitHead": "99dbb945a303b96e576a02a02bc0590785456bd3"
+}
