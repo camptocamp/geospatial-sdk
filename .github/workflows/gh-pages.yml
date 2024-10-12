@@ -52,10 +52,12 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: apps/examples/dist
+          name: gh-pages-examples
       - name: Upload artifact (docs)
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist
+          name: gh-pages-docs
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
