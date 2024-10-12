@@ -46,13 +46,13 @@ jobs:
 
       - name: Build examples
         run: |
-          npm run build -- --base=/geospatial-sdk && \
+          npm run build -- --base=/geospatial-sdk/ && \
           mv dist ../../pages
         working-directory: apps/examples
 
       - name: Build docs
         run: |
-          npm run docs:build -- --base=/geospatial-sdk/docs && \
+          npm run docs:build -- --base=/geospatial-sdk/docs/ && \
           mv .vitepress/dist ../pages/docs
         working-directory: docs
 

@@ -24,7 +24,11 @@ onMounted(() => {
   <div class="flex flex-col items-center p-4 overflow-x-hidden">
     <h1 class="text-5xl font-bold m-6">Geospatial SDK</h1>
     <p class="mb-6">An incredible SDK with many examples.</p>
-    <p class="mb-6"><a href="/docs/">Go to the documentation website</a></p>
+    <p class="mb-6">
+      <a href="https://camptocamp.github.io/geospatial-sdk/docs/"
+        >Go to the documentation website</a
+      >
+    </p>
     <ExampleContainer
       example-name="Example 1: simple map"
       example-id="example01"
