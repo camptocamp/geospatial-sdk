@@ -30,34 +30,40 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+
       - name: Install project dependencies
         run: npm ci
+
       - name: Install application dependencies
         run: npm ci
         working-directory: apps/examples
-      - name: Build
-        run: npm run build -- --base=/geospatial-sdk
+
+      - name: Build examples
+        run: |
+          npm run build -- --base=/geospatial-sdk && \
+          mv dist ../../pages
         working-directory: apps/examples
+
       - name: Build docs
-        run: npm run docs:build -- --base=/geospatial-sdk/docs
+        run: |
+          npm run docs:build -- --base=/geospatial-sdk/docs && \
+          mv .vitepress/dist ../pages/docs
         working-directory: docs
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Upload artifact (examples)
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/examples/dist
-          name: gh-pages-examples
-      - name: Upload artifact (docs)
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/.vitepress/dist
-          name: gh-pages-docs
+          path: pages
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
