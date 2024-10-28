@@ -1,0 +1,18 @@
+<geosdk-map id="map"></geosdk-map>
+
+<script type="text/javascript">
+  const geosdkMap = document.getElementById('map')
+  geosdkMap.context = {
+    layers: [
+      {
+        type: 'maplibre-style',
+        styleUrl:
+          'https://data.geopf.fr/annexes/ressources/vectorTiles/styles/PLAN.IGN/standard.json'
+      }
+    ],
+    view: {
+      zoom: 12,
+      center: [2.33, 48.86]
+    }
+  }
+</script>
