@@ -10,12 +10,26 @@ import ExampleZoomToLayer from '@/examples/Example-ZoomToLayer.vue'
 import ExampleZoomToLayerRaw from '@/examples/Example-ZoomToLayer.vue?raw'
 import ExampleMapEvents from '@/examples/Example-MapEvents.vue'
 import ExampleMapEventsRaw from '@/examples/Example-MapEvents.vue?raw'
-import ExampleCustomElements from '@/examples/Example-CustomElements.vue'
-import ExampleCustomElementsRaw from '@/examples/Example-CustomElements.vue?raw'
-import { onMounted } from 'vue'
+import ExampleCustomElementsHtml from '@/examples/Example-CustomElements.html?raw'
+import { onMounted, ref } from 'vue'
 import hljs from 'highlight.js'
+import '@geospatial-sdk/elements'
 
+function loadHtmlExample(html: string, root: HTMLElement) {
+  const template = document.createElement('template')
+  template.innerHTML = html
+  const geosdkMap = template.content.querySelector('geosdk-map')!
+  const geosdkScript = template.content.querySelector('script')!
+  const script = document.createElement('script')
+  script.type = 'text/javascript'
+  script.textContent = geosdkScript.textContent
+  root.appendChild(geosdkMap)
+  root.appendChild(script)
+}
+
+const example06_root = ref<HTMLElement>()
 onMounted(() => {
+  loadHtmlExample(ExampleCustomElementsHtml as string, example06_root.value!)
   hljs.highlightAll()
 })
 </script>
@@ -67,9 +81,9 @@ onMounted(() => {
     <ExampleContainer
       example-name="Example 6: show a map using a custom element"
       example-id="example06"
-      :source-code="ExampleCustomElementsRaw"
+      :source-code="ExampleCustomElementsHtml"
     >
-      <ExampleCustomElements></ExampleCustomElements>
+      <div class="w-full h-full" ref="example06_root"></div>
     </ExampleContainer>
   </div>
 </template>
