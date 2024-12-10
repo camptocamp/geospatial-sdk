@@ -12,7 +12,7 @@
   "typings": "dist/index.d.ts",
   "type": "module",
   "publishConfig": {
-        "access": "public"
+    "access": "public"
   },
   "directories": {
     "lib": "lib"
