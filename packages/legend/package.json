@@ -1,0 +1,38 @@
+{
+  "name": "@geospatial-sdk/legend",
+  "version": "0.0.5-alpha.2",
+  "description": "Get legend graphic from the map-context",
+  "keywords": [
+    "legend"
+  ],
+  "author": "ronitjadhav <ronit.jadhav@camptocamp.com>",
+  "homepage": "https://github.com/camptocamp/geospatial-sdk#readme",
+  "license": "BSD-3-Clause",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camptocamp/geospatial-sdk.git"
+  },
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@geospatial-sdk/core": "^0.0.5-alpha.2"
+  },
+  "bugs": {
+    "url": "https://github.com/camptocamp/geospatial-sdk/issues"
+  }
+}
