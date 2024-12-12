@@ -107,14 +107,19 @@ export async function createLegendFromLayer(
   legendDiv.id = "legend";
   legendDiv.setAttribute("role", "region");
   legendDiv.setAttribute("aria-label", "Map Layer Legend");
+  legendDiv.classList.add("geosdk--legend-container");
 
   const layerDiv = document.createElement("div");
+  layerDiv.classList.add("geosdk--legend-layer");
+
   const layerTitle = document.createElement("h4");
   layerTitle.textContent = layer.name;
+  layerTitle.classList.add("geosdk--legend-layer-label");
   layerDiv.appendChild(layerTitle);
 
   const img = document.createElement("img");
   img.alt = `Legend for ${layer.name}`;
+  img.classList.add("geosdk--legend-layer-image");
 
   // Error handling for failed image loading
   img.onerror = (e) => {
