@@ -26,17 +26,10 @@ createLegendFromLayer(layer).then((legendDiv) => {
 });
 ```
 
-## API Documentation
+## Documentation
 
-### `createLegendFromLayer(layer: Layer): Promise<HTMLDivElement>`
+For more detailed API documentation, see the [documentation website](https://camptocamp.github.io/geospatial-sdk/docs/).
 
-Creates a legend from a layer.
+## Examples
 
-#### Parameters
-
-- `layer: (MapContextLayer)`: The layer to create the legend from.
-- `options: (LegendOptions, optional)`: The options to create the legend.
-
-#### Returns
-
-- `Promise<HTMLElement | false>`: A promise that resolves to the legend element or `false` if the legend could not be created.
+For examples and demos, see the [examples website](https://camptocamp.github.io/geospatial-sdk/).

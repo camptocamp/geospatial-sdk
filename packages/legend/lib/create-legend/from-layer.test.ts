@@ -100,28 +100,28 @@ describe("createLegendFromLayer", () => {
     );
   });
 
-  it("returns false for invalid layer type", async () => {
+  it("returns null for invalid layer type", async () => {
     const invalidLayer = { ...baseWmsLayer, type: "invalid" as any };
 
     const result = await createLegendFromLayer(invalidLayer);
 
-    expect(result).toBe(false);
+    expect(result).toBe(null);
   });
 
-  it("returns false for layer without URL", async () => {
+  it("returns null for layer without URL", async () => {
     const layerWithoutUrl = { ...baseWmsLayer, url: "" };
 
     const result = await createLegendFromLayer(layerWithoutUrl);
 
-    expect(result).toBe(false);
+    expect(result).toBe(null);
   });
 
-  it("returns false for layer without name", async () => {
+  it("returns null for layer without name", async () => {
     const layerWithoutName = { ...baseWmsLayer, name: "" };
 
     const result = await createLegendFromLayer(layerWithoutName);
 
-    expect(result).toBe(false);
+    expect(result).toBe(null);
   });
 
   it("handles image load error", async () => {

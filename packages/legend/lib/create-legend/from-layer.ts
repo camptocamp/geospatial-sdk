@@ -82,24 +82,23 @@ async function createWmtsLegendUrl(
 }
 
 /**
- * Create a legend from a layer
+ * Creates a legend from a layer.
  *
- *
- * @param layer - The MapContextLayer to create a legend from
- * @param options - Optional configuration for legend generation
- * @returns The legend as a DOM element or false if the legend could not be created
+ * @param {MapContextLayer} layer - The layer to create the legend from.
+ * @param {LegendOptions} [options] - The options to create the legend.
+ * @returns {Promise<HTMLElement | null>} A promise that resolves to the legend element or `null` if the legend could not be created.
  */
 export async function createLegendFromLayer(
   layer: MapContextLayer,
   options: LegendOptions = {},
-): Promise<HTMLElement | false> {
+): Promise<HTMLElement | null> {
   if (
     (layer.type !== "wms" && layer.type !== "wmts") ||
     !layer.url ||
     !layer.name
   ) {
     console.error("Invalid layer for legend creation");
-    return false;
+    return null;
   }
 
   // Create a container for the legend
