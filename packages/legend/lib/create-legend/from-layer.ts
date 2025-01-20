@@ -67,8 +67,6 @@ async function createWmtsLegendUrl(
   const endpoint = await new WmtsEndpoint(layer.url).isReady();
 
   const layerByName = endpoint.getLayerByName(layer.name);
-  console.log("layerByName");
-  console.log(layerByName);
 
   if (
     layerByName.styles &&
