@@ -26,7 +26,7 @@ function createWmsLegendUrl(
   layer: MapContextLayerWms,
   options: LegendOptions = {},
 ): URL {
-  const { format = "image/png", widthPxHint, heightPxHint} = options;
+  const { format = "image/png", widthPxHint, heightPxHint } = options;
 
   const legendUrl = new URL(
     removeSearchParams(layer.url, [
@@ -36,7 +36,6 @@ function createWmsLegendUrl(
       "LAYER",
       "LAYERTITLE",
       "SLD_VERSION",
-      "STYLE",
       "WIDTH",
       "HEIGHT",
     ]),
