@@ -35,6 +35,7 @@ function createWmsLegendUrl(
       "FORMAT",
       "LAYER",
       "LAYERTITLE",
+      "SLD_VERSION",
       "WIDTH",
       "HEIGHT",
     ]),
@@ -44,6 +45,7 @@ function createWmsLegendUrl(
   legendUrl.searchParams.set("FORMAT", format);
   legendUrl.searchParams.set("LAYER", layer.name);
   legendUrl.searchParams.set("LAYERTITLE", false.toString()); // Disable layer title for QGIS Server
+  legendUrl.searchParams.set("SLD_VERSION", "1.1.0"); // Default SLD version
 
   if (widthPxHint) {
     legendUrl.searchParams.set("WIDTH", widthPxHint.toString());
