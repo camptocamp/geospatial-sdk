@@ -4,6 +4,8 @@ import ExampleSimpleMap from '@/examples/Example-SimpleMap.vue'
 import ExampleSimpleMapRaw from '@/examples/Example-SimpleMap.vue?raw'
 import ExampleMapAddRemoveLayers from '@/examples/Example-MapAddRemoveLayers.vue'
 import ExampleMapAddRemoveLayersRaw from '@/examples/Example-MapAddRemoveLayers.vue?raw'
+import ExampleMapAddRemoveRestrictedLayers from '@/examples/Example-MapAddRemoveRestrictedLayers.vue'
+import ExampleMapAddRemoveRestrictedLayersRaw from '@/examples/Example-MapAddRemoveRestrictedLayers.vue?raw'
 import ExampleGeocoding from '@/examples/Example-Geocoding.vue'
 import ExampleGeocodingRaw from '@/examples/Example-Geocoding.vue?raw'
 import ExampleZoomToLayer from '@/examples/Example-ZoomToLayer.vue'
@@ -57,30 +59,37 @@ onMounted(() => {
     >
       <ExampleMapAddRemoveLayers></ExampleMapAddRemoveLayers>
     </ExampleContainer>
-    <ExampleContainer
-      example-name="Example 3: zoom to layers"
+        <ExampleContainer
+      example-name="Example 3: add and remove restricted layers"
       example-id="example03"
+      :source-code="ExampleMapAddRemoveRestrictedLayersRaw"
+    >
+      <ExampleMapAddRemoveRestrictedLayers></ExampleMapAddRemoveRestrictedLayers>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 4: zoom to layers"
+      example-id="example04"
       :source-code="ExampleZoomToLayerRaw"
     >
       <ExampleZoomToLayer></ExampleZoomToLayer>
     </ExampleContainer>
     <ExampleContainer
-      example-name="Example 4: map events"
-      example-id="example04"
+      example-name="Example 5: map events"
+      example-id="example05"
       :source-code="ExampleMapEventsRaw"
     >
       <ExampleMapEvents></ExampleMapEvents>
     </ExampleContainer>
     <ExampleContainer
-      example-name="Example 5: geocoding"
-      example-id="example05"
+      example-name="Example 6: geocoding"
+      example-id="example06"
       :source-code="ExampleGeocodingRaw"
     >
       <ExampleGeocoding></ExampleGeocoding>
     </ExampleContainer>
     <ExampleContainer
-      example-name="Example 6: show a map using a custom element"
-      example-id="example06"
+      example-name="Example 7: show a map using a custom element"
+      example-id="example07"
       :source-code="ExampleCustomElementsHtml"
     >
       <div class="w-full h-full" ref="example06_root"></div>
