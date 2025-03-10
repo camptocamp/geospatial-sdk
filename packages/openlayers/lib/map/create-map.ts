@@ -68,6 +68,9 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
         source: new XYZ({
           url: layerModel.url,
           attributions: layerModel.attributions,
+          tileLoadFunction: (tile: Tile, src: string) => {
+            return tileLoadErrorCatchFunction(tile, src, map)
+          }
         }),
       });
       break;
