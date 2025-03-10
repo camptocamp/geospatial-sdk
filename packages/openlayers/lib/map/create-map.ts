@@ -3,7 +3,6 @@ import {
   MapContextLayer,
   MapContextView,
   removeSearchParams,
-  SourceLoadErrorEvent
 } from "@geospatial-sdk/core";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -26,67 +25,16 @@ import OGCVectorTile from "ol/source/OGCVectorTile";
 import WMTS from "ol/source/WMTS";
 import MVT from "ol/format/MVT";
 import {
-  EndpointError,
   OgcApiEndpoint,
   WfsEndpoint,
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
-import { ImageTile, Tile } from "ol";
-import TileState from 'ol/TileState.js';
+import { Tile } from "ol";
+import { getEndpoint, tileLoadErrorCatchFunction } from "./handle-errors";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
-
-function handleError(statusCode: number, tile: Tile, map: Map) {
-  tile.setState(TileState.ERROR)
-  map.dispatchEvent(
-    new SourceLoadErrorEvent(statusCode)
-  )
-}
-
-function tileLoadErrorCatchFunction(tile: Tile, src: string, map: Map) {
-  fetch(src).then((response) => {
-    if (response.status === 200) {
-      response.blob().then((blob) => {
-            ((tile as ImageTile).getImage() as HTMLImageElement).src = URL.createObjectURL(blob);
-      }).catch((error) => {
-        console.error("Error loading tile", error);
-        handleError(response.status, tile, map)
-      });
-    } else {
-      handleError(response.status, tile, map)
-    }
-  })
-}
-
-async function getEndpoint(url: string, type: 'wmts' | 'wfs', map: Map): Promise<WmtsEndpoint | WfsEndpoint> {
-  try {
-    if (type === 'wfs') {
-      return await new WfsEndpoint(url).isReady()
-    } else {
-      return await new WmtsEndpoint(url).isReady()
-    } 
-  } catch (e: any) {
-    if (
-      e instanceof Error &&
-      'isCrossOriginRelated' in e &&
-      'httpStatus' in e
-    ) {
-      const error = e as EndpointError
-      if (error.httpStatus && error.httpStatus >= 400) {
-        map.dispatchEvent(
-          new SourceLoadErrorEvent(error.httpStatus)
-        )
-        return Promise.reject(e)
-      }
-    } 
-    map.dispatchEvent(
-      new SourceLoadErrorEvent(-1)
-    )
-    return Promise.reject(e)
-  }
-}
 
 export async function createLayer(layerModel: MapContextLayer, map: Map): Promise<Layer> {
   const { type } = layerModel;
@@ -121,7 +69,7 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
       break;
     case "wmts": {
       const olLayer = new TileLayer({});
-      const endpoint = await getEndpoint(layerModel.url, 'wfs', map) as WmtsEndpoint
+      const endpoint = await getEndpoint(layerModel.url, 'wmts', map) as WmtsEndpoint
       endpoint.isReady().then(async (endpoint) => {
         const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
         const layer = endpoint.getLayerByName(layerName);
