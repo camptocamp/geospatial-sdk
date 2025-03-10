@@ -60,9 +60,13 @@ function tileLoadErrorCatchFunction(tile: Tile, src: string, map: Map) {
   })
 }
 
-async function getWmtsEndpoint(wmtsUrl: string, map: Map): Promise<WmtsEndpoint> {
+async function getEndpoint(url: string, type: 'wmts' | 'wfs', map: Map): Promise<WmtsEndpoint | WfsEndpoint> {
   try {
-    return await new WmtsEndpoint(wmtsUrl).isReady()
+    if (type === 'wfs') {
+      return await new WfsEndpoint(url).isReady()
+    } else {
+      return await new WmtsEndpoint(url).isReady()
+    } 
   } catch (e: any) {
     if (
       e instanceof Error &&
@@ -117,7 +121,7 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
       break;
     case "wmts": {
       const olLayer = new TileLayer({});
-      const endpoint = await getWmtsEndpoint(layerModel.url, map)
+      const endpoint = await getEndpoint(layerModel.url, 'wfs', map) as WmtsEndpoint
       endpoint.isReady().then(async (endpoint) => {
         const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
         const layer = endpoint.getLayerByName(layerName);
@@ -150,7 +154,8 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
       });
-      new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
+      const endpoint = await getEndpoint(layerModel.url, 'wfs', map) as WfsEndpoint
+      endpoint.isReady().then((endpoint) => {
         const featureType =
           endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
         olLayer.setSource(

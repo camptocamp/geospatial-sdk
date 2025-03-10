@@ -21,7 +21,12 @@ const Layers: Record<string, MapContextLayer> = {
   xyz: {
     type: 'xyz',
     url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg'
-  }
+  },
+    wfs: {
+    type: 'wfs',
+    url: 'https://data.geopf.fr/private/wfs',
+    name: '0'
+  },
 }
 
 const mapRoot = ref<HTMLElement>()
@@ -30,7 +35,8 @@ let context = DEFAULT_CONTEXT
 let layerStates = ref({
   wms1: false,
   wmts: false,
-  xyz: false
+  xyz: false,
+  wfs: false
 })
 let errorCode = ref<number | null>(null)
 
@@ -39,7 +45,7 @@ onMounted(async () => {
   listen(map, 'source-load-error', (event) => (errorCode.value = event.statusCode))
 })
 
-async function toggleLayer(layer: 'wms1' | 'wmts' | 'xyz') {
+async function toggleLayer(layer: 'wms1' | 'wmts' | 'xyz' | 'wfs') {
   let newContext = { ...context, layers: [...context.layers] }
   const enabled = layerStates.value[layer]
   if (!enabled) {
@@ -71,6 +77,9 @@ async function toggleLayer(layer: 'wms1' | 'wmts' | 'xyz') {
       </ButtonSimple>
       <ButtonSimple class="shadow-sm" @click="toggleLayer('xyz')">
         {{ layerStates['xyz'] ? 'Remove' : 'Add' }} restricted XYZ
+      </ButtonSimple>
+      <ButtonSimple class="shadow-sm" @click="toggleLayer('wfs')">
+        {{ layerStates['wfs'] ? 'Remove' : 'Add' }} restricted WFS
       </ButtonSimple>
     </div>
   </div>
