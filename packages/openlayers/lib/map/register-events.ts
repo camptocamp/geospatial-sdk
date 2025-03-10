@@ -4,6 +4,7 @@ import {
   FeaturesHoverEventType,
   MapClickEventType,
   MapEventsByType,
+  SourceLoadErrorType,
 } from "@geospatial-sdk/core";
 import { toLonLat } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
@@ -151,6 +152,12 @@ export function listen<T extends keyof MapEventsByType>(
           coordinate,
         });
       });
+      break;
+    case SourceLoadErrorType:
+      map.on("source-load-error" as unknown as MapObjectEventTypes, (event) => {
+        (callback as (event: unknown) => void)(
+          event);
+        })
       break;
     default:
       throw new Error(`Unrecognized event type: ${eventType}`);

@@ -3,6 +3,7 @@ import {
   MapContextLayer,
   MapContextView,
   removeSearchParams,
+  SourceLoadErrorEvent
 } from "@geospatial-sdk/core";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -30,11 +31,35 @@ import {
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
+import { ImageTile, Tile } from "ol";
+import TileState from 'ol/TileState.js';
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
-export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
+function handleError(statusCode: number, tile: Tile, map: Map) {
+  tile.setState(TileState.ERROR)
+  map.dispatchEvent(
+    new SourceLoadErrorEvent(statusCode)
+  )
+}
+
+function tileLoadErrorCatchFunction(tile: Tile, src: string, map: Map) {
+  fetch(src).then((response) => {
+    if (response.status === 200) {
+      response.blob().then((blob) => {
+            ((tile as ImageTile).getImage() as HTMLImageElement).src = URL.createObjectURL(blob);
+      }).catch((error) => {
+        console.error("Error loading tile", error);
+        handleError(response.status, tile, map)
+      });
+    } else {
+      handleError(response.status, tile, map)
+    }
+  })
+}
+
+export async function createLayer(layerModel: MapContextLayer, map: Map): Promise<Layer> {
   const { type } = layerModel;
   let layer: Layer | undefined;
   switch (type) {
@@ -56,6 +81,9 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           },
           gutter: 20,
           attributions: layerModel.attributions,
+          tileLoadFunction: (tile: Tile, src: string) => {
+            return tileLoadErrorCatchFunction(tile, src, map)
+          }
         }),
       });
       break;
@@ -279,7 +307,7 @@ export async function resetMapFromContext(
   map.setView(createView(context.view, map));
   map.getLayers().clear();
   for (const layerModel of context.layers) {
-    const layer = await createLayer(layerModel);
+    const layer = await createLayer(layerModel, map);
     map.addLayer(layer);
   }
   return map;

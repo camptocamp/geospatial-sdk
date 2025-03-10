@@ -1,4 +1,5 @@
 import { Feature } from "geojson";
+import BaseEvent from "ol/events/Event";
 
 export const FeaturesClickEventType = "features-click";
 export interface FeaturesClickEvent {
@@ -22,4 +23,14 @@ export interface MapEventsByType {
   [FeaturesClickEventType]: FeaturesClickEvent;
   [FeaturesHoverEventType]: FeaturesHoverEvent;
   [MapClickEventType]: MapClickEvent;
+  [SourceLoadErrorType]: SourceLoadErrorEvent;
+}
+
+export const SourceLoadErrorType = "source-load-error";
+export class SourceLoadErrorEvent extends BaseEvent {
+  statusCode: number
+  constructor(statusCode: number) {
+    super(SourceLoadErrorType)
+    this.statusCode = statusCode
+  }
 }
