@@ -26,6 +26,7 @@ import OGCVectorTile from "ol/source/OGCVectorTile";
 import WMTS from "ol/source/WMTS";
 import MVT from "ol/format/MVT";
 import {
+  EndpointError,
   OgcApiEndpoint,
   WfsEndpoint,
   WmtsEndpoint,
@@ -57,6 +58,30 @@ function tileLoadErrorCatchFunction(tile: Tile, src: string, map: Map) {
       handleError(response.status, tile, map)
     }
   })
+}
+
+async function getWmtsEndpoint(wmtsUrl: string, map: Map): Promise<WmtsEndpoint> {
+  try {
+    return await new WmtsEndpoint(wmtsUrl).isReady()
+  } catch (e: any) {
+    if (
+      e instanceof Error &&
+      'isCrossOriginRelated' in e &&
+      'httpStatus' in e
+    ) {
+      const error = e as EndpointError
+      if (error.httpStatus && error.httpStatus >= 400) {
+        map.dispatchEvent(
+          new SourceLoadErrorEvent(error.httpStatus)
+        )
+        return Promise.reject(e)
+      }
+    } 
+    map.dispatchEvent(
+      new SourceLoadErrorEvent(-1)
+    )
+    return Promise.reject(e)
+  }
 }
 
 export async function createLayer(layerModel: MapContextLayer, map: Map): Promise<Layer> {
@@ -92,7 +117,7 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
       break;
     case "wmts": {
       const olLayer = new TileLayer({});
-      const endpoint = new WmtsEndpoint(layerModel.url);
+      const endpoint = await getWmtsEndpoint(layerModel.url, map)
       endpoint.isReady().then(async (endpoint) => {
         const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
         const layer = endpoint.getLayerByName(layerName);
