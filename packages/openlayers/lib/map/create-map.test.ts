@@ -35,6 +35,44 @@ import {
 import WMTS from "ol/source/WMTS";
 import { VectorTile } from "ol/source";
 import { MapboxVectorLayer } from "ol-mapbox-style";
+import { WfsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
+
+vi.mock("@camptocamp/ogc-client", async(importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    WmtsEndpoint: vi.fn().mockImplementation(() => ({
+      isReady: vi.fn().mockImplementation(() => Promise.resolve(new WmtsEndpoint(''))),
+      getSingleLayerName: vi.fn().mockImplementation(() => 'ms:commune_actuelle_3857'),
+      getLayerByName: vi.fn().mockImplementation(() => ({
+        name: 'ms:commune_actuelle_3857',
+        resourceLinks: [{format: 'image/png', url: "http://mocked-tile-url.org", encoding: "REST" }],
+        styles: [],
+        defaultStyle: '',
+        matrixSets: [{ identifier: "matrixSet" }],
+      })),
+      getOpenLayersTileGrid: vi.fn().mockImplementation(() => ({
+        getTileSize: () => [256, 256],
+        getMatrixIds: () => [],
+        getOrigin: () => [0, 0],
+        getResolutions: () => [],
+        getMatrixWidth: () => 0,
+        getMatrixHeight: () => 0,
+        getTileWidth: () => 0,
+        getTileHeight: () => 0,
+        getMinZoom: () => 0,
+        getMaxZoom: () => 0,
+      })),
+      getDefaultDimensions: vi.fn().mockImplementation(() => ({})),
+      getTileUrl: vi.fn().mockImplementation(() => ''),
+    })),
+    WfsEndpoint: vi.fn().mockImplementation(() => ({
+      isReady: vi.fn().mockImplementation(() => Promise.resolve(new WfsEndpoint(''))),
+      getSingleFeatureTypeName: vi.fn().mockImplementation(() => 'ms:commune_actuelle_3857'),
+      getFeatureUrl: vi.fn().mockImplementation(() => 'http://mocked-feature-url.org'),
+    })),
+  };
+});
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -43,7 +81,7 @@ describe("MapContextService", () => {
     describe("XYZ", () => {
       beforeEach(async () => {
         layerModel = MAP_CTX_LAYER_XYZ_FIXTURE;
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, new Map());
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -71,7 +109,7 @@ describe("MapContextService", () => {
     describe("OGCAPI", () => {
       beforeEach(async () => {
         layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, new Map());
       });
       it("create a vector tile layer", () => {
         expect(layer).toBeTruthy();
@@ -98,7 +136,7 @@ describe("MapContextService", () => {
     describe("WMS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WMS_FIXTURE),
-          (layer = await createLayer(layerModel));
+          (layer = await createLayer(layerModel, new Map()));
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -139,7 +177,7 @@ describe("MapContextService", () => {
     describe("WFS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WFS_FIXTURE),
-          (layer = await createLayer(layerModel));
+          (layer = await createLayer(layerModel, new Map()));
       });
       it("create a vector layer", () => {
         expect(layer).toBeTruthy();
@@ -165,7 +203,7 @@ describe("MapContextService", () => {
         const source = layer.getSource() as VectorSource;
         const urlLoader = source.getUrl() as Function;
         expect(urlLoader([10, 20, 30, 40])).toBe(
-          "https://www.geograndest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
+          "http://mocked-feature-url.org",
         );
       });
     });
@@ -174,7 +212,7 @@ describe("MapContextService", () => {
       describe("with inline data", () => {
         beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
-          layer = await createLayer(layerModel);
+          layer = await createLayer(layerModel, new Map());
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -201,7 +239,7 @@ describe("MapContextService", () => {
         beforeEach(async () => {
           layerModel = { ...MAP_CTX_LAYER_GEOJSON_FIXTURE };
           layerModel.data = JSON.stringify(layerModel.data);
-          layer = await createLayer(layerModel);
+          layer = await createLayer(layerModel, new Map());
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -229,7 +267,7 @@ describe("MapContextService", () => {
             url: undefined,
             data: "blargz",
           };
-          layer = await createLayer(layerModel);
+          layer = await createLayer(layerModel, new Map());
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -247,7 +285,7 @@ describe("MapContextService", () => {
       describe("with remote file url", () => {
         beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
-          layer = await createLayer(layerModel);
+          layer = await createLayer(layerModel, new Map());
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -273,7 +311,7 @@ describe("MapContextService", () => {
     describe("WMTS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WMTS_FIXTURE),
-          (layer = await createLayer(layerModel));
+          (layer = await createLayer(layerModel, new Map()));
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -293,7 +331,7 @@ describe("MapContextService", () => {
         const source = layer.getSource() as WMTS;
         const urls = source.getUrls() ?? [];
         expect(urls).toEqual([
-          "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
+          "http://mocked-tile-url.org",
         ]);
       });
     });
@@ -301,7 +339,7 @@ describe("MapContextService", () => {
     describe("Maplibre Style", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE),
-          (layer = await createLayer(layerModel));
+          (layer = await createLayer(layerModel, new Map()));
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();

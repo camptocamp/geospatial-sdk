@@ -16,9 +16,47 @@ import { createLayer, createMapFromContext } from "./create-map";
 import { applyContextDiffToMap } from "./apply-context-diff";
 import { beforeEach } from "vitest";
 import BaseLayer from "ol/layer/Base";
+import { WfsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
+
+vi.mock("@camptocamp/ogc-client", async(importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    WmtsEndpoint: vi.fn().mockImplementation(() => ({
+      isReady: vi.fn().mockImplementation(() => Promise.resolve(new WmtsEndpoint(''))),
+      getSingleLayerName: vi.fn().mockImplementation(() => 'ms:commune_actuelle_3857'),
+      getLayerByName: vi.fn().mockImplementation(() => ({
+        name: 'ms:commune_actuelle_3857',
+        resourceLinks: [{format: 'image/png', url: "http://mocked-tile-url.org", encoding: "REST" }],
+        styles: [],
+        defaultStyle: '',
+        matrixSets: [{ identifier: "matrixSet" }],
+      })),
+      getOpenLayersTileGrid: vi.fn().mockImplementation(() => ({
+        getTileSize: () => [256, 256],
+        getMatrixIds: () => [],
+        getOrigin: () => [0, 0],
+        getResolutions: () => [],
+        getMatrixWidth: () => 0,
+        getMatrixHeight: () => 0,
+        getTileWidth: () => 0,
+        getTileHeight: () => 0,
+        getMinZoom: () => 0,
+        getMaxZoom: () => 0,
+      })),
+      getDefaultDimensions: vi.fn().mockImplementation(() => ({})),
+      getTileUrl: vi.fn().mockImplementation(() => ''),
+    })),
+    WfsEndpoint: vi.fn().mockImplementation(() => ({
+      isReady: vi.fn().mockImplementation(() => Promise.resolve(new WfsEndpoint(''))),
+      getSingleFeatureTypeName: vi.fn().mockImplementation(() => 'ms:commune_actuelle_3857'),
+      getFeatureUrl: vi.fn().mockImplementation(() => 'http://mocked-feature-url.org'),
+    })),
+  };
+});
 
 async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
-  const reference = (await createLayer(layerModel)) as any;
+  const reference = (await createLayer(layerModel, new Map())) as any;
   expect(reference).toBeInstanceOf(layer.constructor);
   const refSource = reference.getSource() as any;
   const layerSource = layer.getSource() as any;
@@ -65,7 +103,7 @@ describe("applyContextDiffToMap", () => {
   });
 
   describe("layers added", () => {
-    beforeEach(() => {
+    beforeEach(async() => {
       diff = {
         layersAdded: [
           {
@@ -81,7 +119,7 @@ describe("applyContextDiffToMap", () => {
         layersRemoved: [],
         layersReordered: [],
       };
-      applyContextDiffToMap(map, diff);
+      await applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();
     });
     it("adds the layers to the map", () => {
