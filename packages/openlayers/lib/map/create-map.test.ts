@@ -37,18 +37,28 @@ import { VectorTile } from "ol/source";
 import { MapboxVectorLayer } from "ol-mapbox-style";
 import { WfsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 
-vi.mock("@camptocamp/ogc-client", async(importOriginal) => {
-  const actual = await importOriginal()
+vi.mock("@camptocamp/ogc-client", async (importOriginal) => {
+  const actual = await importOriginal();
   return {
     ...actual,
     WmtsEndpoint: vi.fn().mockImplementation(() => ({
-      isReady: vi.fn().mockImplementation(() => Promise.resolve(new WmtsEndpoint(''))),
-      getSingleLayerName: vi.fn().mockImplementation(() => 'ms:commune_actuelle_3857'),
+      isReady: vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(new WmtsEndpoint(""))),
+      getSingleLayerName: vi
+        .fn()
+        .mockImplementation(() => "ms:commune_actuelle_3857"),
       getLayerByName: vi.fn().mockImplementation(() => ({
-        name: 'ms:commune_actuelle_3857',
-        resourceLinks: [{format: 'image/png', url: "http://mocked-tile-url.org", encoding: "REST" }],
+        name: "ms:commune_actuelle_3857",
+        resourceLinks: [
+          {
+            format: "image/png",
+            url: "http://mocked-tile-url.org",
+            encoding: "REST",
+          },
+        ],
         styles: [],
-        defaultStyle: '',
+        defaultStyle: "",
         matrixSets: [{ identifier: "matrixSet" }],
       })),
       getOpenLayersTileGrid: vi.fn().mockImplementation(() => ({
@@ -64,12 +74,18 @@ vi.mock("@camptocamp/ogc-client", async(importOriginal) => {
         getMaxZoom: () => 0,
       })),
       getDefaultDimensions: vi.fn().mockImplementation(() => ({})),
-      getTileUrl: vi.fn().mockImplementation(() => ''),
+      getTileUrl: vi.fn().mockImplementation(() => ""),
     })),
     WfsEndpoint: vi.fn().mockImplementation(() => ({
-      isReady: vi.fn().mockImplementation(() => Promise.resolve(new WfsEndpoint(''))),
-      getSingleFeatureTypeName: vi.fn().mockImplementation(() => 'ms:commune_actuelle_3857'),
-      getFeatureUrl: vi.fn().mockImplementation(() => 'http://mocked-feature-url.org'),
+      isReady: vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(new WfsEndpoint(""))),
+      getSingleFeatureTypeName: vi
+        .fn()
+        .mockImplementation(() => "ms:commune_actuelle_3857"),
+      getFeatureUrl: vi
+        .fn()
+        .mockImplementation(() => "http://mocked-feature-url.org"),
     })),
   };
 });
@@ -330,9 +346,7 @@ describe("MapContextService", () => {
       it("set correct urls", () => {
         const source = layer.getSource() as WMTS;
         const urls = source.getUrls() ?? [];
-        expect(urls).toEqual([
-          "http://mocked-tile-url.org",
-        ]);
+        expect(urls).toEqual(["http://mocked-tile-url.org"]);
       });
     });
 

@@ -36,7 +36,10 @@ import { getEndpoint, tileLoadErrorCatchFunction } from "./handle-errors";
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
-export async function createLayer(layerModel: MapContextLayer, map: Map): Promise<Layer> {
+export async function createLayer(
+  layerModel: MapContextLayer,
+  map: Map,
+): Promise<Layer> {
   const { type } = layerModel;
   let layer: Layer | undefined;
   switch (type) {
@@ -46,8 +49,8 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
           url: layerModel.url,
           attributions: layerModel.attributions,
           tileLoadFunction: (tile: Tile, src: string) => {
-            return tileLoadErrorCatchFunction(tile, src, map)
-          }
+            return tileLoadErrorCatchFunction(tile, src, map);
+          },
         }),
       });
       break;
@@ -62,14 +65,18 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
           gutter: 20,
           attributions: layerModel.attributions,
           tileLoadFunction: (tile: Tile, src: string) => {
-            return tileLoadErrorCatchFunction(tile, src, map)
-          }
+            return tileLoadErrorCatchFunction(tile, src, map);
+          },
         }),
       });
       break;
     case "wmts": {
       const olLayer = new TileLayer({});
-      const endpoint = await getEndpoint(layerModel.url, 'wmts', map) as WmtsEndpoint
+      const endpoint = (await getEndpoint(
+        layerModel.url,
+        "wmts",
+        map,
+      )) as WmtsEndpoint;
       endpoint.isReady().then(async (endpoint) => {
         const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
         const layer = endpoint.getLayerByName(layerName);
@@ -102,7 +109,11 @@ export async function createLayer(layerModel: MapContextLayer, map: Map): Promis
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
       });
-      const endpoint = await getEndpoint(layerModel.url, 'wfs', map) as WfsEndpoint
+      const endpoint = (await getEndpoint(
+        layerModel.url,
+        "wfs",
+        map,
+      )) as WfsEndpoint;
       endpoint.isReady().then((endpoint) => {
         const featureType =
           endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;

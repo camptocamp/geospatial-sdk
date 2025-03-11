@@ -155,9 +155,8 @@ export function listen<T extends keyof MapEventsByType>(
       break;
     case SourceLoadErrorType:
       map.on("source-load-error" as unknown as MapObjectEventTypes, (event) => {
-        (callback as (event: unknown) => void)(
-          event);
-        })
+        (callback as (event: unknown) => void)(event);
+      });
       break;
     default:
       throw new Error(`Unrecognized event type: ${eventType}`);

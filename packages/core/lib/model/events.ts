@@ -28,9 +28,9 @@ export interface MapEventsByType {
 
 export const SourceLoadErrorType = "source-load-error";
 export class SourceLoadErrorEvent extends BaseEvent {
-  statusCode: number
+  statusCode: number;
   constructor(statusCode: number) {
-    super(SourceLoadErrorType)
-    this.statusCode = statusCode
+    super(SourceLoadErrorType);
+    this.statusCode = statusCode;
   }
 }

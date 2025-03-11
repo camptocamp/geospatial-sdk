@@ -31,7 +31,9 @@ export async function applyContextDiffToMap(
 
   // insert added layers
   const newLayers = await Promise.all(
-    contextDiff.layersAdded.map((layerAdded) => createLayer(layerAdded.layer, map)),
+    contextDiff.layersAdded.map((layerAdded) =>
+      createLayer(layerAdded.layer, map),
+    ),
   );
 
   newLayers.forEach((layer, index) => {
