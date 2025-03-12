@@ -7,7 +7,7 @@ import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
 import { ImageTile, Map, Tile } from "ol";
 import TileState from "ol/TileState.js";
 
-function handleError(statusCode: number, tile: Tile, map: Map) {
+export function handleError(statusCode: number, tile: Tile, map: Map) {
   tile.setState(TileState.ERROR);
   map.dispatchEvent(new SourceLoadErrorEvent(statusCode));
 }
@@ -34,7 +34,7 @@ export function tileLoadErrorCatchFunction(tile: Tile, src: string, map: Map) {
 export async function getEndpoint(
   url: string,
   type: "wmts" | "wfs",
-  map: Map,
+  map: Map
 ): Promise<WmtsEndpoint | WfsEndpoint> {
   try {
     if (type === "wfs") {
