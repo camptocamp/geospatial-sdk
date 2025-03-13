@@ -35,7 +35,14 @@ import {
 import WMTS from "ol/source/WMTS";
 import { VectorTile } from "ol/source";
 import { MapboxVectorLayer } from "ol-mapbox-style";
+import { tileLoadErrorCatchFunction } from "./handle-errors";
+import { ImageTile } from "ol";
+import TileState from "ol/TileState.js";
 
+const tileLoadErrorCatchFunctionSpy = vi.spyOn(
+  { tileLoadErrorCatchFunction },
+  "tileLoadErrorCatchFunction"
+);
 describe("MapContextService", () => {
   describe("#createLayer", () => {
     let layerModel: MapContextLayer, layer: Layer;
@@ -67,6 +74,25 @@ describe("MapContextService", () => {
           "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
         );
       });
+      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+        const source = layer.getSource() as XYZ;
+        const tileLoadFunction = source.getTileLoadFunction();
+        expect(tileLoadFunction).toBe(tileLoadErrorCatchFunction);
+      });
+      // it("should set tileLoadErrorCatchFunction to handle errors", () => {
+      //   const source = layer.getSource() as XYZ;
+      //   const tileLoadFunction = source.getTileLoadFunction();
+      //   expect(tileLoadFunction).toBeInstanceOf(Function);
+      //   const tile = new ImageTile(
+      //     [0, 0, 0],
+      //     TileState.IDLE,
+      //     "",
+      //     null,
+      //     () => {}
+      //   );
+      //   tileLoadFunction(tile, "http://example.com/tile");
+      //   expect(tileLoadErrorCatchFunctionSpy).toHaveBeenCalled();
+      // });
     });
     describe("OGCAPI", () => {
       beforeEach(async () => {
