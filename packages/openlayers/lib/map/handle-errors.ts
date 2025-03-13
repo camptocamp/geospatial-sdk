@@ -1,60 +1,56 @@
-import {
-  EndpointError,
-  WfsEndpoint,
-  WmtsEndpoint,
-} from "@camptocamp/ogc-client";
+import { EndpointError } from "@camptocamp/ogc-client";
 import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
-import { ImageTile, Map, Tile } from "ol";
+import { ImageTile, Tile } from "ol";
+import TileLayer from "ol/layer/Tile";
+import VectorLayer from "ol/layer/Vector";
+import { Source } from "ol/source";
+import TileSource from "ol/source/Tile";
+import VectorSource from "ol/source/Vector";
 import TileState from "ol/TileState.js";
 
-export function handleError(statusCode: number, tile: Tile, map: Map) {
-  tile.setState(TileState.ERROR);
-  map.dispatchEvent(new SourceLoadErrorEvent(statusCode));
-}
-
-export function tileLoadErrorCatchFunction(tile: Tile, src: string, map: Map) {
-  fetch(src).then((response) => {
-    if (response.status === 200) {
-      response
-        .blob()
-        .then((blob) => {
-          ((tile as ImageTile).getImage() as HTMLImageElement).src =
-            URL.createObjectURL(blob);
-        })
-        .catch((error) => {
-          console.error("Error loading tile", error);
-          handleError(response.status, tile, map);
-        });
-    } else {
-      handleError(response.status, tile, map);
-    }
-  });
-}
-
-export async function getEndpoint(
-  url: string,
-  type: "wmts" | "wfs",
-  map: Map
-): Promise<WmtsEndpoint | WfsEndpoint> {
-  try {
-    if (type === "wfs") {
-      return await new WfsEndpoint(url).isReady();
-    } else {
-      return await new WmtsEndpoint(url).isReady();
-    }
-  } catch (e: any) {
-    if (
-      e instanceof Error &&
-      "isCrossOriginRelated" in e &&
-      "httpStatus" in e
-    ) {
-      const error = e as EndpointError;
-      if (error.httpStatus && error.httpStatus >= 400) {
-        map.dispatchEvent(new SourceLoadErrorEvent(error.httpStatus));
-        return Promise.reject(e);
-      }
-    }
-    map.dispatchEvent(new SourceLoadErrorEvent(-1));
-    return Promise.reject(e);
+export function handleEndpointError(
+  layer: TileLayer<TileSource> | VectorLayer<VectorSource>,
+  error: EndpointError
+) {
+  console.error("Error loading Endpoint", error);
+  const source = layer.getSource();
+  if (source) {
+    source.dispatchEvent(new SourceLoadErrorEvent(error));
   }
+}
+
+export function handleTileError(
+  response: Response | Error,
+  tile: Tile,
+  source: Source
+) {
+  console.error("Error loading tile", response);
+  tile.setState(TileState.ERROR);
+  source.dispatchEvent(new SourceLoadErrorEvent(response));
+}
+
+export function tileLoadErrorCatchFunction(
+  source: Source,
+  tile: Tile,
+  src: string
+) {
+  fetch(src)
+    .then((response) => {
+      if (response.ok) {
+        response
+          .blob()
+          .then((blob) => {
+            const image = (tile as ImageTile).getImage();
+            (image as HTMLImageElement).src = URL.createObjectURL(blob);
+          })
+          .catch(() => {
+            handleTileError(response, tile, source);
+          });
+      } else {
+        handleTileError(response, tile, source);
+      }
+    })
+    .catch((error) => {
+      handleTileError(error, tile, source);
+    });
 }

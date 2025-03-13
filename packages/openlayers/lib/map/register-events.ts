@@ -18,12 +18,14 @@ import Layer from "ol/layer/Layer";
 import { Pixel } from "ol/pixel";
 import type { Feature, FeatureCollection } from "geojson";
 import throttle from "lodash.throttle";
+import TileSource from "ol/source/Tile";
+import VectorSource from "ol/source/Vector";
 
 const GEOJSON = new GeoJSON();
 
 export function getFeaturesFromVectorSources(
   olMap: Map,
-  pixel: Pixel,
+  pixel: Pixel
 ): Feature[] {
   const olFeatures = olMap.getFeaturesAtPixel(pixel);
   const { features } = GEOJSON.writeFeaturesObject(olFeatures as OlFeature[]);
@@ -36,7 +38,7 @@ export function getFeaturesFromVectorSources(
 export function getGFIUrl(
   source: TileWMS | ImageWMS,
   map: Map,
-  coordinate: Coordinate,
+  coordinate: Coordinate
 ): string | null {
   const view = map.getView();
   const projection = view.getProjection();
@@ -52,7 +54,7 @@ export function getGFIUrl(
 
 export function getFeaturesFromWmsSources(
   olMap: Map,
-  coordinate: Coordinate,
+  coordinate: Coordinate
 ): Promise<Feature[]> {
   const wmsSources: (ImageWMS | TileWMS)[] = olMap
     .getLayers()
@@ -61,7 +63,7 @@ export function getFeaturesFromWmsSources(
       (layer): layer is Layer<ImageWMS | TileWMS> =>
         layer instanceof Layer &&
         (layer.getSource() instanceof TileWMS ||
-          layer.getSource() instanceof ImageWMS),
+          layer.getSource() instanceof ImageWMS)
     )
     .map((layer) => layer.getSource()!);
 
@@ -77,19 +79,19 @@ export function getFeaturesFromWmsSources(
     gfiUrls.map((url) =>
       fetch(url)
         .then((response) => response.json())
-        .then((collection: FeatureCollection) => collection.features),
-    ),
+        .then((collection: FeatureCollection) => collection.features)
+    )
   ).then((features) => features.flat());
 }
 
 const getFeaturesFromWmsSourcesThrottled = throttle(
   getFeaturesFromWmsSources,
-  250,
+  250
 );
 
 async function readFeaturesAtPixel(
   map: Map,
-  event: MapBrowserEvent<PointerEvent>,
+  event: MapBrowserEvent<PointerEvent>
 ) {
   return [
     ...getFeaturesFromVectorSources(map, event.pixel),
@@ -124,7 +126,7 @@ function registerFeatureHoverEvent(map: Map) {
 export function listen<T extends keyof MapEventsByType>(
   map: Map,
   eventType: T,
-  callback: (event: MapEventsByType[T]) => void,
+  callback: (event: MapEventsByType[T]) => void
 ) {
   switch (eventType) {
     case FeaturesClickEventType:
@@ -145,7 +147,7 @@ export function listen<T extends keyof MapEventsByType>(
       map.on("click", (event) => {
         const coordinate = toLonLat(
           event.coordinate,
-          map.getView().getProjection(),
+          map.getView().getProjection()
         ) as [number, number];
         (callback as (event: unknown) => void)({
           type: "map-click",
@@ -154,8 +156,24 @@ export function listen<T extends keyof MapEventsByType>(
       });
       break;
     case SourceLoadErrorType:
-      map.on("source-load-error" as unknown as MapObjectEventTypes, (event) => {
-        (callback as (event: unknown) => void)(event);
+      //attach event listener to all existing layers
+      map.getLayers().forEach((layer) => {
+        const source = (layer as Layer<TileSource | VectorSource>).getSource();
+        if (source) {
+          source.on(SourceLoadErrorType as any, (event: BaseEvent) => {
+            (callback as (event: unknown) => void)(event);
+          });
+        }
+      });
+      //attach event listener to future layers
+      map.getLayers().on("add", (event) => {
+        const layer = (event as any).element as Layer;
+        const source = layer.getSource();
+        if (source) {
+          source.on(SourceLoadErrorType as any, (event: BaseEvent) => {
+            (callback as (event: unknown) => void)(event);
+          });
+        }
       });
       break;
     default:

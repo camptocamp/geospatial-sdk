@@ -31,32 +31,36 @@ import {
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
 import { Tile } from "ol";
-import { getEndpoint, tileLoadErrorCatchFunction } from "./handle-errors";
+import {
+  handleEndpointError,
+  tileLoadErrorCatchFunction,
+} from "./handle-errors";
+import TileSource from "ol/source/Tile";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
-export async function createLayer(
-  layerModel: MapContextLayer,
-  map: Map,
-): Promise<Layer> {
+export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
   let layer: Layer | undefined;
   switch (type) {
     case "xyz":
-      layer = new TileLayer({
-        source: new XYZ({
+      {
+        const source = new XYZ({
           url: layerModel.url,
           attributions: layerModel.attributions,
-          tileLoadFunction: (tile: Tile, src: string) => {
-            return tileLoadErrorCatchFunction(tile, src, map);
-          },
-        }),
-      });
+        });
+        source.setTileLoadFunction(function (tile: Tile, src: string) {
+          return tileLoadErrorCatchFunction(source, tile, src);
+        });
+        layer = new TileLayer({
+          source,
+        });
+      }
       break;
     case "wms":
-      layer = new TileLayer({
-        source: new TileWMS({
+      {
+        const source = new TileWMS({
           url: removeSearchParams(layerModel.url, ["request", "service"]),
           params: {
             LAYERS: layerModel.name,
@@ -64,76 +68,104 @@ export async function createLayer(
           },
           gutter: 20,
           attributions: layerModel.attributions,
-          tileLoadFunction: (tile: Tile, src: string) => {
-            return tileLoadErrorCatchFunction(tile, src, map);
-          },
-        }),
-      });
+        });
+        source.setTileLoadFunction(function (tile: Tile, src: string) {
+          return tileLoadErrorCatchFunction(source, tile, src);
+        });
+        layer = new TileLayer({
+          source,
+        });
+      }
+
       break;
     case "wmts": {
-      const olLayer = new TileLayer({});
-      const endpoint = (await getEndpoint(
-        layerModel.url,
-        "wmts",
-        map,
-      )) as WmtsEndpoint;
-      endpoint.isReady().then(async (endpoint) => {
-        const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
-        const layer = endpoint.getLayerByName(layerName);
-        const matrixSet = layer.matrixSets[0];
-        const tileGrid = await endpoint.getOpenLayersTileGrid(layer.name);
-        if (tileGrid === null) {
-          console.warn("A WMTS tile grid could not be created", layerModel);
-          return;
-        }
-        const resourceUrl = layer.resourceLinks[0];
-        const dimensions = endpoint.getDefaultDimensions(layer.name);
-        olLayer.setSource(
-          new WMTS({
-            layer: layer.name,
-            style: layer.defaultStyle,
-            matrixSet: matrixSet.identifier,
-            format: resourceUrl.format,
-            url: resourceUrl.url,
-            requestEncoding: resourceUrl.encoding,
-            tileGrid,
-            projection: matrixSet.crs,
-            dimensions,
-            attributions: layerModel.attributions,
-          }),
-        );
+      const olLayer = new TileLayer({
+        //create empty source for dispatching events incase of error
+        // FIXME: Do not use an abstract class here. Find a way to create an default WMTS source.
+        source: new TileSource({}),
+        // new WMTS({
+        //   layer: "",
+        //   style: "",
+        //   matrixSet: "",
+        //   format: "",
+        //   url: "",
+        //   requestEncoding: "KVP",
+        //   tileGrid: new WMTSTileGrid({
+        //     extent: [0, 0, 0, 0],
+        //     origin: [0, 0],
+        //     resolutions: [1],
+        //     matrixIds: ["0"],
+        //   }),
+        //   projection: "",
+        //   dimensions: {},
+        //   attributions: [],
+        // }),
       });
+      const endpoint = new WmtsEndpoint(layerModel.url);
+      endpoint
+        .isReady()
+        .then(async (endpoint) => {
+          const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
+          const layer = endpoint.getLayerByName(layerName);
+          const matrixSet = layer.matrixSets[0];
+          const tileGrid = await endpoint.getOpenLayersTileGrid(layer.name);
+          if (tileGrid === null) {
+            console.warn("A WMTS tile grid could not be created", layerModel);
+            return;
+          }
+          const resourceUrl = layer.resourceLinks[0];
+          const dimensions = endpoint.getDefaultDimensions(layer.name);
+          olLayer.setSource(
+            new WMTS({
+              layer: layer.name,
+              style: layer.defaultStyle,
+              matrixSet: matrixSet.identifier,
+              format: resourceUrl.format,
+              url: resourceUrl.url,
+              requestEncoding: resourceUrl.encoding,
+              tileGrid,
+              projection: matrixSet.crs,
+              dimensions,
+              attributions: layerModel.attributions,
+            })
+          );
+        })
+        .catch((e) => {
+          handleEndpointError(olLayer, e);
+        });
       return olLayer;
     }
     case "wfs": {
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
+        //create empty source for dispatching events incase of error
+        source: new VectorSource(),
       });
-      const endpoint = (await getEndpoint(
-        layerModel.url,
-        "wfs",
-        map,
-      )) as WfsEndpoint;
-      endpoint.isReady().then((endpoint) => {
-        const featureType =
-          endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
-        olLayer.setSource(
-          new VectorSource({
-            format: new GeoJSON(),
-            url: function (extent) {
-              return endpoint.getFeatureUrl(featureType, {
-                maxFeatures: WFS_MAX_FEATURES,
-                asJson: true,
-                outputCrs: "EPSG:3857",
-                extent: extent as [number, number, number, number],
-                extentCrs: "EPSG:3857",
-              });
-            },
-            strategy: bboxStrategy,
-            attributions: layerModel.attributions,
-          }),
-        );
-      });
+      new WfsEndpoint(layerModel.url)
+        .isReady()
+        .then((endpoint) => {
+          const featureType =
+            endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
+          olLayer.setSource(
+            new VectorSource({
+              format: new GeoJSON(),
+              url: function (extent) {
+                return endpoint.getFeatureUrl(featureType, {
+                  maxFeatures: WFS_MAX_FEATURES,
+                  asJson: true,
+                  outputCrs: "EPSG:3857",
+                  extent: extent as [number, number, number, number],
+                  extentCrs: "EPSG:3857",
+                });
+              },
+              strategy: bboxStrategy,
+              attributions: layerModel.attributions,
+            })
+          );
+        })
+        .catch((e) => {
+          handleEndpointError(olLayer, e);
+        });
       layer = olLayer;
       break;
     }
@@ -185,7 +217,7 @@ export async function createLayer(
         if (layerModel.useTiles === "vector") {
           layerUrl = await ogcEndpoint.getVectorTilesetUrl(
             layerModel.collection,
-            layerModel.tileMatrixSet,
+            layerModel.tileMatrixSet
           );
           layer = new VectorTileLayer({
             source: new OGCVectorTile({
@@ -197,7 +229,7 @@ export async function createLayer(
         } else if (layerModel.useTiles === "map") {
           layerUrl = await ogcEndpoint.getMapTilesetUrl(
             layerModel.collection,
-            layerModel.tileMatrixSet,
+            layerModel.tileMatrixSet
           );
           layer = new TileLayer({
             source: new OGCMapTile({
@@ -209,7 +241,7 @@ export async function createLayer(
       } else {
         layerUrl = await ogcEndpoint.getCollectionItemsUrl(
           layerModel.collection,
-          layerModel.options,
+          layerModel.options
         );
         layer = new VectorLayer({
           source: new VectorSource({
@@ -279,7 +311,7 @@ export function createView(viewModel: MapContextView | null, map: Map): View {
  */
 export async function createMapFromContext(
   context: MapContext,
-  target?: string | HTMLElement,
+  target?: string | HTMLElement
 ): Promise<Map> {
   const map = new Map({
     target,
@@ -294,12 +326,12 @@ export async function createMapFromContext(
  */
 export async function resetMapFromContext(
   map: Map,
-  context: MapContext,
+  context: MapContext
 ): Promise<Map> {
   map.setView(createView(context.view, map));
   map.getLayers().clear();
   for (const layerModel of context.layers) {
-    const layer = await createLayer(layerModel, map);
+    const layer = await createLayer(layerModel);
     map.addLayer(layer);
   }
   return map;

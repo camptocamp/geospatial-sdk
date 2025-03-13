@@ -42,7 +42,7 @@ let errorCode = ref<number | null>(null)
 
 onMounted(async () => {
   map = await createMapFromContext(context, mapRoot.value)
-  listen(map, 'source-load-error', (event) => (errorCode.value = event.statusCode))
+  listen(map, 'source-load-error', (event) => (errorCode.value = event.httpStatus))
 })
 
 async function toggleLayer(layer: 'wms1' | 'wmts' | 'xyz' | 'wfs') {
