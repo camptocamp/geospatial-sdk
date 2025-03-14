@@ -164,11 +164,20 @@ export function listen<T extends keyof MapEventsByType>(
           });
         }
       });
-      //attach event listener to future layers
+      //attach event listener when layer is added
       map.getLayers().on("add", (event) => {
         const layer = (event as any).element as Layer;
         if (layer) {
           layer.on(SourceLoadErrorType as any, (event: BaseEvent) => {
+            (callback as (event: unknown) => void)(event);
+          });
+        }
+      });
+      //remove event listener when layer is removed
+      map.getLayers().on("remove", (event) => {
+        const layer = (event as any).element as Layer;
+        if (layer) {
+          layer.un(SourceLoadErrorType as any, (event: BaseEvent) => {
             (callback as (event: unknown) => void)(event);
           });
         }
