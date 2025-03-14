@@ -10,7 +10,7 @@ import TileState from "ol/TileState.js";
 
 export function handleEndpointError(
   layer: TileLayer<TileSource> | VectorLayer<VectorSource>,
-  error: EndpointError
+  error: EndpointError,
 ) {
   console.error("Error loading Endpoint", error);
   layer.dispatchEvent(new SourceLoadErrorEvent(error));
@@ -19,7 +19,7 @@ export function handleEndpointError(
 export function handleTileError(
   response: Response | Error,
   tile: Tile,
-  layer: Layer
+  layer: Layer,
 ) {
   console.error("Error loading tile", response);
   tile.setState(TileState.ERROR);
@@ -29,7 +29,7 @@ export function handleTileError(
 export function tileLoadErrorCatchFunction(
   layer: Layer,
   tile: Tile,
-  src: string
+  src: string,
 ) {
   fetch(src)
     .then((response) => {

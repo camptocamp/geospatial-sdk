@@ -72,7 +72,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           return tileLoadErrorCatchFunction(
             layer as TileLayer<TileWMS>,
             tile,
-            src
+            src,
           );
         });
         layer.setSource(source);
@@ -107,7 +107,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               projection: matrixSet.crs,
               dimensions,
               attributions: layerModel.attributions,
-            })
+            }),
           );
         })
         .catch((e) => {
@@ -138,7 +138,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               },
               strategy: bboxStrategy,
               attributions: layerModel.attributions,
-            })
+            }),
           );
         })
         .catch((e) => {
@@ -195,7 +195,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         if (layerModel.useTiles === "vector") {
           layerUrl = await ogcEndpoint.getVectorTilesetUrl(
             layerModel.collection,
-            layerModel.tileMatrixSet
+            layerModel.tileMatrixSet,
           );
           layer = new VectorTileLayer({
             source: new OGCVectorTile({
@@ -207,7 +207,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         } else if (layerModel.useTiles === "map") {
           layerUrl = await ogcEndpoint.getMapTilesetUrl(
             layerModel.collection,
-            layerModel.tileMatrixSet
+            layerModel.tileMatrixSet,
           );
           layer = new TileLayer({
             source: new OGCMapTile({
@@ -219,7 +219,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       } else {
         layerUrl = await ogcEndpoint.getCollectionItemsUrl(
           layerModel.collection,
-          layerModel.options
+          layerModel.options,
         );
         layer = new VectorLayer({
           source: new VectorSource({
@@ -289,7 +289,7 @@ export function createView(viewModel: MapContextView | null, map: Map): View {
  */
 export async function createMapFromContext(
   context: MapContext,
-  target?: string | HTMLElement
+  target?: string | HTMLElement,
 ): Promise<Map> {
   const map = new Map({
     target,
@@ -304,7 +304,7 @@ export async function createMapFromContext(
  */
 export async function resetMapFromContext(
   map: Map,
-  context: MapContext
+  context: MapContext,
 ): Promise<Map> {
   map.setView(createView(context.view, map));
   map.getLayers().clear();

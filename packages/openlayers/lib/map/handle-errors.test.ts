@@ -35,7 +35,7 @@ describe("handle-errors", () => {
       TileState.IDLE,
       "",
       null,
-      () => tileLoadErrorCatchFunction
+      () => tileLoadErrorCatchFunction,
     );
   });
 
@@ -50,7 +50,7 @@ describe("handle-errors", () => {
       const dispatchEventSpy = vi.spyOn(layer, "dispatchEvent");
       handleTileError(endpointErrorMock, tile, layer);
       expect(dispatchEventSpy).toHaveBeenCalledWith(
-        new SourceLoadErrorEvent(endpointErrorMock)
+        new SourceLoadErrorEvent(endpointErrorMock),
       );
     });
   });
@@ -64,7 +64,7 @@ describe("handle-errors", () => {
       handleTileError(response, tile, layer);
       expect(setStateEventSpy).toHaveBeenCalledWith(TileState.ERROR);
       expect(dispatchEventSpy).toHaveBeenCalledWith(
-        new SourceLoadErrorEvent(response)
+        new SourceLoadErrorEvent(response),
       );
     });
   });

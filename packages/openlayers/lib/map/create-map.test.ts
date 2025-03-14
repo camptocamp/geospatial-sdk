@@ -80,7 +80,7 @@ describe("MapContextService", () => {
         const urls = source.getUrls() ?? [];
         expect(urls.length).toBe(3);
         expect(urls[0]).toEqual(
-          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
         );
       });
       it("should set tileLoadErrorCatchFunction to handle errors", () => {
@@ -92,7 +92,7 @@ describe("MapContextService", () => {
           TileState.IDLE,
           "",
           null,
-          () => {}
+          () => {},
         );
         tileLoadFunction(tile, "http://example.com/tile");
         expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe("MapContextService", () => {
         const source = layer.getSource() as VectorSource;
         const url = source.getUrl();
         expect(url).toBe(
-          "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json"
+          "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
         );
       });
     });
@@ -156,7 +156,7 @@ describe("MapContextService", () => {
         const urls = source.getUrls() || [];
         expect(urls.length).toBe(1);
         expect(urls[0]).toBe(
-          "https://www.geograndest.fr/geoserver/region-grand-est/ows"
+          "https://www.geograndest.fr/geoserver/region-grand-est/ows",
         );
       });
       it("set WMS gutter of 20px", () => {
@@ -173,7 +173,7 @@ describe("MapContextService", () => {
           TileState.IDLE,
           "",
           null,
-          () => {}
+          () => {},
         );
         tileLoadFunction(tile, "http://example.com/tile");
         expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
@@ -209,7 +209,7 @@ describe("MapContextService", () => {
         const source = layer.getSource() as VectorSource;
         const urlLoader = source.getUrl() as Function;
         expect(urlLoader([10, 20, 30, 40])).toBe(
-          "https://www.geograndest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000"
+          "https://www.geograndest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
         );
       });
       it("should NOT call handleEndpointError", () => {
@@ -272,7 +272,7 @@ describe("MapContextService", () => {
           const features = source.getFeatures();
           expect(features.length).toBe(
             (MAP_CTX_LAYER_GEOJSON_FIXTURE.data as FeatureCollection).features
-              .length
+              .length,
           );
         });
       });
@@ -320,7 +320,7 @@ describe("MapContextService", () => {
         it("set the url to point to the file", () => {
           const source = layer.getSource() as VectorSource;
           expect(source.getUrl()).toBe(
-            (layerModel as MapContextLayerGeojson).url
+            (layerModel as MapContextLayerGeojson).url,
           );
         });
       });
