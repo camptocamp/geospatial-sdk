@@ -6,11 +6,11 @@ import WMTSTileGrid from "ol/tilegrid/WMTS";
 export class WmtsEndpoint {
   constructor(private url) {}
   isReady() {
+    if (this.url.indexOf("error") > -1) {
+      return Promise.reject(new Error("Something went wrong"));
+    }
     return Promise.resolve({
       getLayerByName: (name) => {
-        if (this.url.indexOf("error") > -1) {
-          throw new Error("Something went wrong");
-        }
         return {
           name,
           title: "SG00066",
@@ -72,11 +72,11 @@ export class WfsEndpoint {
   constructor(private url) {}
 
   isReady() {
+    if (this.url.indexOf("error") > -1) {
+      return Promise.reject(new Error("Something went wrong"));
+    }
     return Promise.resolve({
       getLayerByName: (name) => {
-        if (this.url.indexOf("error") > -1) {
-          throw new Error("Something went wrong");
-        }
         return {
           name,
           latLonBoundingBox: [1.33, 48.81, 4.3, 51.1],
