@@ -35,7 +35,6 @@ import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
 } from "./handle-errors";
-import TileSource from "ol/source/Tile";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -46,20 +45,20 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   switch (type) {
     case "xyz":
       {
+        layer = new TileLayer({});
         const source = new XYZ({
           url: layerModel.url,
           attributions: layerModel.attributions,
         });
         source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(source, tile, src);
+          return tileLoadErrorCatchFunction(layer as TileLayer<XYZ>, tile, src);
         });
-        layer = new TileLayer({
-          source,
-        });
+        layer.setSource(source);
       }
       break;
     case "wms":
       {
+        layer = new TileLayer({});
         const source = new TileWMS({
           url: removeSearchParams(layerModel.url, ["request", "service"]),
           params: {
@@ -70,37 +69,18 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           attributions: layerModel.attributions,
         });
         source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(source, tile, src);
+          return tileLoadErrorCatchFunction(
+            layer as TileLayer<TileWMS>,
+            tile,
+            src
+          );
         });
-        layer = new TileLayer({
-          source,
-        });
+        layer.setSource(source);
       }
 
       break;
     case "wmts": {
-      const olLayer = new TileLayer({
-        //create empty source for dispatching events incase of error
-        // FIXME: Do not use an abstract class here. Find a way to create an default WMTS source.
-        source: new TileSource({}),
-        // new WMTS({
-        //   layer: "",
-        //   style: "",
-        //   matrixSet: "",
-        //   format: "",
-        //   url: "",
-        //   requestEncoding: "KVP",
-        //   tileGrid: new WMTSTileGrid({
-        //     extent: [0, 0, 0, 0],
-        //     origin: [0, 0],
-        //     resolutions: [1],
-        //     matrixIds: ["0"],
-        //   }),
-        //   projection: "",
-        //   dimensions: {},
-        //   attributions: [],
-        // }),
-      });
+      const olLayer = new TileLayer({});
       const endpoint = new WmtsEndpoint(layerModel.url);
       endpoint
         .isReady()
@@ -138,8 +118,6 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     case "wfs": {
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
-        //create empty source for dispatching events incase of error
-        source: new VectorSource(),
       });
       new WfsEndpoint(layerModel.url)
         .isReady()

@@ -6,7 +6,6 @@ import { Map } from "ol";
 import { describe } from "node:test";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
 import { XYZ } from "ol/source";
 import { EndpointError } from "@camptocamp/ogc-client";
 
@@ -48,14 +47,9 @@ describe("handle-errors", () => {
         message: "FORBIDDEN",
         httpStatus: 403,
       };
-      const layer = new VectorLayer({
-        source: new VectorSource(),
-      });
-      const source = layer.getSource();
-      const dispatchEventSpy = vi.spyOn(source, "dispatchEvent");
-      if (source) {
-        handleTileError(endpointErrorMock, tile, source);
-      }
+      const layer = new VectorLayer({});
+      const dispatchEventSpy = vi.spyOn(layer, "dispatchEvent");
+      handleTileError(endpointErrorMock, tile, layer);
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         new SourceLoadErrorEvent(endpointErrorMock)
       );
@@ -65,13 +59,10 @@ describe("handle-errors", () => {
   describe("handleTileError", () => {
     it("should set tile state to ERROR and dispatch SourceLoadErrorEvent", () => {
       const response = new Response("Forbidden", { status: 403 });
-      const layer = new TileLayer({
-        source: new XYZ(),
-      });
-      const source = layer.getSource();
-      const dispatchEventSpy = vi.spyOn(source, "dispatchEvent");
+      const layer = new TileLayer({});
+      const dispatchEventSpy = vi.spyOn(layer, "dispatchEvent");
       const setStateEventSpy = vi.spyOn(tile, "setState");
-      handleTileError(response, tile, source);
+      handleTileError(response, tile, layer);
       expect(setStateEventSpy).toHaveBeenCalledWith(TileState.ERROR);
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         new SourceLoadErrorEvent(response)

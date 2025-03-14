@@ -158,9 +158,8 @@ export function listen<T extends keyof MapEventsByType>(
     case SourceLoadErrorType:
       //attach event listener to all existing layers
       map.getLayers().forEach((layer) => {
-        const source = (layer as Layer<TileSource | VectorSource>).getSource();
-        if (source) {
-          source.on(SourceLoadErrorType as any, (event: BaseEvent) => {
+        if (layer) {
+          layer.on(SourceLoadErrorType as any, (event: BaseEvent) => {
             (callback as (event: unknown) => void)(event);
           });
         }
@@ -168,9 +167,8 @@ export function listen<T extends keyof MapEventsByType>(
       //attach event listener to future layers
       map.getLayers().on("add", (event) => {
         const layer = (event as any).element as Layer;
-        const source = layer.getSource();
-        if (source) {
-          source.on(SourceLoadErrorType as any, (event: BaseEvent) => {
+        if (layer) {
+          layer.on(SourceLoadErrorType as any, (event: BaseEvent) => {
             (callback as (event: unknown) => void)(event);
           });
         }
