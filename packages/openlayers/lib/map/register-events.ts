@@ -154,15 +154,16 @@ export function listen<T extends keyof MapEventsByType>(
         });
       });
       break;
-    case SourceLoadErrorType:
+    case SourceLoadErrorType: {
+      const errorCallback = (event: BaseEvent) => {
+        (callback as (event: unknown) => void)(event);
+      };
       //attach event listener to all existing layers
       map.getLayers().forEach((layer) => {
         if (layer) {
           layer.on(
             SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            (event: BaseEvent) => {
-              (callback as (event: unknown) => void)(event);
-            },
+            errorCallback,
           );
         }
       });
@@ -172,9 +173,7 @@ export function listen<T extends keyof MapEventsByType>(
         if (layer) {
           layer.on(
             SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            (event: BaseEvent) => {
-              (callback as (event: unknown) => void)(event);
-            },
+            errorCallback,
           );
         }
       });
@@ -184,13 +183,12 @@ export function listen<T extends keyof MapEventsByType>(
         if (layer) {
           layer.un(
             SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            (event: BaseEvent) => {
-              (callback as (event: unknown) => void)(event);
-            },
+            errorCallback,
           );
         }
       });
       break;
+    }
     default:
       throw new Error(`Unrecognized event type: ${eventType}`);
   }
