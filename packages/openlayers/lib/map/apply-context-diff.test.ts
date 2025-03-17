@@ -65,7 +65,7 @@ describe("applyContextDiffToMap", () => {
   });
 
   describe("layers added", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       diff = {
         layersAdded: [
           {
@@ -81,7 +81,7 @@ describe("applyContextDiffToMap", () => {
         layersRemoved: [],
         layersReordered: [],
       };
-      applyContextDiffToMap(map, diff);
+      await applyContextDiffToMap(map, diff);
       layersArray = map.getLayers().getArray();
     });
     it("adds the layers to the map", () => {

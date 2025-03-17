@@ -24,6 +24,7 @@ import {
   MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWms,
+  SourceLoadErrorEvent,
 } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer";
 import {
@@ -35,6 +36,21 @@ import {
 import WMTS from "ol/source/WMTS";
 import { VectorTile } from "ol/source";
 import { MapboxVectorLayer } from "ol-mapbox-style";
+import {
+  handleEndpointError,
+  tileLoadErrorCatchFunction,
+} from "./handle-errors";
+import { ImageTile } from "ol";
+import TileState from "ol/TileState.js";
+
+vi.mock("./handle-errors", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    tileLoadErrorCatchFunction: vi.fn(),
+    handleEndpointError: vi.fn(),
+  };
+});
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -66,6 +82,20 @@ describe("MapContextService", () => {
         expect(urls[0]).toEqual(
           "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
         );
+      });
+      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+        const source = layer.getSource() as XYZ;
+        const tileLoadFunction = source.getTileLoadFunction();
+        expect(tileLoadFunction).toBeInstanceOf(Function);
+        const tile = new ImageTile(
+          [0, 0, 0],
+          TileState.IDLE,
+          "",
+          null,
+          () => {},
+        );
+        tileLoadFunction(tile, "http://example.com/tile");
+        expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
       });
     });
     describe("OGCAPI", () => {
@@ -134,6 +164,20 @@ describe("MapContextService", () => {
         const gutter = source["gutter_"];
         expect(gutter).toBe(20);
       });
+      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+        const source = layer.getSource() as TileWMS;
+        const tileLoadFunction = source.getTileLoadFunction();
+        expect(tileLoadFunction).toBeInstanceOf(Function);
+        const tile = new ImageTile(
+          [0, 0, 0],
+          TileState.IDLE,
+          "",
+          null,
+          () => {},
+        );
+        tileLoadFunction(tile, "http://example.com/tile");
+        expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
+      });
     });
 
     describe("WFS", () => {
@@ -167,6 +211,18 @@ describe("MapContextService", () => {
         expect(urlLoader([10, 20, 30, 40])).toBe(
           "https://www.geograndest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
         );
+      });
+      it("should NOT call handleEndpointError", () => {
+        expect(handleEndpointError).not.toHaveBeenCalled();
+      });
+    });
+    describe("WFS error", () => {
+      beforeEach(async () => {
+        layerModel = { ...MAP_CTX_LAYER_WFS_FIXTURE, url: "https://wfs/error" };
+        layer = await createLayer(layerModel);
+      });
+      it("should call handleEndpointError", () => {
+        expect(handleEndpointError).toHaveBeenCalled();
       });
     });
 
@@ -275,6 +331,9 @@ describe("MapContextService", () => {
         (layerModel = MAP_CTX_LAYER_WMTS_FIXTURE),
           (layer = await createLayer(layerModel));
       });
+      afterEach(() => {
+        vi.clearAllMocks();
+      });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
         expect(layer).toBeInstanceOf(TileLayer);
@@ -295,6 +354,24 @@ describe("MapContextService", () => {
         expect(urls).toEqual([
           "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
         ]);
+      });
+      it("should NOT call handleEndpointError", () => {
+        expect(handleEndpointError).not.toHaveBeenCalled();
+      });
+    });
+    describe("WMTS error", () => {
+      beforeEach(async () => {
+        layerModel = {
+          ...MAP_CTX_LAYER_WMTS_FIXTURE,
+          url: "https://wmts/error",
+        };
+        layer = await createLayer(layerModel);
+      });
+      it("should call handleEndpointError", () => {
+        expect(handleEndpointError).toHaveBeenCalled();
+      });
+      afterEach(() => {
+        vi.clearAllMocks();
       });
     });
 

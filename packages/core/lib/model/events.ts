@@ -1,4 +1,6 @@
+import { EndpointError } from "@camptocamp/ogc-client";
 import { Feature } from "geojson";
+import BaseEvent from "ol/events/Event";
 
 export const FeaturesClickEventType = "features-click";
 export interface FeaturesClickEvent {
@@ -22,4 +24,28 @@ export interface MapEventsByType {
   [FeaturesClickEventType]: FeaturesClickEvent;
   [FeaturesHoverEventType]: FeaturesHoverEvent;
   [MapClickEventType]: MapClickEvent;
+  [SourceLoadErrorType]: SourceLoadErrorEvent;
+}
+
+export const SourceLoadErrorType = "source-load-error";
+export class SourceLoadErrorEvent extends BaseEvent {
+  message: string;
+  httpStatus?: number;
+  constructor(error: EndpointError | Error | Response) {
+    super(SourceLoadErrorType);
+    if (error instanceof Response) {
+      this.message = error.statusText;
+      this.httpStatus = error.status;
+    } else if (
+      error instanceof Error &&
+      "isCrossOriginRelated" in error &&
+      "httpStatus" in error
+    ) {
+      const e = error as EndpointError;
+      this.message = e.message;
+      this.httpStatus = e.httpStatus;
+    } else {
+      this.message = error.message;
+    }
+  }
 }

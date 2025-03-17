@@ -4,6 +4,7 @@ import {
   FeaturesHoverEventType,
   MapClickEventType,
   MapEventsByType,
+  SourceLoadErrorType,
 } from "@geospatial-sdk/core";
 import { toLonLat } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
@@ -17,6 +18,7 @@ import Layer from "ol/layer/Layer";
 import { Pixel } from "ol/pixel";
 import type { Feature, FeatureCollection } from "geojson";
 import throttle from "lodash.throttle";
+import { BaseLayerObjectEventTypes } from "ol/layer/Base";
 
 const GEOJSON = new GeoJSON();
 
@@ -152,6 +154,41 @@ export function listen<T extends keyof MapEventsByType>(
         });
       });
       break;
+    case SourceLoadErrorType: {
+      const errorCallback = (event: BaseEvent) => {
+        (callback as (event: unknown) => void)(event);
+      };
+      //attach event listener to all existing layers
+      map.getLayers().forEach((layer) => {
+        if (layer) {
+          layer.on(
+            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
+            errorCallback,
+          );
+        }
+      });
+      //attach event listener when layer is added
+      map.getLayers().on("add", (event) => {
+        const layer = event.element as Layer;
+        if (layer) {
+          layer.on(
+            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
+            errorCallback,
+          );
+        }
+      });
+      //remove event listener when layer is removed
+      map.getLayers().on("remove", (event) => {
+        const layer = event.element as Layer;
+        if (layer) {
+          layer.un(
+            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
+            errorCallback,
+          );
+        }
+      });
+      break;
+    }
     default:
       throw new Error(`Unrecognized event type: ${eventType}`);
   }

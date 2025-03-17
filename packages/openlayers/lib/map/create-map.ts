@@ -30,6 +30,11 @@ import {
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
+import { Tile } from "ol";
+import {
+  handleEndpointError,
+  tileLoadErrorCatchFunction,
+} from "./handle-errors";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -39,16 +44,22 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   let layer: Layer | undefined;
   switch (type) {
     case "xyz":
-      layer = new TileLayer({
-        source: new XYZ({
+      {
+        layer = new TileLayer({});
+        const source = new XYZ({
           url: layerModel.url,
           attributions: layerModel.attributions,
-        }),
-      });
+        });
+        source.setTileLoadFunction(function (tile: Tile, src: string) {
+          return tileLoadErrorCatchFunction(layer as TileLayer<XYZ>, tile, src);
+        });
+        layer.setSource(source);
+      }
       break;
     case "wms":
-      layer = new TileLayer({
-        source: new TileWMS({
+      {
+        layer = new TileLayer({});
+        const source = new TileWMS({
           url: removeSearchParams(layerModel.url, ["request", "service"]),
           params: {
             LAYERS: layerModel.name,
@@ -56,64 +67,83 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           },
           gutter: 20,
           attributions: layerModel.attributions,
-        }),
-      });
+        });
+        source.setTileLoadFunction(function (tile: Tile, src: string) {
+          return tileLoadErrorCatchFunction(
+            layer as TileLayer<TileWMS>,
+            tile,
+            src,
+          );
+        });
+        layer.setSource(source);
+      }
+
       break;
     case "wmts": {
       const olLayer = new TileLayer({});
       const endpoint = new WmtsEndpoint(layerModel.url);
-      endpoint.isReady().then(async (endpoint) => {
-        const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
-        const layer = endpoint.getLayerByName(layerName);
-        const matrixSet = layer.matrixSets[0];
-        const tileGrid = await endpoint.getOpenLayersTileGrid(layer.name);
-        if (tileGrid === null) {
-          console.warn("A WMTS tile grid could not be created", layerModel);
-          return;
-        }
-        const resourceUrl = layer.resourceLinks[0];
-        const dimensions = endpoint.getDefaultDimensions(layer.name);
-        olLayer.setSource(
-          new WMTS({
-            layer: layer.name,
-            style: layer.defaultStyle,
-            matrixSet: matrixSet.identifier,
-            format: resourceUrl.format,
-            url: resourceUrl.url,
-            requestEncoding: resourceUrl.encoding,
-            tileGrid,
-            projection: matrixSet.crs,
-            dimensions,
-            attributions: layerModel.attributions,
-          }),
-        );
-      });
+      endpoint
+        .isReady()
+        .then(async (endpoint) => {
+          const layerName = endpoint.getSingleLayerName() ?? layerModel.name;
+          const layer = endpoint.getLayerByName(layerName);
+          const matrixSet = layer.matrixSets[0];
+          const tileGrid = await endpoint.getOpenLayersTileGrid(layer.name);
+          if (tileGrid === null) {
+            console.warn("A WMTS tile grid could not be created", layerModel);
+            return;
+          }
+          const resourceUrl = layer.resourceLinks[0];
+          const dimensions = endpoint.getDefaultDimensions(layer.name);
+          olLayer.setSource(
+            new WMTS({
+              layer: layer.name,
+              style: layer.defaultStyle,
+              matrixSet: matrixSet.identifier,
+              format: resourceUrl.format,
+              url: resourceUrl.url,
+              requestEncoding: resourceUrl.encoding,
+              tileGrid,
+              projection: matrixSet.crs,
+              dimensions,
+              attributions: layerModel.attributions,
+            }),
+          );
+        })
+        .catch((e) => {
+          handleEndpointError(olLayer, e);
+        });
       return olLayer;
     }
     case "wfs": {
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
       });
-      new WfsEndpoint(layerModel.url).isReady().then((endpoint) => {
-        const featureType =
-          endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
-        olLayer.setSource(
-          new VectorSource({
-            format: new GeoJSON(),
-            url: function (extent) {
-              return endpoint.getFeatureUrl(featureType, {
-                maxFeatures: WFS_MAX_FEATURES,
-                asJson: true,
-                outputCrs: "EPSG:3857",
-                extent: extent as [number, number, number, number],
-                extentCrs: "EPSG:3857",
-              });
-            },
-            strategy: bboxStrategy,
-            attributions: layerModel.attributions,
-          }),
-        );
-      });
+      new WfsEndpoint(layerModel.url)
+        .isReady()
+        .then((endpoint) => {
+          const featureType =
+            endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
+          olLayer.setSource(
+            new VectorSource({
+              format: new GeoJSON(),
+              url: function (extent) {
+                return endpoint.getFeatureUrl(featureType, {
+                  maxFeatures: WFS_MAX_FEATURES,
+                  asJson: true,
+                  outputCrs: "EPSG:3857",
+                  extent: extent as [number, number, number, number],
+                  extentCrs: "EPSG:3857",
+                });
+              },
+              strategy: bboxStrategy,
+              attributions: layerModel.attributions,
+            }),
+          );
+        })
+        .catch((e) => {
+          handleEndpointError(olLayer, e);
+        });
       layer = olLayer;
       break;
     }
