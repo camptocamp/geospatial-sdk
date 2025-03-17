@@ -18,6 +18,7 @@ import Layer from "ol/layer/Layer";
 import { Pixel } from "ol/pixel";
 import type { Feature, FeatureCollection } from "geojson";
 import throttle from "lodash.throttle";
+import { BaseLayerObjectEventTypes } from "ol/layer/Base";
 
 const GEOJSON = new GeoJSON();
 
@@ -157,27 +158,36 @@ export function listen<T extends keyof MapEventsByType>(
       //attach event listener to all existing layers
       map.getLayers().forEach((layer) => {
         if (layer) {
-          layer.on(SourceLoadErrorType as any, (event: BaseEvent) => {
-            (callback as (event: unknown) => void)(event);
-          });
+          layer.on(
+            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
+            (event: BaseEvent) => {
+              (callback as (event: unknown) => void)(event);
+            },
+          );
         }
       });
       //attach event listener when layer is added
       map.getLayers().on("add", (event) => {
         const layer = event.element as Layer;
         if (layer) {
-          layer.on(SourceLoadErrorType as any, (event: BaseEvent) => {
-            (callback as (event: unknown) => void)(event);
-          });
+          layer.on(
+            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
+            (event: BaseEvent) => {
+              (callback as (event: unknown) => void)(event);
+            },
+          );
         }
       });
       //remove event listener when layer is removed
       map.getLayers().on("remove", (event) => {
         const layer = event.element as Layer;
         if (layer) {
-          layer.un(SourceLoadErrorType as any, (event: BaseEvent) => {
-            (callback as (event: unknown) => void)(event);
-          });
+          layer.un(
+            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
+            (event: BaseEvent) => {
+              (callback as (event: unknown) => void)(event);
+            },
+          );
         }
       });
       break;
