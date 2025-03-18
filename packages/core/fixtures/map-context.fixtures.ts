@@ -79,9 +79,7 @@ export const MAP_CTX_FIXTURE = deepFreeze({
   view: MAP_CTX_VIEW_FIXTURE,
 });
 
-export const MAP_CTX_EXTENT_FIXTURE: Extent = [
-  171083.69713494915, 6246047.945419401, 476970.39956295764, 6631079.362882684,
-];
+export const MAP_CTX_EXTENT_FIXTURE: Extent = [1.5, 50.0, 4.2, 52.0];
 
 export const SAMPLE_CONTEXT: MapContext = deepFreeze({
   view: {

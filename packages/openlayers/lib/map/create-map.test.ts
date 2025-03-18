@@ -434,7 +434,7 @@ describe("MapContextService", () => {
       });
       it("set center", () => {
         const center = view.getCenter();
-        expect(center).toEqual([324027.04834895337, 6438563.654151043]);
+        expect(center).toEqual([317260.5487608297, 6623200.647707232]);
       });
       it("set zoom", () => {
         const zoom = view.getZoom();
