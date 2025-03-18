@@ -16,7 +16,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import Feature from "ol/Feature";
 import Geometry from "ol/geom/Geometry";
 import SimpleGeometry from "ol/geom/SimpleGeometry";
-import { fromLonLat } from "ol/proj";
+import { fromLonLat, transformExtent } from "ol/proj";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { defaultStyle } from "./styles";
 import VectorTileLayer from "ol/layer/VectorTile";
@@ -268,9 +268,12 @@ export function createView(viewModel: MapContextView | null, map: Map): View {
       size: map.getSize(),
     });
   } else if ("extent" in viewModel) {
-    view.fit(viewModel.extent, {
-      size: map.getSize(),
-    });
+    view.fit(
+      transformExtent(viewModel.extent, "EPSG:4326", view.getProjection()),
+      {
+        size: map.getSize(),
+      },
+    );
   } else {
     const { center: centerInViewProj, zoom } = viewModel;
     const center = centerInViewProj
