@@ -13,6 +13,7 @@ import {
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
   MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE,
+  MAP_CTX_LAYER_MVT_FIXTURE,
   MAP_CTX_LAYER_OGCAPI_FIXTURE,
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
@@ -42,6 +43,7 @@ import {
 } from "./handle-errors";
 import { ImageTile } from "ol";
 import TileState from "ol/TileState.js";
+import VectorTileLayer from "ol/layer/VectorTile";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual = await importOriginal();
@@ -392,6 +394,26 @@ describe("MapContextService", () => {
       it("create a Vector Tile source", () => {
         const source = layer.getSource();
         expect(source).toBeInstanceOf(VectorTile);
+      });
+    });
+
+    describe("MVT", () => {
+      beforeEach(async () => {
+        (layerModel = MAP_CTX_LAYER_MVT_FIXTURE),
+          (layer = await createLayer(layerModel));
+      });
+      it("create a VectorTileLayer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(VectorTileLayer);
+      });
+      it("create a VectorTile source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorTile);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(1);
+        expect(layer.get("label")).toBeUndefined();
       });
     });
   });

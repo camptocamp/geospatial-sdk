@@ -35,6 +35,7 @@ import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
 } from "./handle-errors";
+import VectorTile from "ol/source/VectorTile";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -152,6 +153,17 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         styleUrl: layerModel.styleUrl,
         accessToken: layerModel.accessToken,
       }) as unknown as Layer;
+      break;
+    }
+    case "mvt": {
+      const url = layerModel.url.replace(/\/?$/, "/{z}/{x}/{y}.pbf");
+      layer = new VectorTileLayer({
+        source: new VectorTile({
+          format: new MVT(),
+          url,
+          attributions: layerModel.attributions,
+        }),
+      });
       break;
     }
     case "geojson": {
