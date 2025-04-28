@@ -46,15 +46,30 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   switch (type) {
     case "xyz":
       {
-        layer = new TileLayer({});
-        const source = new XYZ({
-          url: layerModel.url,
-          attributions: layerModel.attributions,
-        });
-        source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(layer as TileLayer<XYZ>, tile, src);
-        });
-        layer.setSource(source);
+        if (layerModel.tileFormat === "mvt") {
+          const url = layerModel.url.replace(/\/?$/, "/{z}/{x}/{y}.pbf");
+          layer = new VectorTileLayer({
+            source: new VectorTile({
+              format: new MVT(),
+              url,
+              attributions: layerModel.attributions,
+            }),
+          });
+        } else {
+          layer = new TileLayer({});
+          const source = new XYZ({
+            url: layerModel.url,
+            attributions: layerModel.attributions,
+          });
+          source.setTileLoadFunction(function (tile: Tile, src: string) {
+            return tileLoadErrorCatchFunction(
+              layer as TileLayer<XYZ>,
+              tile,
+              src,
+            );
+          });
+          layer.setSource(source);
+        }
       }
       break;
     case "wms":
@@ -153,17 +168,6 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         styleUrl: layerModel.styleUrl,
         accessToken: layerModel.accessToken,
       }) as unknown as Layer;
-      break;
-    }
-    case "mvt": {
-      const url = layerModel.url.replace(/\/?$/, "/{z}/{x}/{y}.pbf");
-      layer = new VectorTileLayer({
-        source: new VectorTile({
-          format: new MVT(),
-          url,
-          attributions: layerModel.attributions,
-        }),
-      });
       break;
     }
     case "geojson": {

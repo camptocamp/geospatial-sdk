@@ -4,7 +4,6 @@ import {
   MapContext,
   MapContextLayerGeojson,
   MapContextLayerMapLibreStyle,
-  MapContextLayerMvt,
   MapContextLayerOgcApi,
   MapContextLayerWfs,
   MapContextLayerWms,
@@ -65,9 +64,10 @@ export const MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE: MapContextLayerMapLibreStyle
     styleUrl: "http://my.host.com/maplibre/style.json",
     accessToken: "abcdefgh",
   });
-export const MAP_CTX_LAYER_MVT_FIXTURE: MapContextLayerMvt = deepFreeze({
-  type: "mvt",
+export const MAP_CTX_LAYER_MVT_FIXTURE: MapContextLayerXyz = deepFreeze({
+  type: "xyz",
   url: "https://data.geopf.fr/tms/1.0.0/PLAN.IGN",
+  tileFormat: "mvt",
   accessToken: "abcdefgh",
 });
 

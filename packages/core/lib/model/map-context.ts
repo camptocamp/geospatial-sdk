@@ -61,15 +61,10 @@ export interface MapContextLayerMapLibreStyle extends MapContextBaseLayer {
   accessToken?: string;
 }
 
-export interface MapContextLayerMvt extends MapContextBaseLayer {
-  type: "mvt";
-  url: string;
-  accessToken?: string;
-}
-
 export interface MapContextLayerXyz extends MapContextBaseLayer {
   type: "xyz";
   url: string;
+  tileFormat?: string;
 }
 
 interface LayerGeojson extends MapContextBaseLayer {
@@ -100,8 +95,7 @@ export type MapContextLayer =
   | MapContextLayerXyz
   | MapContextLayerGeojson
   | MapContextLayerOgcApi
-  | MapContextLayerMapLibreStyle
-  | MapContextLayerMvt;
+  | MapContextLayerMapLibreStyle;
 
 export type Coordinate = [number, number];
 
