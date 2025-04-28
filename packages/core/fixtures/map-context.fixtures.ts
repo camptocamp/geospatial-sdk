@@ -66,8 +66,8 @@ export const MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE: MapContextLayerMapLibreStyle
   });
 export const MAP_CTX_LAYER_MVT_FIXTURE: MapContextLayerXyz = deepFreeze({
   type: "xyz",
-  url: "https://data.geopf.fr/tms/1.0.0/PLAN.IGN",
-  tileFormat: "mvt",
+  url: "https://data.geopf.fr/tms/1.0.0/PLAN.IGN/{z}/{x}/{y}.pbf",
+  tileFormat: "application/vnd.mapbox-vector-tile",
   accessToken: "abcdefgh",
 });
 

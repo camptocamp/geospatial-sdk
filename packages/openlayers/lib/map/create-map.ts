@@ -46,12 +46,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   switch (type) {
     case "xyz":
       {
-        if (layerModel.tileFormat === "mvt") {
-          const url = layerModel.url.replace(/\/?$/, "/{z}/{x}/{y}.pbf");
+        if (layerModel.tileFormat === "application/vnd.mapbox-vector-tile") {
           layer = new VectorTileLayer({
             source: new VectorTile({
               format: new MVT(),
-              url,
+              url: layerModel.url,
               attributions: layerModel.attributions,
             }),
           });
