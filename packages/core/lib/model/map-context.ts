@@ -64,6 +64,7 @@ export interface MapContextLayerMapLibreStyle extends MapContextBaseLayer {
 export interface MapContextLayerXyz extends MapContextBaseLayer {
   type: "xyz";
   url: string;
+  tileFormat?: "application/vnd.mapbox-vector-tile"; // If not specified, the system will automatically assume tiles are images.
 }
 
 interface LayerGeojson extends MapContextBaseLayer {

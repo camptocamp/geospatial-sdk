@@ -64,6 +64,12 @@ export const MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE: MapContextLayerMapLibreStyle
     styleUrl: "http://my.host.com/maplibre/style.json",
     accessToken: "abcdefgh",
   });
+export const MAP_CTX_LAYER_MVT_FIXTURE: MapContextLayerXyz = deepFreeze({
+  type: "xyz",
+  url: "https://data.geopf.fr/tms/1.0.0/PLAN.IGN/{z}/{x}/{y}.pbf",
+  tileFormat: "application/vnd.mapbox-vector-tile",
+  accessToken: "abcdefgh",
+});
 
 export const MAP_CTX_VIEW_FIXTURE: MapContextView = deepFreeze({
   center: [7.75, 48.6],

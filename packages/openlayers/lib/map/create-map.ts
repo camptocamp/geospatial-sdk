@@ -35,6 +35,7 @@ import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
 } from "./handle-errors";
+import VectorTile from "ol/source/VectorTile";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -45,15 +46,29 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   switch (type) {
     case "xyz":
       {
-        layer = new TileLayer({});
-        const source = new XYZ({
-          url: layerModel.url,
-          attributions: layerModel.attributions,
-        });
-        source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(layer as TileLayer<XYZ>, tile, src);
-        });
-        layer.setSource(source);
+        if (layerModel.tileFormat === "application/vnd.mapbox-vector-tile") {
+          layer = new VectorTileLayer({
+            source: new VectorTile({
+              format: new MVT(),
+              url: layerModel.url,
+              attributions: layerModel.attributions,
+            }),
+          });
+        } else {
+          layer = new TileLayer({});
+          const source = new XYZ({
+            url: layerModel.url,
+            attributions: layerModel.attributions,
+          });
+          source.setTileLoadFunction(function (tile: Tile, src: string) {
+            return tileLoadErrorCatchFunction(
+              layer as TileLayer<XYZ>,
+              tile,
+              src,
+            );
+          });
+          layer.setSource(source);
+        }
       }
       break;
     case "wms":
