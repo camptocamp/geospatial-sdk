@@ -21,8 +21,8 @@ const Layers = {
   } as MapContextLayerWms,
   wmts: {
     type: 'wmts',
-    url: 'https://map.bern.ch/arcgis/rest/services/Geoportal/Hist_Bern_1872/MapServer/WMTS/1.0.0/WMTSCapabilities.xml',
-    name: 'Geoportal_Hist_Bern_1872'
+    url: 'https://data.geopf.fr/wmts?SERVICE=WMTS&Request=GetCapabilities&Version=1.0.0',
+    name: 'BUILDINGS.BUILDINGS'
   } as MapContextLayerWmts,
   geojson: {
     type: 'geojson',
