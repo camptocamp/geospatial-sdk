@@ -113,7 +113,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           olLayer.setSource(
             new WMTS({
               layer: layer.name,
-              style: layer.defaultStyle,
+              style: layer.defaultStyle || layer.styles[0].name,
               matrixSet: matrixSet.identifier,
               format: resourceUrl.format,
               url: resourceUrl.url,
