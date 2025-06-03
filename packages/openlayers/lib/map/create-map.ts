@@ -46,28 +46,25 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   switch (type) {
     case "xyz":
       {
+        const tileLoadFunction = (tile: Tile, src: string) =>
+          tileLoadErrorCatchFunction(layer as TileLayer<XYZ>, tile, src);
         if (layerModel.tileFormat === "application/vnd.mapbox-vector-tile") {
           layer = new VectorTileLayer({
             source: new VectorTile({
               format: new MVT(),
               url: layerModel.url,
               attributions: layerModel.attributions,
+              tileLoadFunction,
             }),
           });
         } else {
-          layer = new TileLayer({});
-          const source = new XYZ({
-            url: layerModel.url,
-            attributions: layerModel.attributions,
+          layer = new TileLayer({
+            source: new XYZ({
+              url: layerModel.url,
+              attributions: layerModel.attributions,
+              tileLoadFunction,
+            }),
           });
-          source.setTileLoadFunction(function (tile: Tile, src: string) {
-            return tileLoadErrorCatchFunction(
-              layer as TileLayer<XYZ>,
-              tile,
-              src,
-            );
-          });
-          layer.setSource(source);
         }
       }
       break;

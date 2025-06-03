@@ -25,7 +25,6 @@ import {
   MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWms,
-  SourceLoadErrorEvent,
 } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer";
 import {
@@ -44,6 +43,7 @@ import {
 import { ImageTile } from "ol";
 import TileState from "ol/TileState.js";
 import VectorTileLayer from "ol/layer/VectorTile";
+import MVT from "ol/format/MVT";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual = await importOriginal();
@@ -414,6 +414,16 @@ describe("MapContextService", () => {
         expect(layer.getVisible()).toBe(true);
         expect(layer.getOpacity()).toBe(1);
         expect(layer.get("label")).toBeUndefined();
+      });
+      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+        const source = layer.getSource() as VectorTile;
+        const tileLoadFunction = source.getTileLoadFunction();
+        expect(tileLoadFunction).toBeInstanceOf(Function);
+        const tile = new VectorTile({
+          format: new MVT(),
+        });
+        tileLoadFunction(tile, "http://example.com/tms/tile");
+        expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
       });
     });
   });
