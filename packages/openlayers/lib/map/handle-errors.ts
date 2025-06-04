@@ -1,11 +1,12 @@
 import { EndpointError } from "@camptocamp/ogc-client";
 import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
-import { ImageTile, Tile } from "ol";
+import { ImageTile, Tile, VectorTile } from "ol";
 import { Layer } from "ol/layer";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import TileSource from "ol/source/Tile";
 import VectorSource from "ol/source/Vector";
+import { defaultLoadFunction } from "ol/source/VectorTile";
 import TileState from "ol/TileState.js";
 
 export function handleEndpointError(
@@ -26,7 +27,20 @@ export function handleTileError(
   layer.dispatchEvent(new SourceLoadErrorEvent(response));
 }
 
-export function tileLoadErrorCatchFunction(
+export function vectorTileLoadErrorCatchFunction(
+  layer: Layer,
+  tile: Tile,
+  url: string,
+) {
+  try {
+    // TODO: WIP override?
+    defaultLoadFunction(<VectorTile>tile, url);
+  } catch (e) {
+    handleTileError(<Error>e, tile, layer);
+  }
+}
+
+export function imageTileLoadErrorCatchFunction(
   layer: Layer,
   tile: Tile,
   src: string,
