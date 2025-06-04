@@ -38,7 +38,7 @@ import { VectorTile } from "ol/source";
 import { MapboxVectorLayer } from "ol-mapbox-style";
 import {
   handleEndpointError,
-  tileLoadErrorCatchFunction,
+  imageTileLoadErrorCatchFunction,
 } from "./handle-errors";
 import { ImageTile } from "ol";
 import TileState from "ol/TileState.js";
@@ -49,7 +49,7 @@ vi.mock("./handle-errors", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    tileLoadErrorCatchFunction: vi.fn(),
+    imageTileLoadErrorCatchFunction: vi.fn(),
     handleEndpointError: vi.fn(),
   };
 });
@@ -85,7 +85,7 @@ describe("MapContextService", () => {
           "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
         );
       });
-      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+      it("should set imageTileLoadErrorCatchFunction to handle errors", () => {
         const source = layer.getSource() as XYZ;
         const tileLoadFunction = source.getTileLoadFunction();
         expect(tileLoadFunction).toBeInstanceOf(Function);
@@ -97,7 +97,7 @@ describe("MapContextService", () => {
           () => {},
         );
         tileLoadFunction(tile, "http://example.com/tile");
-        expect(tileLoadErrorCatchFunction).toHaveBeenCalledWith(
+        expect(imageTileLoadErrorCatchFunction).toHaveBeenCalledWith(
           layer,
           tile,
           "http://example.com/tile",
@@ -170,7 +170,7 @@ describe("MapContextService", () => {
         const gutter = source["gutter_"];
         expect(gutter).toBe(20);
       });
-      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+      it("should set imageTileLoadErrorCatchFunction to handle errors", () => {
         const source = layer.getSource() as TileWMS;
         const tileLoadFunction = source.getTileLoadFunction();
         expect(tileLoadFunction).toBeInstanceOf(Function);
@@ -182,7 +182,7 @@ describe("MapContextService", () => {
           () => {},
         );
         tileLoadFunction(tile, "http://example.com/tile");
-        expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
+        expect(imageTileLoadErrorCatchFunction).toHaveBeenCalled();
       });
     });
 
@@ -419,7 +419,7 @@ describe("MapContextService", () => {
         expect(layer.getOpacity()).toBe(1);
         expect(layer.get("label")).toBeUndefined();
       });
-      it("should set tileLoadErrorCatchFunction to handle errors", () => {
+      it("should set imageTileLoadErrorCatchFunction to handle errors", () => {
         const source = layer.getSource() as VectorTile;
         const tileLoadFunction = source.getTileLoadFunction();
         expect(tileLoadFunction).toBeInstanceOf(Function);
@@ -427,7 +427,7 @@ describe("MapContextService", () => {
           format: new MVT(),
         });
         tileLoadFunction(tile, "http://example.com/tms/tile");
-        expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
+        expect(imageTileLoadErrorCatchFunction).toHaveBeenCalled();
       });
     });
   });

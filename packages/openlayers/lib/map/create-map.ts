@@ -33,7 +33,8 @@ import { MapboxVectorLayer } from "ol-mapbox-style";
 import { Tile } from "ol";
 import {
   handleEndpointError,
-  tileLoadErrorCatchFunction,
+  imageTileLoadErrorCatchFunction,
+  vectorTileLoadErrorCatchFunction,
 } from "./handle-errors";
 import VectorTile from "ol/source/VectorTile";
 
@@ -56,6 +57,10 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               attributions: layerModel.attributions,
             }),
           });
+          const source = <VectorTile>layer.getSource();
+          source.setTileLoadFunction((tile: Tile, src: string) =>
+            vectorTileLoadErrorCatchFunction(<VectorTileLayer>layer, tile, src),
+          );
         } else {
           layer = new TileLayer({
             source: new XYZ({
@@ -63,12 +68,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               attributions: layerModel.attributions,
             }),
           });
+          const source = <XYZ>layer.getSource();
+          source.setTileLoadFunction((tile: Tile, src: string) =>
+            imageTileLoadErrorCatchFunction(<Layer>layer, tile, src),
+          );
         }
-
-        const source = layer.getSource();
-        (<TileSource>source).setTileLoadFunction((tile: Tile, src: string) =>
-          tileLoadErrorCatchFunction(layer as TileLayer<TileSource>, tile, src),
-        );
       }
       break;
     case "wms":
@@ -84,7 +88,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           attributions: layerModel.attributions,
         });
         source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(
+          return imageTileLoadErrorCatchFunction(
             layer as TileLayer<TileWMS>,
             tile,
             src,
