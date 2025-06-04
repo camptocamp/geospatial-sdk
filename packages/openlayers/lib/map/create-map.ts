@@ -40,21 +40,20 @@ import VectorTile from "ol/source/VectorTile";
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
+type TileSource = VectorTile | XYZ;
+
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
   let layer: Layer | undefined;
   switch (type) {
     case "xyz":
       {
-        const tileLoadFunction = (tile: Tile, src: string) =>
-          tileLoadErrorCatchFunction(layer as TileLayer<XYZ>, tile, src);
         if (layerModel.tileFormat === "application/vnd.mapbox-vector-tile") {
           layer = new VectorTileLayer({
             source: new VectorTile({
               format: new MVT(),
               url: layerModel.url,
               attributions: layerModel.attributions,
-              tileLoadFunction,
             }),
           });
         } else {
@@ -62,10 +61,14 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             source: new XYZ({
               url: layerModel.url,
               attributions: layerModel.attributions,
-              tileLoadFunction,
             }),
           });
         }
+
+        const source = layer.getSource();
+        (<TileSource>source).setTileLoadFunction((tile: Tile, src: string) =>
+          tileLoadErrorCatchFunction(layer as TileLayer<TileSource>, tile, src),
+        );
       }
       break;
     case "wms":

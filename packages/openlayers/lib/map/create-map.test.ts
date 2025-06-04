@@ -97,7 +97,11 @@ describe("MapContextService", () => {
           () => {},
         );
         tileLoadFunction(tile, "http://example.com/tile");
-        expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
+        expect(tileLoadErrorCatchFunction).toHaveBeenCalledWith(
+          layer,
+          tile,
+          "http://example.com/tile",
+        );
       });
     });
     describe("OGCAPI", () => {
