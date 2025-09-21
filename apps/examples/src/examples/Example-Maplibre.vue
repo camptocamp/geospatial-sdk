@@ -18,17 +18,16 @@ const Layers = {
 }
 
 const mapRoot = ref<HTMLElement>()
-let map: Map
 let context = {
   view: {
-    zoom: 5,
-    center: [6, 48.5]
+    zoom: 10,
+    center: [3.1626248124366176, 50.67829080457065]
   },
   layers: [Layers.wms, Layers.geojson],
 }
 
 onMounted(async () => {
-  map = await createMapFromContext(context, mapRoot.value)
+  await createMapFromContext(context, mapRoot.value)
 })
 
 </script>

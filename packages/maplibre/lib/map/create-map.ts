@@ -4,14 +4,16 @@ import {
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 import { Map, StyleSpecification } from "maplibre-gl";
-import { getGeometryTypes } from "../maplibre.helpers";
+import {
+  createDefaultLayersForGeometries,
+  getGeometryTypes,
+} from "../maplibre.helpers";
 import { Feature, FeatureCollection } from "geojson";
 
 export async function createLayer(
   layerModel: MapContextLayer,
 ): Promise<StyleSpecification> {
   const { type } = layerModel;
-  console.log(`Creating layer of type ${type}`, layerModel);
   switch (type) {
     case "wms": {
       const url = new URL(layerModel.url);
@@ -56,20 +58,13 @@ export async function createLayer(
 
       let geojson;
       if (layerModel.url !== undefined) {
-        const response = await fetch(layerModel.url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        });
-
+        const response = await fetch(layerModel.url);
         if (!response.ok) {
           throw new Error(
             `[Error] Maplibre.util:: ${response.status} ${response.statusText}`,
           );
         }
-        geojson = await response.json().catch((e) => console.log(e));
+        geojson = await response.json();
       } else {
         geojson = layerModel.data;
         if (typeof geojson === "string") {
@@ -83,53 +78,26 @@ export async function createLayer(
             } as FeatureCollection;
           }
         }
-
-        const geometryTypes = getGeometryTypes(geojson.features as Feature[]);
-        const layers = [];
-        if (
-          geometryTypes.includes("polygon") ||
-          geometryTypes.includes("multipolygon")
-        ) {
-          layers.push({
-            id: `${layerId}-fill`,
-            type: "fill",
-            source: sourceId,
-            paint: {
-              "fill-color": "orange",
-              "fill-opacity": 0.5,
-            },
-          });
-        }
-        if (
-          geometryTypes.includes("point") ||
-          geometryTypes.includes("multipoint")
-        ) {
-          layers.push({
-            id: `${layerId}-circle`,
-            type: "circle",
-            source: sourceId,
-            paint: {
-              "circle-radius": 6,
-              "circle-color": "blue",
-              "circle-stroke-width": 1,
-              "circle-stroke-color": "#0f172b",
-            },
-          });
-        }
-
-        const styleDiff = {
-          sources: {
-            [sourceId]: {
-              type: "geojson",
-              data: geojson,
-            },
-          },
-          layers,
-        } as StyleSpecification;
-        return styleDiff;
       }
+      const geometryTypes = getGeometryTypes(geojson.features as Feature[]);
+      const layers = createDefaultLayersForGeometries(
+        layerId,
+        sourceId,
+        geometryTypes,
+      );
+      const styleDiff = {
+        sources: {
+          [sourceId]: {
+            type: "geojson",
+            data: geojson,
+          },
+        },
+        layers,
+      } as StyleSpecification;
+      return styleDiff;
     }
   }
+
   return {} as StyleSpecification;
 }
 
