@@ -11,9 +11,11 @@ import ExampleZoomToLayerRaw from '@/examples/Example-ZoomToLayer.vue?raw'
 import ExampleMapEvents from '@/examples/Example-MapEvents.vue'
 import ExampleMapEventsRaw from '@/examples/Example-MapEvents.vue?raw'
 import ExampleCustomElementsHtml from '@/examples/Example-CustomElements.html?raw'
+import ExampleMaplibreRaw from '@/examples/Example-Maplibre.vue?raw'
 import { onMounted, ref } from 'vue'
 import hljs from 'highlight.js'
 import '@geospatial-sdk/elements'
+import ExampleMaplibre from '@/examples/Example-Maplibre.vue'
 
 function loadHtmlExample(html: string, root: HTMLElement) {
   const template = document.createElement('template')
@@ -84,6 +86,13 @@ onMounted(() => {
       :source-code="ExampleCustomElementsHtml"
     >
       <div class="w-full h-full" ref="example06_root"></div>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 7: Maplibre"
+      example-id="example07"
+      :source-code="ExampleMaplibreRaw"
+    >
+     <ExampleMaplibre></ExampleMaplibre>
     </ExampleContainer>
   </div>
 </template>
