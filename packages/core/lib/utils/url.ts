@@ -18,3 +18,19 @@ export function removeSearchParams(
   toDelete.map((param) => urlObj.searchParams.delete(param));
   return urlObj.toString();
 }
+
+export function getSearchParams(
+  url: string,
+  paramNames: string[],
+): URLSearchParams {
+  const toDelete = [];
+  const urlObj = new URL(url, window.location.toString());
+  const keysLower = paramNames.map((p) => p.toLowerCase());
+  for (const param of urlObj.searchParams.keys()) {
+    if (keysLower.indexOf(param.toLowerCase()) > -1) {
+      toDelete.push(param);
+    }
+  }
+  toDelete.map((param) => urlObj.searchParams.delete(param));
+  return urlObj.searchParams;
+}

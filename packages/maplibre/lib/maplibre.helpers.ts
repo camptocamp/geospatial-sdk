@@ -1,5 +1,5 @@
-import { Feature, Geometry } from "geojson";
-import { LayerSpecification } from "maplibre-gl";
+import { Feature, FeatureCollection, Geometry } from "geojson";
+import { LayerSpecification, StyleSpecification } from "maplibre-gl";
 import {
   CircleLayerSpecification,
   FillLayerSpecification,
@@ -85,4 +85,29 @@ export function createDefaultLineLayer(
       "line-width": 3,
     },
   };
+}
+
+export function createStyleFromGeoJson(
+  datasetId: string,
+  geojson: FeatureCollection,
+): StyleSpecification {
+  datasetId = datasetId || Math.floor(Math.random() * 1000000).toString();
+  const sourceId = `source-${datasetId}`;
+  const layerId = `layer-${datasetId}`;
+  const geometryTypes = getGeometryTypes(geojson!.features as Feature[]);
+  const layers = createDefaultLayersForGeometries(
+    layerId,
+    sourceId,
+    geometryTypes,
+  );
+  const styleDiff = {
+    sources: {
+      [sourceId]: {
+        type: "geojson",
+        data: geojson,
+      },
+    },
+    layers,
+  } as StyleSpecification;
+  return styleDiff;
 }

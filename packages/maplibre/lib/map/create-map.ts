@@ -1,43 +1,50 @@
 import {
   MapContext,
   MapContextLayer,
+  removeSearchParams,
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
+
 import { Map, StyleSpecification } from "maplibre-gl";
+import { createStyleFromGeoJson } from "../maplibre.helpers";
+import { FeatureCollection } from "geojson";
 import {
-  createDefaultLayersForGeometries,
-  getGeometryTypes,
-} from "../maplibre.helpers";
-import { Feature, FeatureCollection } from "geojson";
+  OgcApiEndpoint,
+  WfsEndpoint,
+  WmsEndpoint,
+} from "@camptocamp/ogc-client";
+
+const featureCollection: FeatureCollection = {
+  type: "FeatureCollection",
+  features: [],
+};
 
 export async function createLayer(
   layerModel: MapContextLayer,
 ): Promise<StyleSpecification> {
   const { type } = layerModel;
+
   switch (type) {
     case "wms": {
-      const url = new URL(layerModel.url);
-      const version = url.searchParams.get("version") || "1.3.0";
-      const crsParam = version === "1.3.0" ? "CRS" : "SRS";
-
-      url.searchParams.set("service", "WMS");
-      url.searchParams.set("request", "GetMap");
-      url.searchParams.set(crsParam, "EPSG:3857");
-      url.searchParams.set("width", "256");
-      url.searchParams.set("height", "256");
-      url.searchParams.set("format", "image/png");
-      url.searchParams.set("transparent", "true");
-      url.searchParams.set("layers", layerModel.name);
-      url.searchParams.set("styles", "");
-
       const sourceId = `source-${layerModel.name}`;
       const layerId = `layer-${layerModel.name}`;
+
+      const endpoint = await new WmsEndpoint(layerModel.url).isReady();
+      let url = endpoint.getMapUrl([layerModel.name], {
+        widthPx: 256,
+        heightPx: 256,
+        extent: [0, 0, 0, 0], // will be replaced by maplibre-gl
+        outputFormat: "image/png",
+        crs: "EPSG:3857",
+      });
+      url = removeSearchParams(url, ["bbox"]);
+      url = `${url.toString()}&bbox={bbox-epsg-3857}`;
 
       const styleDiff = {
         sources: {
           [sourceId]: {
             type: "raster",
-            tiles: [`${url.toString()}&bbox={bbox-epsg-3857}`],
+            tiles: [url],
             tileSize: 256,
           },
         },
@@ -52,52 +59,60 @@ export async function createLayer(
       } as StyleSpecification;
       return styleDiff;
     }
+    case "wfs": {
+      const entryPoint = new WfsEndpoint(layerModel.url);
+      await entryPoint.isReady();
+      const url = entryPoint.getFeatureUrl(layerModel.featureType, {
+        asJson: true,
+        outputCrs: "EPSG:4326",
+      });
+      const geojson = await fetchGeoJson(url);
+      return createStyleFromGeoJson(layerModel.featureType, geojson!);
+    }
     case "geojson": {
-      const sourceId = `source-${layerModel.id}`;
-      const layerId = `layer-${layerModel.id}`;
-
       let geojson;
       if (layerModel.url !== undefined) {
-        const response = await fetch(layerModel.url);
-        if (!response.ok) {
-          throw new Error(
-            `[Error] Maplibre.util:: ${response.status} ${response.statusText}`,
-          );
-        }
-        geojson = await response.json();
+        geojson = await fetchGeoJson(layerModel.url).catch(
+          () => featureCollection,
+        );
       } else {
-        geojson = layerModel.data;
-        if (typeof geojson === "string") {
+        const data = layerModel.data;
+        if (typeof data === "string") {
           try {
-            geojson = JSON.parse(geojson) as FeatureCollection;
+            geojson = JSON.parse(data) as FeatureCollection;
           } catch (e) {
             console.warn("A layer could not be created", layerModel, e);
-            geojson = {
-              type: "FeatureCollection",
-              features: [],
-            } as FeatureCollection;
+            geojson = featureCollection;
           }
         }
       }
-      const geometryTypes = getGeometryTypes(geojson.features as Feature[]);
-      const layers = createDefaultLayersForGeometries(
-        layerId,
-        sourceId,
-        geometryTypes,
-      );
-      const styleDiff = {
-        sources: {
-          [sourceId]: {
-            type: "geojson",
-            data: geojson,
-          },
-        },
-        layers,
-      } as StyleSpecification;
-      return styleDiff;
+      return createStyleFromGeoJson(layerModel.id?.toString() || "", geojson!);
+    }
+    case "ogcapi": {
+      const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
+      let layerUrl: string;
+      if (layerModel.useTiles) {
+        if (layerModel.useTiles === "vector") {
+        } else if (layerModel.useTiles === "map") {
+        }
+      } else {
+        layerUrl = await ogcEndpoint.getCollectionItemsUrl(
+          layerModel.collection,
+          { ...layerModel.options, asJson: true },
+        );
+        console.log("Loading OGC API - Features from", layerUrl);
+        const geojson = await fetchGeoJson(layerUrl).catch(
+          () => featureCollection,
+        );
+        return createStyleFromGeoJson(layerModel.collection, geojson!);
+      }
+      break;
+    }
+    case "maplibre-style": {
+      const style = await fetch(layerModel.styleUrl).then((res) => res.json());
+      return style;
     }
   }
-
   return {} as StyleSpecification;
 }
 
@@ -130,11 +145,26 @@ export async function resetMapFromContext(
 
   for (const layerModel of context.layers) {
     const styleDiff = await createLayer(layerModel);
-    map.addSource(
-      Object.keys(styleDiff.sources)[0],
-      Object.values(styleDiff.sources)[0],
+    if (styleDiff.glyphs) {
+      map.setGlyphs(styleDiff.glyphs);
+    }
+    if (styleDiff.sprite) {
+      map.setSprite(styleDiff.sprite as string);
+    }
+    Object.keys(styleDiff.sources).forEach((sourceId) =>
+      map.addSource(sourceId, styleDiff.sources[sourceId]),
     );
-    map.addLayer(styleDiff.layers[0]);
+    styleDiff.layers.map((layer) => map.addLayer(layer));
   }
   return map;
+}
+
+async function fetchGeoJson(url: string): Promise<FeatureCollection> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `[Error] Maplibre.util:: ${response.status} ${response.statusText}`,
+    );
+  }
+  return await response.json();
 }
