@@ -1,10 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import WMTSTileGrid from "ol/tilegrid/WMTS";
-
-export class WmtsEndpoint {
+export class WmsEndpoint {
   constructor(private url) {}
+
   isReady() {
     if (this.url.indexOf("error") > -1) {
       return Promise.reject(new Error("Something went wrong"));
@@ -13,56 +12,11 @@ export class WmtsEndpoint {
       getLayerByName: (name) => {
         return {
           name,
-          title: "SG00066",
-          abstract: "",
-          styles: [
-            {
-              title: "Default Style",
-              name: "default",
-            },
-          ],
-          resourceLinks: [
-            {
-              format: "image/jpgpng",
-              url: "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
-              encoding: "REST",
-            },
-            {
-              encoding: "KVP",
-              url: "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest?",
-              format: "image/jpgpng",
-            },
-          ],
-          matrixSets: [
-            {
-              identifier: "default028mm",
-              crs: "urn:ogc:def:crs:EPSG::2056",
-              limits: [],
-            },
-          ],
-          defaultStyle: "default",
-          latLonBoundingBox: [
-            8.73730142520394, 46.847419134101315, 9.748085959426389,
-            47.53980655003323,
-          ],
-          dimensions: [],
+          latLonBoundingBox: [1.33, 48.81, 4.3, 51.1],
         };
       },
-      getOpenLayersTileGrid() {
-        return new WMTSTileGrid({
-          extent: [
-            8.73730142520394, 46.847419134101315, 9.748085959426389,
-            47.53980655003323,
-          ],
-          origin: [8.73730142520394, 46.847419134101315],
-          resolutions: [1000, 500, 250, 100, 50],
-        });
-      },
-      getDefaultDimensions: () => {
-        return [];
-      },
-      getSingleLayerName: () => {
-        return null;
+      getMapUrl: () => {
+        return "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&bbox=0%2C0%2C0%2C0";
       },
     });
   }

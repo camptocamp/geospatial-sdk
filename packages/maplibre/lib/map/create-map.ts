@@ -7,14 +7,14 @@ import {
 
 import { Map, StyleSpecification } from "maplibre-gl";
 import { createStyleFromGeoJson } from "../maplibre.helpers";
-import { FeatureCollection } from "geojson";
+import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
   WfsEndpoint,
   WmsEndpoint,
 } from "@camptocamp/ogc-client";
 
-const featureCollection: FeatureCollection = {
+const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
   features: [],
 };
@@ -60,8 +60,7 @@ export async function createLayer(
       return styleDiff;
     }
     case "wfs": {
-      const entryPoint = new WfsEndpoint(layerModel.url);
-      await entryPoint.isReady();
+      const entryPoint = await new WfsEndpoint(layerModel.url).isReady();
       const url = entryPoint.getFeatureUrl(layerModel.featureType, {
         asJson: true,
         outputCrs: "EPSG:4326",
@@ -84,9 +83,11 @@ export async function createLayer(
             console.warn("A layer could not be created", layerModel, e);
             geojson = featureCollection;
           }
+        } else {
+          geojson = data;
         }
       }
-      return createStyleFromGeoJson(layerModel.id?.toString() || "", geojson!);
+      return createStyleFromGeoJson(layerModel.id?.toString() || "", geojson);
     }
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
@@ -104,7 +105,7 @@ export async function createLayer(
         const geojson = await fetchGeoJson(layerUrl).catch(
           () => featureCollection,
         );
-        return createStyleFromGeoJson(layerModel.collection, geojson!);
+        return createStyleFromGeoJson(layerModel.collection, geojson);
       }
       break;
     }

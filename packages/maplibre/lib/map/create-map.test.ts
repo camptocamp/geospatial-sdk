@@ -1,6 +1,8 @@
 import {
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
+  MAP_CTX_LAYER_OGCAPI_FIXTURE,
+  MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures";
 import { MapContextLayer } from "@geospatial-sdk/core";
@@ -10,7 +12,11 @@ import {
   FillLayerSpecification,
   RasterLayerSpecification,
 } from "@maplibre/maplibre-gl-style-spec";
-import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "@geospatial-sdk/core/fixtures/geojson.fixtures";
+import {
+  FEATURE_COLLECTION_LINESTRING_FIXTURE_4326,
+  FEATURE_COLLECTION_POINT_FIXTURE_4326,
+  FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
+} from "@geospatial-sdk/core/fixtures/geojson.fixtures";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -27,7 +33,12 @@ describe("MapContextService", () => {
       it("create a source", () => {
         const sourcesIds = Object.keys(style.sources);
         expect(sourcesIds.length).toBe(1);
-        expect(sourcesIds[0]).toBe("source-commune_actuelle_3857");
+        const id = sourcesIds[0];
+        const source = style.sources[id];
+        expect(id).toBe("source-commune_actuelle_3857");
+        expect(source.tiles).toEqual([
+          "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&bbox={bbox-epsg-3857}",
+        ]);
       });
       it("create a layer", () => {
         expect(style.layers).toBeTruthy();
@@ -44,6 +55,7 @@ describe("MapContextService", () => {
         beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
           style = await createLayer(layerModel);
+          Math.random = vi.fn(() => 0.027404);
         });
         it("create a VectorLayer", () => {
           expect(style).toBeTruthy();
@@ -51,10 +63,15 @@ describe("MapContextService", () => {
         it("create a source", () => {
           const sourcesIds = Object.keys(style.sources);
           expect(sourcesIds.length).toBe(1);
+          expect(sourcesIds[0]).toBe("source-27404");
         });
         it("create a layer", () => {
           expect(style.layers).toBeTruthy();
           expect(style.layers.length).toBe(1);
+
+          const layer = style.layers[0] as RasterLayerSpecification;
+          expect(layer.id).toBe("layer-27404-fill");
+          expect(layer.source).toBe("source-27404");
         });
 
         it("set correct source properties", () => {
@@ -123,7 +140,7 @@ describe("MapContextService", () => {
           expect(style).toEqual({
             layers: [],
             sources: {
-              "source-undefined": {
+              "source-27404": {
                 data: {
                   features: [],
                   type: "FeatureCollection",
@@ -171,6 +188,101 @@ describe("MapContextService", () => {
             expect(layer.paint["fill-opacity"]).toBe(0.6);
           });
         });
+      });
+    });
+    describe("WFS", () => {
+      beforeEach(async () => {
+        (layerModel = MAP_CTX_LAYER_WFS_FIXTURE),
+          (style = await createLayer(layerModel));
+      });
+      it("create a vector layer", () => {
+        expect(style).toBeTruthy();
+      });
+      it("create a source", () => {
+        const sourcesIds = Object.keys(style.sources);
+        expect(sourcesIds.length).toBe(1);
+        const id = sourcesIds[0];
+        const source = style.sources[id];
+        expect(id).toBe("source-ms:commune_actuelle_3857");
+        expect(source.data).toEqual(FEATURE_COLLECTION_POLYGON_FIXTURE_4326);
+      });
+      it("create a layer", () => {
+        expect(style.layers).toBeTruthy();
+        expect(style.layers.length).toBe(1);
+        const layer = style.layers[0] as RasterLayerSpecification;
+        expect(layer.id).toBe("layer-ms:commune_actuelle_3857-fill");
+        expect(layer.source).toBe("source-ms:commune_actuelle_3857");
+      });
+
+      describe("when data type is Poylgon", () => {
+        it("set a line paint", () => {
+          const layer = style.layers[0] as RasterLayerSpecification;
+          expect(layer.type).toBe(`fill`);
+        });
+      });
+      describe("when data type is Point", () => {
+        beforeEach(async () => {
+          global.fetch = vi.fn(() =>
+            Promise.resolve({
+              ok: true,
+              json: () =>
+                Promise.resolve(FEATURE_COLLECTION_POINT_FIXTURE_4326),
+            }),
+          );
+          style = await createLayer(layerModel);
+        });
+        it("set a point paint", () => {
+          const layer = style.layers[0] as RasterLayerSpecification;
+          expect(layer.type).toBe(`circle`);
+        });
+      });
+      describe("when data type is LineString", () => {
+        beforeEach(async () => {
+          global.fetch = vi.fn(() =>
+            Promise.resolve({
+              ok: true,
+              json: () =>
+                Promise.resolve(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326),
+            }),
+          );
+          style = await createLayer(layerModel);
+        });
+        it("set a line paint", () => {
+          const layer = style.layers[0] as RasterLayerSpecification;
+          expect(layer.type).toBe(`line`);
+        });
+      });
+    });
+    describe("OGCAPI", () => {
+      beforeEach(async () => {
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326),
+          }),
+        );
+
+        (layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE),
+          (style = await createLayer(layerModel));
+      });
+      it("create a vector layer", () => {
+        expect(style).toBeTruthy();
+      });
+      it("create a source", () => {
+        const sourcesIds = Object.keys(style.sources);
+        expect(sourcesIds.length).toBe(1);
+        const id = sourcesIds[0];
+        const source = style.sources[id];
+        expect(id).toBe("source-airports");
+        expect(source.data).toEqual(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326);
+      });
+      it("create a layer", () => {
+        expect(style.layers).toBeTruthy();
+        expect(style.layers.length).toBe(1);
+        const layer = style.layers[0] as RasterLayerSpecification;
+        expect(layer.id).toBe("layer-airports-line");
+        expect(layer.source).toBe("source-airports");
       });
     });
   });

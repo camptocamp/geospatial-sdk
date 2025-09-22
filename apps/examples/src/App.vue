@@ -46,48 +46,6 @@ onMounted(() => {
       >
     </p>
     <ExampleContainer
-      example-name="Example 1: simple map"
-      example-id="example01"
-      :source-code="ExampleSimpleMapRaw"
-    >
-      <ExampleSimpleMap></ExampleSimpleMap>
-    </ExampleContainer>
-    <ExampleContainer
-      example-name="Example 2: add and remove layers"
-      example-id="example02"
-      :source-code="ExampleMapAddRemoveLayersRaw"
-    >
-      <ExampleMapAddRemoveLayers></ExampleMapAddRemoveLayers>
-    </ExampleContainer>
-    <ExampleContainer
-      example-name="Example 3: zoom to layers"
-      example-id="example03"
-      :source-code="ExampleZoomToLayerRaw"
-    >
-      <ExampleZoomToLayer></ExampleZoomToLayer>
-    </ExampleContainer>
-    <ExampleContainer
-      example-name="Example 4: map events"
-      example-id="example04"
-      :source-code="ExampleMapEventsRaw"
-    >
-      <ExampleMapEvents></ExampleMapEvents>
-    </ExampleContainer>
-    <ExampleContainer
-      example-name="Example 5: geocoding"
-      example-id="example05"
-      :source-code="ExampleGeocodingRaw"
-    >
-      <ExampleGeocoding></ExampleGeocoding>
-    </ExampleContainer>
-    <ExampleContainer
-      example-name="Example 6: show a map using a custom element"
-      example-id="example06"
-      :source-code="ExampleCustomElementsHtml"
-    >
-      <div class="w-full h-full" ref="example06_root"></div>
-    </ExampleContainer>
-    <ExampleContainer
       example-name="Example 7: Maplibre"
       example-id="example07"
       :source-code="ExampleMaplibreRaw"

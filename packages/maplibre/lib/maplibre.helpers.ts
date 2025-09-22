@@ -89,7 +89,7 @@ export function createDefaultLineLayer(
 
 export function createStyleFromGeoJson(
   datasetId: string,
-  geojson: FeatureCollection,
+  geojson: FeatureCollection<Geometry | null>,
 ): StyleSpecification {
   datasetId = datasetId || Math.floor(Math.random() * 1000000).toString();
   const sourceId = `source-${datasetId}`;
