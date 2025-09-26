@@ -1,4 +1,3 @@
-import { VectorStyle } from "@geospatial-sdk/core/dist/model/style";
 import chroma from "chroma-js";
 import { ColorExpression } from "ol/style/flat";
 
@@ -8,10 +7,7 @@ interface ColorProps {
   expression?: any[];
 }
 
-export const defaultFillColor = "rgba(255,255,255,0.4)";
-
 export function createColor(input: ColorExpression): ColorProps {
-  if (!input) return { color: defaultFillColor };
 
   // Expression
   if (Array.isArray(input) && typeof input[0] === "string") {
@@ -42,5 +38,5 @@ export function createColor(input: ColorExpression): ColorProps {
       opacity: alpha < 1 ? alpha : undefined,
     };
   }
-  return { color: defaultFillColor };
+  return {  };
 }

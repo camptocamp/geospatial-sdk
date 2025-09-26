@@ -37,7 +37,7 @@ export function createStyleFromGeoJsonLayer(
   const sourceId = `source-${datasetId}`;
   const layerId = `layer-${datasetId}`;
 
-  const partialLayers = layerModel.style ? contextStyleToMaplibreLayers(layerModel.style) : [];
+  const partialLayers =  contextStyleToMaplibreLayers(layerModel.style);
   const layers = partialLayers.map(layer => ({
     ...layer,
      id: `${layerId}-${layer.type}`,
