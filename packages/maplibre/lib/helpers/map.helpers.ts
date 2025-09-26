@@ -1,3 +1,2 @@
 import { MapContextLayer } from "@geospatial-sdk/core";
-import {Map} from "maplibre-gl";
-
+import { Map } from "maplibre-gl";

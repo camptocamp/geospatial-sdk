@@ -6,7 +6,7 @@ import {
 } from "@geospatial-sdk/core";
 
 import { Map, StyleSpecification } from "maplibre-gl";
-import { createStyleFromGeoJson } from "../maplibre.helpers";
+import { createStyleFromGeoJsonLayer } from "../maplibre.helpers";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -66,7 +66,7 @@ export async function createLayer(
         outputCrs: "EPSG:4326",
       });
       const geojson = await fetchGeoJson(url);
-      return createStyleFromGeoJson(layerModel.featureType, geojson!);
+      return createStyleFromGeoJsonLayer(layerModel, geojson!);
     }
     case "geojson": {
       let geojson;
@@ -87,7 +87,7 @@ export async function createLayer(
           geojson = data;
         }
       }
-      return createStyleFromGeoJson(layerModel.id?.toString() || "", geojson);
+      return createStyleFromGeoJsonLayer(layerModel, geojson);
     }
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
@@ -105,7 +105,7 @@ export async function createLayer(
         const geojson = await fetchGeoJson(layerUrl).catch(
           () => featureCollection,
         );
-        return createStyleFromGeoJson(layerModel.collection, geojson);
+        return createStyleFromGeoJsonLayer(layerModel, geojson);
       }
       break;
     }
