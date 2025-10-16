@@ -33,15 +33,16 @@ export function createStyleFromGeoJsonLayer(
   geojson: FeatureCollection<Geometry | null>,
 ): StyleSpecification {
 
-  const datasetId = layerModel.id || Math.floor(Math.random() * 1000000).toString();
-  const sourceId = `source-${datasetId}`;
-  const layerId = `layer-${datasetId}`;
+  const sourceId =  layerModel.id || Math.floor(Math.random() * 1000000).toString();
 
   const partialLayers =  contextStyleToMaplibreLayers(layerModel.style);
   const layers = partialLayers.map(layer => ({
     ...layer,
-     id: `${layerId}-${layer.type}`,
-     source: sourceId
+     id: `${sourceId}-${layer.type}`,
+     source: sourceId,
+     layout: {
+      visibility: layerModel.visibility === false ? 'none' : 'visible'
+     }
   }))
   const styleDiff = {
     sources: {

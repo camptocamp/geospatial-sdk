@@ -90,6 +90,7 @@ export function contextStyleToMaplibreLayers(style: VectorStyle = {}): Partial<L
         }),
         "circle-stroke-width": style["circle-stroke-width"] as number,
       },
+      filter: ['==', '$type', 'Point'],
     });
   }
   return layers;

@@ -1,7 +1,7 @@
 import chroma from "chroma-js";
 import { ColorExpression } from "ol/style/flat";
 
-interface ColorProps {
+export interface ColorProps {
   color?: string;
   opacity?: number;
   expression?: any[];
@@ -39,4 +39,13 @@ export function createColor(input: ColorExpression): ColorProps {
     };
   }
   return {  };
+}
+
+export function colorToRgbaString(color: ColorProps): string | undefined {
+  if (color.color === undefined) return undefined;
+  if (color.opacity !== undefined) {
+    const c = chroma(color.color).alpha(color.opacity);
+    return c.css();
+  }
+  return color.color;
 }

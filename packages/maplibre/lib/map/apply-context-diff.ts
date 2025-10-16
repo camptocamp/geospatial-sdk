@@ -2,6 +2,7 @@ import { MapContextDiff } from "@geospatial-sdk/core";
 import GeoJSON from "ol/format/GeoJSON";
 import { Map } from "maplibre-gl";
 import { createLayer } from "./create-map";
+import { removeLayerFromSource } from "../helpers/map.helpers";
 
 /**
  * Apply a context diff to an MapLibre map
@@ -51,24 +52,11 @@ export async function applyContextDiffToMap(
   });
 
   // recreate changed layers
-/*
   for (const layerChanged of contextDiff.layersChanged) {
-    const maplibreLayer = map.getStyle().layers[layerChanged.position];
-    if (maplibreLayer.type === "background") {
-      console.warn(
-        "[Warning] applyContextDiffToMap: removing background layer is not supported.",
-      );
-      continue;
-    }
-    const sourceId = maplibreLayer.source;
-    map.removeLayer(maplibreLayer.id);
-    map.removeSource(sourceId);
+    const sourceId = layerChanged.layer.id as string;
+    removeLayerFromSource(map, sourceId);
     createLayer(layerChanged.layer).then((styleDiff) => {
-      Object.keys(styleDiff.sources).forEach((sourceId) =>
-        map.addSource(sourceId, styleDiff.sources[sourceId]),
-      );
       styleDiff.layers.map((layer) => map.addLayer(layer));
     });
   }
-*/
 }
