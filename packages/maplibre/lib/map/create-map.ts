@@ -134,7 +134,7 @@ export async function createMapFromContext(
 }
 
 /**
- * Resets an OpenLayers map from a context; existing content will be cleared
+ * Resets a Maplibre map from a context; existing content will be cleared
  * @param map
  * @param context
  */

@@ -57,7 +57,7 @@ describe("createPaint", () => {
   });
 
   describe("Line layer", () => {
-    it("génère un layer line si stroke-color est défini", () => {
+    it("generates a line layer if stroke-color is defined", () => {
       const result = contextStyleToMaplibreLayers({
         "stroke-color": "rgba(30, 67, 246, 0.5)",
         "stroke-width": 3,

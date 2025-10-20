@@ -228,7 +228,7 @@ describe("MapContextService", () => {
         expect(layer.source).toBe("ms:commune_actuelle_3857");
       });
 
-      describe("when data type is Poylgon", () => {
+      describe("when data type is Polygon", () => {
         it("set a line paint", () => {
           const layer = style.layers[0] as RasterLayerSpecification;
           expect(layer.type).toBe(`fill`);
