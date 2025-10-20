@@ -6,13 +6,14 @@ import {
 } from "@geospatial-sdk/core";
 
 import { Map, StyleSpecification } from "maplibre-gl";
-import { createStyleFromGeoJsonLayer } from "../maplibre.helpers";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
   WfsEndpoint,
   WmsEndpoint,
 } from "@camptocamp/ogc-client";
+import { createDatasetFromGeoJsonLayer } from "../helpers/map.helpers";
+import { Dataset, PartialStyleSpecification } from "../maplibre.models";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
@@ -21,13 +22,13 @@ const featureCollection: FeatureCollection<Geometry | null> = {
 
 export async function createLayer(
   layerModel: MapContextLayer,
-): Promise<StyleSpecification> {
+): Promise<PartialStyleSpecification> {
   const { type } = layerModel;
 
   switch (type) {
     case "wms": {
-      const sourceId = `source-${layerModel.name}`;
-      const layerId = `layer-${layerModel.name}`;
+      const sourceId = `${layerModel.name}`;
+      const layerId = `${layerModel.name}`;
 
       const endpoint = await new WmsEndpoint(layerModel.url).isReady();
       let url = endpoint.getMapUrl([layerModel.name], {
@@ -40,7 +41,7 @@ export async function createLayer(
       url = removeSearchParams(url, ["bbox"]);
       url = `${url.toString()}&bbox={bbox-epsg-3857}`;
 
-      const styleDiff = {
+      const dataset: Dataset = {
         sources: {
           [sourceId]: {
             type: "raster",
@@ -56,8 +57,8 @@ export async function createLayer(
             paint: {},
           },
         ],
-      } as StyleSpecification;
-      return styleDiff;
+      };
+      return dataset;
     }
     case "wfs": {
       const entryPoint = await new WfsEndpoint(layerModel.url).isReady();
@@ -66,7 +67,7 @@ export async function createLayer(
         outputCrs: "EPSG:4326",
       });
       const geojson = await fetchGeoJson(url);
-      return createStyleFromGeoJsonLayer(layerModel, geojson!);
+      return createDatasetFromGeoJsonLayer(layerModel, geojson!);
     }
     case "geojson": {
       let geojson;
@@ -87,25 +88,25 @@ export async function createLayer(
           geojson = data;
         }
       }
-      return createStyleFromGeoJsonLayer(layerModel, geojson);
+      return createDatasetFromGeoJsonLayer(layerModel, geojson);
     }
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
       if (layerModel.useTiles) {
-        if (layerModel.useTiles === "vector") {
-        } else if (layerModel.useTiles === "map") {
-        }
+        console.warn("[Warning] OGC API - Tiles not yet implemented.");
+        // if (layerModel.useTiles === "vector") {
+        // } else if (layerModel.useTiles === "map") {
+        // }
       } else {
         layerUrl = await ogcEndpoint.getCollectionItemsUrl(
           layerModel.collection,
           { ...layerModel.options, asJson: true },
         );
-        console.log("Loading OGC API - Features from", layerUrl);
         const geojson = await fetchGeoJson(layerUrl).catch(
           () => featureCollection,
         );
-        return createStyleFromGeoJsonLayer(layerModel, geojson);
+        return createDatasetFromGeoJsonLayer(layerModel, geojson);
       }
       break;
     }
@@ -145,17 +146,17 @@ export async function resetMapFromContext(
   map.setCenter((context.view as ViewByZoomAndCenter).center);
 
   for (const layerModel of context.layers) {
-    const styleDiff = await createLayer(layerModel);
-    if (styleDiff.glyphs) {
-      map.setGlyphs(styleDiff.glyphs);
+    const partialMLStyle = await createLayer(layerModel);
+    if (partialMLStyle.glyphs) {
+      map.setGlyphs(partialMLStyle.glyphs);
     }
-    if (styleDiff.sprite) {
-      map.setSprite(styleDiff.sprite as string);
+    if (partialMLStyle.sprite) {
+      map.setSprite(partialMLStyle.sprite as string);
     }
-    Object.keys(styleDiff.sources).forEach((sourceId) =>
-      map.addSource(sourceId, styleDiff.sources[sourceId]),
+    Object.keys(partialMLStyle.sources).forEach((sourceId) =>
+      map.addSource(sourceId, partialMLStyle.sources[sourceId]),
     );
-    styleDiff.layers.map((layer) => map.addLayer(layer));
+    partialMLStyle.layers.map((layer) => map.addLayer(layer));
   }
   return map;
 }

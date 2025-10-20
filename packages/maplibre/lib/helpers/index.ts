@@ -1,1 +1,1 @@
-export * from './color.helpers'
+export * from "./color.helpers";

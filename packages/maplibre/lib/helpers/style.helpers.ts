@@ -13,13 +13,15 @@ const defaultOltStyle: FlatStyle = {
   "circle-stroke-color": "#3399CC",
 };
 
-export function contextStyleToMaplibreLayers(style: VectorStyle = {}): Partial<LayerSpecification>[] {
+export function contextStyleToMaplibreLayers(
+  style: VectorStyle = {},
+): Partial<LayerSpecification>[] {
   const layers: Partial<LayerSpecification>[] = [];
 
   if (Array.isArray(style)) {
     return style.flatMap((style_) => {
-      if (style_.hasOwnProperty('style')) {
-        console.warn('Rules in styles are not supported yet.');
+      if (style_.hasOwnProperty("style")) {
+        console.warn("Rules in styles are not supported yet.");
         return contextStyleToMaplibreLayers((style_ as Rule).style);
       }
       return contextStyleToMaplibreLayers(style_ as any);
@@ -55,14 +57,13 @@ export function contextStyleToMaplibreLayers(style: VectorStyle = {}): Partial<L
           "line-color": colorProps.color,
         }),
         ...(style["stroke-width"] !== undefined && {
-          "line-width": style["stroke-width"],
+          "line-width": style["stroke-width"] as number,
         }),
         ...(style["stroke-line-dash"] !== undefined && {
           "line-dasharray": style["stroke-line-dash"],
         }),
       },
-    } as LayerSpecification); // fixme
-
+    });
   }
   if (style["circle-radius"]) {
     let fillColorPropsProps, strokeColorProps;
@@ -90,7 +91,7 @@ export function contextStyleToMaplibreLayers(style: VectorStyle = {}): Partial<L
         }),
         "circle-stroke-width": style["circle-stroke-width"] as number,
       },
-      filter: ['==', '$type', 'Point'],
+      filter: ["==", "$type", "Point"],
     });
   }
   return layers;

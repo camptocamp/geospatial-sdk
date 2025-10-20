@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
@@ -5,11 +6,11 @@ import {
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures";
-import { MapContextLayer } from "@geospatial-sdk/core";
-import { StyleSpecification } from "maplibre-gl";
+import { LayerGeojsonWithData, MapContextLayer } from "@geospatial-sdk/core";
 import { createLayer } from "./create-map";
 import {
   FillLayerSpecification,
+  GeoJSONSourceSpecification,
   RasterLayerSpecification,
 } from "@maplibre/maplibre-gl-style-spec";
 import {
@@ -17,10 +18,12 @@ import {
   FEATURE_COLLECTION_POINT_FIXTURE_4326,
   FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
 } from "@geospatial-sdk/core/fixtures/geojson.fixtures";
+import { PartialStyleSpecification } from "../maplibre.models";
+import { GeoJSONSource, RasterSourceSpecification } from "maplibre-gl";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
-    let layerModel: MapContextLayer, style: StyleSpecification;
+    let layerModel: MapContextLayer, style: PartialStyleSpecification;
 
     describe("WMS", () => {
       beforeEach(async () => {
@@ -34,8 +37,8 @@ describe("MapContextService", () => {
         const sourcesIds = Object.keys(style.sources);
         expect(sourcesIds.length).toBe(1);
         const id = sourcesIds[0];
-        const source = style.sources[id];
-        expect(id).toBe("source-commune_actuelle_3857");
+        const source = style.sources[id] as RasterSourceSpecification;
+        expect(id).toBe("commune_actuelle_3857");
         expect(source.tiles).toEqual([
           "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&bbox={bbox-epsg-3857}",
         ]);
@@ -45,8 +48,8 @@ describe("MapContextService", () => {
         expect(style.layers.length).toBe(1);
 
         const layer = style.layers[0] as RasterLayerSpecification;
-        expect(layer.id).toBe("layer-commune_actuelle_3857");
-        expect(layer.source).toBe("source-commune_actuelle_3857");
+        expect(layer.id).toBe("commune_actuelle_3857");
+        expect(layer.source).toBe("commune_actuelle_3857");
         expect(layer.type).toBe(`raster`);
       });
     });
@@ -63,28 +66,38 @@ describe("MapContextService", () => {
         it("create a source", () => {
           const sourcesIds = Object.keys(style.sources);
           expect(sourcesIds.length).toBe(1);
-          expect(sourcesIds[0]).toBe("source-27404");
+          expect(sourcesIds[0]).toBe("27404");
         });
-        it("create a layer", () => {
+        it("create 3 layers", () => {
           expect(style.layers).toBeTruthy();
-          expect(style.layers.length).toBe(1);
+          expect(style.layers.length).toBe(3);
 
-          const layer = style.layers[0] as RasterLayerSpecification;
-          expect(layer.id).toBe("layer-27404-fill");
-          expect(layer.source).toBe("source-27404");
+          let layer = style.layers[0] as RasterLayerSpecification;
+          expect(layer.id).toBe("27404-fill");
+          expect(layer.source).toBe("27404");
+
+          layer = style.layers[1] as RasterLayerSpecification;
+          expect(layer.id).toBe("27404-line");
+          expect(layer.source).toBe("27404");
+
+          layer = style.layers[2] as RasterLayerSpecification;
+          expect(layer.id).toBe("27404-circle");
+          expect(layer.source).toBe("27404");
         });
 
         it("set correct source properties", () => {
           const sourcesIds = Object.keys(style.sources);
-          const source = style.sources[sourcesIds[0]];
+          const source = style.sources[
+            sourcesIds[0]
+          ] as GeoJSONSourceSpecification;
           expect(source.type).toBe("geojson");
-          expect(source.data).toBe(layerModel.data);
+          expect(source.data).toBe((layerModel as LayerGeojsonWithData).data);
         });
         it("set correct layer properties", () => {
           const layer = style.layers[0] as FillLayerSpecification;
           expect(layer.type).toBe(`fill`);
-          expect(layer.paint["fill-color"]).toBe("#68C6DE");
-          expect(layer.paint["fill-opacity"]).toBe(0.6);
+          expect(layer.paint["fill-color"]).toBe("#ffffff");
+          expect(layer.paint["fill-opacity"]).toBe(0.4);
         });
       });
       describe("with inline data as string", () => {
@@ -100,14 +113,16 @@ describe("MapContextService", () => {
           const sourcesIds = Object.keys(style.sources);
           expect(sourcesIds.length).toBe(1);
         });
-        it("create a layer", () => {
+        it("create 3 layers", () => {
           expect(style.layers).toBeTruthy();
-          expect(style.layers.length).toBe(1);
+          expect(style.layers.length).toBe(3);
         });
 
         it("set correct source properties", () => {
           const sourcesIds = Object.keys(style.sources);
-          const source = style.sources[sourcesIds[0]];
+          const source = style.sources[
+            sourcesIds[0]
+          ] as GeoJSONSourceSpecification;
           expect(source.type).toBe("geojson");
           expect(source.data).toEqual(MAP_CTX_LAYER_GEOJSON_FIXTURE.data);
         });
@@ -115,8 +130,8 @@ describe("MapContextService", () => {
         it("set correct layer properties", () => {
           const layer = style.layers[0] as FillLayerSpecification;
           expect(layer.type).toBe(`fill`);
-          expect(layer.paint["fill-color"]).toBe("#68C6DE");
-          expect(layer.paint["fill-opacity"]).toBe(0.6);
+          expect(layer.paint["fill-color"]).toBe("#ffffff");
+          expect(layer.paint["fill-opacity"]).toBe(0.4);
         });
       });
       describe("with invalid inline data as string", () => {
@@ -127,7 +142,7 @@ describe("MapContextService", () => {
             ...MAP_CTX_LAYER_GEOJSON_FIXTURE,
             url: undefined,
             data: "blargz",
-          };
+          } as LayerGeojsonWithData;
           style = await createLayer(layerModel);
         });
         it("create a VectorLayer", () => {
@@ -137,16 +152,13 @@ describe("MapContextService", () => {
           expect(window.console.warn).toHaveBeenCalled();
         });
         it("create an empty VectorSource source", () => {
-          expect(style).toEqual({
-            layers: [],
-            sources: {
-              "source-27404": {
-                data: {
-                  features: [],
-                  type: "FeatureCollection",
-                },
-                type: "geojson",
+          expect(style.sources).toEqual({
+            "27404": {
+              data: {
+                features: [],
+                type: "FeatureCollection",
               },
+              type: "geojson",
             },
           });
         });
@@ -169,14 +181,16 @@ describe("MapContextService", () => {
             const sourcesIds = Object.keys(style.sources);
             expect(sourcesIds.length).toBe(1);
           });
-          it("create a layer", () => {
+          it("create 3 layers", () => {
             expect(style.layers).toBeTruthy();
-            expect(style.layers.length).toBe(1);
+            expect(style.layers.length).toBe(3);
           });
 
           it("set correct source properties", () => {
             const sourcesIds = Object.keys(style.sources);
-            const source = style.sources[sourcesIds[0]];
+            const source = style.sources[
+              sourcesIds[0]
+            ] as GeoJSONSourceSpecification;
             expect(source.type).toBe("geojson");
             expect(source.data).toEqual(MAP_CTX_LAYER_GEOJSON_FIXTURE.data);
           });
@@ -184,8 +198,8 @@ describe("MapContextService", () => {
           it("set correct layer properties", () => {
             const layer = style.layers[0] as FillLayerSpecification;
             expect(layer.type).toBe(`fill`);
-            expect(layer.paint["fill-color"]).toBe("#68C6DE");
-            expect(layer.paint["fill-opacity"]).toBe(0.6);
+            expect(layer.paint["fill-color"]).toBe("#ffffff");
+            expect(layer.paint["fill-opacity"]).toBe(0.4);
           });
         });
       });
@@ -202,16 +216,16 @@ describe("MapContextService", () => {
         const sourcesIds = Object.keys(style.sources);
         expect(sourcesIds.length).toBe(1);
         const id = sourcesIds[0];
-        const source = style.sources[id];
-        expect(id).toBe("source-ms:commune_actuelle_3857");
+        const source = style.sources[id] as GeoJSONSourceSpecification;
+        expect(id).toBe("ms:commune_actuelle_3857");
         expect(source.data).toEqual(FEATURE_COLLECTION_POLYGON_FIXTURE_4326);
       });
-      it("create a layer", () => {
+      it("create 3 layerS", () => {
         expect(style.layers).toBeTruthy();
         expect(style.layers.length).toBe(1);
         const layer = style.layers[0] as RasterLayerSpecification;
-        expect(layer.id).toBe("layer-ms:commune_actuelle_3857-fill");
-        expect(layer.source).toBe("source-ms:commune_actuelle_3857");
+        expect(layer.id).toBe("ms:commune_actuelle_3857-fill");
+        expect(layer.source).toBe("ms:commune_actuelle_3857");
       });
 
       describe("when data type is Poylgon", () => {
@@ -274,15 +288,15 @@ describe("MapContextService", () => {
         expect(sourcesIds.length).toBe(1);
         const id = sourcesIds[0];
         const source = style.sources[id];
-        expect(id).toBe("source-airports");
+        expect(id).toBe("airports");
         expect(source.data).toEqual(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326);
       });
       it("create a layer", () => {
         expect(style.layers).toBeTruthy();
         expect(style.layers.length).toBe(1);
         const layer = style.layers[0] as RasterLayerSpecification;
-        expect(layer.id).toBe("layer-airports-line");
-        expect(layer.source).toBe("source-airports");
+        expect(layer.id).toBe("airports-line");
+        expect(layer.source).toBe("airports");
       });
     });
   });

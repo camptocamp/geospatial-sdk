@@ -7,8 +7,9 @@ export interface ColorProps {
   expression?: any[];
 }
 
-export function createColor(input: ColorExpression): ColorProps {
+export const DEFAULT_COLOR = "black";
 
+export function createColor(input: ColorExpression): ColorProps {
   // Expression
   if (Array.isArray(input) && typeof input[0] === "string") {
     console.warn("Color expressions are not fully supported yet.");
@@ -29,7 +30,7 @@ export function createColor(input: ColorExpression): ColorProps {
     }
   }
 
-  // String CSS, eg 'black
+  // String eg 'black
   if (typeof input === "string") {
     const c = chroma(input);
     const alpha = c.alpha();
@@ -38,7 +39,7 @@ export function createColor(input: ColorExpression): ColorProps {
       opacity: alpha < 1 ? alpha : undefined,
     };
   }
-  return {  };
+  return { color: DEFAULT_COLOR };
 }
 
 export function colorToRgbaString(color: ColorProps): string | undefined {
