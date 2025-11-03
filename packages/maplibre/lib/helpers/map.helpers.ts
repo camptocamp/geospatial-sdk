@@ -32,7 +32,7 @@ export function removeLayersFromSource(map: Map, sourceId: string) {
  */
 export function createDatasetFromGeoJsonLayer(
   layerModel: LayerContextWithStyle,
-  geojson: FeatureCollection<Geometry | null>,
+  geojson: FeatureCollection<Geometry | null> | string,
 ): Dataset {
   const sourceId =
     layerModel.id || Math.floor(Math.random() * 1000000).toString();

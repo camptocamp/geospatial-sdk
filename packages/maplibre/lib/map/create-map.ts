@@ -5,7 +5,7 @@ import {
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 
-import { Map, StyleSpecification } from "maplibre-gl";
+import { Map, MapOptions, StyleSpecification } from "maplibre-gl";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -72,9 +72,7 @@ export async function createLayer(
     case "geojson": {
       let geojson;
       if (layerModel.url !== undefined) {
-        geojson = await fetchGeoJson(layerModel.url).catch(
-          () => featureCollection,
-        );
+        geojson = layerModel.url;
       } else {
         const data = layerModel.data;
         if (typeof data === "string") {
@@ -126,10 +124,13 @@ export async function createLayer(
 export async function createMapFromContext(
   context: MapContext,
   container: string | HTMLElement,
+  options?: MapOptions
 ): Promise<Map> {
-  const map = new Map({
+  const mapOptions: MapOptions = {
     container,
-  });
+    ...options
+  }
+  const map = new Map(mapOptions);
   return await resetMapFromContext(map, context);
 }
 
