@@ -1,6 +1,7 @@
 import { EndpointError } from "@camptocamp/ogc-client";
 import { Feature } from "geojson";
 import BaseEvent from "ol/events/Event";
+import { Extent } from "ol/extent";
 
 export const FeaturesClickEventType = "features-click";
 export interface FeaturesClickEvent {
@@ -20,11 +21,10 @@ export interface MapClickEvent {
   coordinate: [number, number]; // expressed in lon/lat
 }
 
-export interface MapEventsByType {
-  [FeaturesClickEventType]: FeaturesClickEvent;
-  [FeaturesHoverEventType]: FeaturesHoverEvent;
-  [MapClickEventType]: MapClickEvent;
-  [SourceLoadErrorType]: SourceLoadErrorEvent;
+export const MapExtentChangeEventType = "map-extent-change";
+export interface MapExtentChangeEvent {
+  type: typeof MapExtentChangeEventType;
+  extent: Extent;
 }
 
 export const SourceLoadErrorType = "source-load-error";
@@ -48,4 +48,12 @@ export class SourceLoadErrorEvent extends BaseEvent {
       this.message = error.message;
     }
   }
+}
+
+export interface MapEventsByType {
+  [FeaturesClickEventType]: FeaturesClickEvent;
+  [FeaturesHoverEventType]: FeaturesHoverEvent;
+  [MapClickEventType]: MapClickEvent;
+  [MapExtentChangeEventType]: MapExtentChangeEvent;
+  [SourceLoadErrorType]: SourceLoadErrorEvent;
 }

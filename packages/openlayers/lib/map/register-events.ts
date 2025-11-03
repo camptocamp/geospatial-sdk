@@ -3,6 +3,7 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   MapClickEventType,
+  MapExtentChangeEventType,
   MapEventsByType,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
@@ -122,6 +123,23 @@ function registerFeatureHoverEvent(map: Map) {
   map.set(FeaturesHoverEventType, true);
 }
 
+function registerMapExtentChangeEvent(
+  map: Map,
+  callback: (event: unknown) => void,
+) {
+  const handleExtentChange = () => {
+    const extent = map.getView().calculateExtent(map.getSize());
+    callback({
+      type: MapExtentChangeEventType,
+      extent,
+    });
+  };
+
+  map.getView().on('change:center', handleExtentChange);
+  map.getView().on('change:resolution', handleExtentChange);
+  map.getView().on('change:rotation', handleExtentChange);
+}
+
 export function listen<T extends keyof MapEventsByType>(
   map: Map,
   eventType: T,
@@ -153,6 +171,9 @@ export function listen<T extends keyof MapEventsByType>(
           coordinate,
         });
       });
+      break;
+    case MapExtentChangeEventType:
+      registerMapExtentChangeEvent(map, callback as (event: unknown) => void);
       break;
     case SourceLoadErrorType: {
       const errorCallback = (event: BaseEvent) => {
