@@ -6,6 +6,7 @@ import type { MapContext } from '@geospatial-sdk/core'
 import { DEFAULT_CONTEXT } from '@/constants'
 import Panel from '@/components/Panel.vue'
 import type { Feature } from 'geojson'
+import type { Extent } from 'ol/extent'
 
 const Layers = {
   wms: {
@@ -27,11 +28,15 @@ let context = {
 } as MapContext
 let features = ref<Feature[]>([])
 let clickCoordinates = ref<[number, number] | null>(null)
+let extent = ref<Extent | null>(null)
 
 onMounted(async () => {
   map = await createMapFromContext(context, mapRoot.value)
   listen(map, 'features-hover', (event) => (features.value = event.features))
   listen(map, 'map-click', (event) => (clickCoordinates.value = event.coordinate))
+  listen(map, 'map-extent-change', (event) => {
+    extent.value = event.extent;
+  });
 })
 </script>
 
@@ -41,6 +46,15 @@ onMounted(async () => {
       <Panel v-if="clickCoordinates">
         <strong>Last click coordinates</strong>
         {{ clickCoordinates.join(', ') }}
+      </Panel>
+      <Panel v-if="extent">
+        <h4 class="font-bold mb-1">Map Extent</h4>
+        <ul>
+          <li><strong>Min X</strong>: {{ extent[0] }}</li>
+          <li><strong>Min Y</strong>: {{ extent[1] }}</li>
+          <li><strong>Max X</strong>: {{ extent[2] }}</li>
+          <li><strong>Max Y</strong>: {{ extent[3] }}</li>
+        </ul>
       </Panel>
       <Panel v-for="(feature, index) in features" v-bind:key="index">
         <h4 class="font-bold mb-1">Feature</h4>
