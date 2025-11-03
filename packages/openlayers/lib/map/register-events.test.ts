@@ -199,14 +199,14 @@ describe("event registration", () => {
   });
   describe("map extent change event", () => {
     let callback: Mock;
-    
+
     beforeEach(() => {
       callback = vi.fn();
       listen(map, "map-extent-change", callback);
     });
 
     it("should registers the event on the map when center changed", () => {
-      map.getView().dispatchEvent(createMapEvent(map, 'change:center'));
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
 
       expect(callback).toHaveBeenCalledOnce();
       expect(callback).toHaveBeenCalledWith({
@@ -216,7 +216,7 @@ describe("event registration", () => {
     });
 
     it("should registers the event on the map when resolution changed", () => {
-      map.getView().dispatchEvent(createMapEvent(map, 'change:resolution'));
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
 
       expect(callback).toHaveBeenCalledOnce();
       expect(callback).toHaveBeenCalledWith({
@@ -226,7 +226,7 @@ describe("event registration", () => {
     });
 
     it("should registers the event on the map when rotation changed", () => {
-      map.getView().dispatchEvent(createMapEvent(map, 'change:rotation'));
+      map.getView().dispatchEvent(createMapEvent(map, "change:rotation"));
 
       expect(callback).toHaveBeenCalledOnce();
       expect(callback).toHaveBeenCalledWith({

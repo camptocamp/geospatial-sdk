@@ -135,9 +135,9 @@ function registerMapExtentChangeEvent(
     });
   };
 
-  map.getView().on('change:center', handleExtentChange);
-  map.getView().on('change:resolution', handleExtentChange);
-  map.getView().on('change:rotation', handleExtentChange);
+  map.getView().on("change:center", handleExtentChange);
+  map.getView().on("change:resolution", handleExtentChange);
+  map.getView().on("change:rotation", handleExtentChange);
 }
 
 export function listen<T extends keyof MapEventsByType>(
