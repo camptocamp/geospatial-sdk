@@ -5,7 +5,7 @@ import {
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 
-import { Map, MapOptions, StyleSpecification } from "maplibre-gl";
+import { Map, StyleSpecification } from "maplibre-gl";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -123,14 +123,11 @@ export async function createLayer(
  */
 export async function createMapFromContext(
   context: MapContext,
-  container: string | HTMLElement,
-  options?: MapOptions
+  container: string | HTMLElement
 ): Promise<Map> {
-  const mapOptions: MapOptions = {
+  const map = new Map({
     container,
-    ...options
-  }
-  const map = new Map(mapOptions);
+  });
   return await resetMapFromContext(map, context);
 }
 
