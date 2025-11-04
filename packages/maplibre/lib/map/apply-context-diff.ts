@@ -58,4 +58,23 @@ export async function applyContextDiffToMap(
       styleDiff.layers.map((layer) => map.addLayer(layer));
     });
   }
+
+  if (typeof contextDiff.viewChanges !== "undefined") {
+    const { viewChanges } = contextDiff;
+
+    if (viewChanges && "extent" in viewChanges) {
+      const { extent } = viewChanges;
+
+      map.fitBounds(
+        [
+          [extent[0], extent[1]],
+          [extent[2], extent[3]],
+        ],
+        {
+          padding: 20,
+          duration: 1000,
+        },
+      );
+    }
+  }
 }

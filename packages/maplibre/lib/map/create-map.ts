@@ -123,7 +123,7 @@ export async function createLayer(
  */
 export async function createMapFromContext(
   context: MapContext,
-  container: string | HTMLElement
+  container: string | HTMLElement,
 ): Promise<Map> {
   const map = new Map({
     container,
