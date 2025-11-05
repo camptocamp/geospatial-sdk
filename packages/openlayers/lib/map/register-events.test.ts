@@ -212,6 +212,7 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: expect.any(Array),
+        target: expect.anything(),
       });
     });
 
@@ -222,6 +223,7 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: expect.any(Array),
+        target: expect.anything(),
       });
     });
 
@@ -232,6 +234,18 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: expect.any(Array),
+        target: expect.anything(),
+      });
+    });
+
+    it("should registers the event on the map when size changed", () => {
+      map.dispatchEvent(createMapEvent(map, "change:size"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: expect.any(Array),
+        target: expect.anything(),
       });
     });
   });
