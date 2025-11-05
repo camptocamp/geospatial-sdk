@@ -7,7 +7,7 @@ import {
   MapEventsByType,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
-import { toLonLat } from "ol/proj";
+import { toLonLat, transformExtent } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
 import OlFeature from "ol/Feature";
 import BaseEvent from "ol/events/Event";
@@ -132,9 +132,11 @@ function registerMapExtentChangeEvent(map: Map) {
 
   const handleExtentChange = () => {
     const extent = map.getView().calculateExtent(map.getSize());
+    const reprojectedExtent = transformExtent(extent, map.getView().getProjection(), "EPSG:4326");
+
     map.dispatchEvent({
       type: MapExtentChangeEventType,
-      extent,
+      extent: reprojectedExtent,
     } as unknown as BaseEvent);
   };
 
