@@ -246,9 +246,59 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledOnce();
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
-        extent: expect.any(Array),
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
         target: expect.anything(),
       });
+    });
+
+    it("should send map-extent-change only once when multiple events occur with same extent", () => {
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
+      map.getView().dispatchEvent(createMapEvent(map, "change:rotation"));
+      map.dispatchEvent(createMapEvent(map, "change:size"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
+        target: expect.anything(),
+      });
+    });
+
+    it("should send map-extent-change twice when view properties actually change", () => {
+      map.getView().setCenter([1000, 1000]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      map.getView().setResolution(2);
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "map-extent-change",
+          extent: expect.any(Array),
+        })
+      );
+      
+      const firstCall = callback.mock.calls[0][0];
+      const lastCall = callback.mock.calls[1][0];
+      expect(firstCall.extent).not.toEqual(lastCall.extent);
+    });
+
+    it("should send map-extent-change only once when same view property is set multiple times to same value", () => {
+      map.getView().setCenter([1000, 1000]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      map.getView().setCenter([1000, 1000]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "map-extent-change",
+          extent: expect.any(Array),
+        })
+      );
     });
   });
 });

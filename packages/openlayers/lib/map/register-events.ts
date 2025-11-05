@@ -20,6 +20,7 @@ import { Pixel } from "ol/pixel";
 import type { Feature, FeatureCollection } from "geojson";
 import throttle from "lodash.throttle";
 import { BaseLayerObjectEventTypes } from "ol/layer/Base";
+import { equals } from "ol/extent";
 
 const GEOJSON = new GeoJSON();
 
@@ -130,9 +131,17 @@ function registerFeatureHoverEvent(map: Map) {
 function registerMapExtentChangeEvent(map: Map) {
   if (map.get(MapExtentChangeEventType)) return;
 
+  let lastExtent: number[] | null = null;
+
   const handleExtentChange = () => {
     const extent = map.getView().calculateExtent(map.getSize());
     const reprojectedExtent = transformExtent(extent, map.getView().getProjection(), "EPSG:4326");
+
+    if (lastExtent && equals(lastExtent, reprojectedExtent)) {
+      return;
+    }
+
+    lastExtent = [...reprojectedExtent];
 
     map.dispatchEvent({
       type: MapExtentChangeEventType,
