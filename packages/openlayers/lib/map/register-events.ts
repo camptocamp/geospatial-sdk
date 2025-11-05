@@ -135,7 +135,11 @@ function registerMapExtentChangeEvent(map: Map) {
 
   const handleExtentChange = () => {
     const extent = map.getView().calculateExtent(map.getSize());
-    const reprojectedExtent = transformExtent(extent, map.getView().getProjection(), "EPSG:4326");
+    const reprojectedExtent = transformExtent(
+      extent,
+      map.getView().getProjection(),
+      "EPSG:4326",
+    );
 
     if (lastExtent && equals(lastExtent, reprojectedExtent)) {
       return;

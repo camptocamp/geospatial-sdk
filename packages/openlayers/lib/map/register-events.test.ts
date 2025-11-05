@@ -16,7 +16,10 @@ import Point from "ol/geom/Point";
 import TileLayer from "ol/layer/Tile";
 import OlFeature from "ol/Feature";
 
-const EXPECTED_MAP_EXTENT_EPSG4326 = [-0.0035932611364780857, -0.0026949458513598756, 0.0035932611364780857, 0.0026949458513740865];
+const EXPECTED_MAP_EXTENT_EPSG4326 = [
+  -0.0035932611364780857, -0.0026949458513598756, 0.0035932611364780857,
+  0.0026949458513740865,
+];
 
 const gfiResult = {
   type: "Feature",
@@ -277,9 +280,9 @@ describe("event registration", () => {
         expect.objectContaining({
           type: "map-extent-change",
           extent: expect.any(Array),
-        })
+        }),
       );
-      
+
       const firstCall = callback.mock.calls[0][0];
       const lastCall = callback.mock.calls[1][0];
       expect(firstCall.extent).not.toEqual(lastCall.extent);
@@ -297,7 +300,7 @@ describe("event registration", () => {
         expect.objectContaining({
           type: "map-extent-change",
           extent: expect.any(Array),
-        })
+        }),
       );
     });
   });
