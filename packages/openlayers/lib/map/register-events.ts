@@ -145,7 +145,7 @@ function registerMapExtentChangeEvent(map: Map) {
       return;
     }
 
-    lastExtent = [...reprojectedExtent];
+    lastExtent = reprojectedExtent;
 
     map.dispatchEvent({
       type: MapExtentChangeEventType,
