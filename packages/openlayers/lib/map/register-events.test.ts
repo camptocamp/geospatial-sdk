@@ -16,6 +16,11 @@ import Point from "ol/geom/Point";
 import TileLayer from "ol/layer/Tile";
 import OlFeature from "ol/Feature";
 
+const EXPECTED_MAP_EXTENT_EPSG4326 = [
+  -0.0035932611364780857, -0.0026949458513598756, 0.0035932611364780857,
+  0.0026949458513740865,
+];
+
 const gfiResult = {
   type: "Feature",
   properties: {
@@ -57,6 +62,7 @@ function createMap(): Map {
     getEventPixel: { value: vi.fn(() => [10, 10]) },
     getCoordinateFromPixel: { value: vi.fn(() => [123, 123]) },
     getFeaturesAtPixel: { value: vi.fn(() => [feature]) },
+    getSize: { value: vi.fn(() => [800, 600]) },
   });
   return map;
 }
@@ -194,6 +200,108 @@ describe("event registration", () => {
         coordinate: toLonLat([123, 123]),
         type: "map-click",
       });
+    });
+  });
+  describe("map extent change event", () => {
+    let callback: Mock;
+
+    beforeEach(() => {
+      callback = vi.fn();
+      listen(map, "map-extent-change", callback);
+    });
+
+    it("should registers the event on the map when center changed", () => {
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
+        target: expect.anything(),
+      });
+    });
+
+    it("should registers the event on the map when resolution changed", () => {
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
+        target: expect.anything(),
+      });
+    });
+
+    it("should registers the event on the map when rotation changed", () => {
+      map.getView().dispatchEvent(createMapEvent(map, "change:rotation"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
+        target: expect.anything(),
+      });
+    });
+
+    it("should registers the event on the map when size changed", () => {
+      map.dispatchEvent(createMapEvent(map, "change:size"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
+        target: expect.anything(),
+      });
+    });
+
+    it("should send map-extent-change only once when multiple events occur with same extent", () => {
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
+      map.getView().dispatchEvent(createMapEvent(map, "change:rotation"));
+      map.dispatchEvent(createMapEvent(map, "change:size"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-extent-change",
+        extent: EXPECTED_MAP_EXTENT_EPSG4326,
+        target: expect.anything(),
+      });
+    });
+
+    it("should send map-extent-change twice when view properties actually change", () => {
+      map.getView().setCenter([1000, 1000]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      map.getView().setResolution(2);
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "map-extent-change",
+          extent: expect.any(Array),
+        }),
+      );
+
+      const firstCall = callback.mock.calls[0][0];
+      const lastCall = callback.mock.calls[1][0];
+      expect(firstCall.extent).not.toEqual(lastCall.extent);
+    });
+
+    it("should send map-extent-change only once when same view property is set multiple times to same value", () => {
+      map.getView().setCenter([1000, 1000]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      map.getView().setCenter([1000, 1000]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "map-extent-change",
+          extent: expect.any(Array),
+        }),
+      );
     });
   });
 });

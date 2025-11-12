@@ -3,10 +3,11 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   MapClickEventType,
+  MapExtentChangeEventType,
   MapEventsByType,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
-import { toLonLat } from "ol/proj";
+import { toLonLat, transformExtent } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
 import OlFeature from "ol/Feature";
 import BaseEvent from "ol/events/Event";
@@ -19,6 +20,7 @@ import { Pixel } from "ol/pixel";
 import type { Feature, FeatureCollection } from "geojson";
 import throttle from "lodash.throttle";
 import { BaseLayerObjectEventTypes } from "ol/layer/Base";
+import { equals } from "ol/extent";
 
 const GEOJSON = new GeoJSON();
 
@@ -100,6 +102,7 @@ async function readFeaturesAtPixel(
 
 function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
+
   map.on("click", async (event) => {
     const features = await readFeaturesAtPixel(map, event);
     map.dispatchEvent({
@@ -107,11 +110,13 @@ function registerFeatureClickEvent(map: Map) {
       features,
     } as unknown as BaseEvent);
   });
+
   map.set(FeaturesClickEventType, true);
 }
 
 function registerFeatureHoverEvent(map: Map) {
   if (map.get(FeaturesHoverEventType)) return;
+
   map.on("pointermove", async (event) => {
     const features = await readFeaturesAtPixel(map, event);
     map.dispatchEvent({
@@ -119,7 +124,41 @@ function registerFeatureHoverEvent(map: Map) {
       features,
     } as unknown as BaseEvent);
   });
+
   map.set(FeaturesHoverEventType, true);
+}
+
+function registerMapExtentChangeEvent(map: Map) {
+  if (map.get(MapExtentChangeEventType)) return;
+
+  let lastExtent: number[] | null = null;
+
+  const handleExtentChange = () => {
+    const extent = map.getView().calculateExtent(map.getSize());
+    const reprojectedExtent = transformExtent(
+      extent,
+      map.getView().getProjection(),
+      "EPSG:4326",
+    );
+
+    if (lastExtent && equals(lastExtent, reprojectedExtent)) {
+      return;
+    }
+
+    lastExtent = reprojectedExtent;
+
+    map.dispatchEvent({
+      type: MapExtentChangeEventType,
+      extent: reprojectedExtent,
+    } as unknown as BaseEvent);
+  };
+
+  map.getView().on("change:center", handleExtentChange);
+  map.getView().on("change:resolution", handleExtentChange);
+  map.getView().on("change:rotation", handleExtentChange);
+  map.on("change:size", handleExtentChange);
+
+  map.set(MapExtentChangeEventType, true);
 }
 
 export function listen<T extends keyof MapEventsByType>(
@@ -152,6 +191,13 @@ export function listen<T extends keyof MapEventsByType>(
           type: "map-click",
           coordinate,
         });
+      });
+      break;
+    case MapExtentChangeEventType:
+      registerMapExtentChangeEvent(map);
+      // see comment above
+      map.on(eventType as unknown as MapObjectEventTypes, (event) => {
+        (callback as (event: unknown) => void)(event);
       });
       break;
     case SourceLoadErrorType: {
