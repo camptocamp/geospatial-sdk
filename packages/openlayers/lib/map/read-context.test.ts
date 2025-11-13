@@ -23,7 +23,7 @@ import {
   MAP_CTX_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures";
 import { createLayer, createMapFromContext, createView } from "./create-map";
-import { createContextFromMap } from "./create-context";
+import { readContextFromMap } from "./read-context";
 
 // Mock the WFS endpoint to make it resolve immediately
 vi.mock("@camptocamp/ogc-client", async () => {
@@ -46,7 +46,7 @@ vi.mock("@camptocamp/ogc-client", async () => {
   };
 });
 
-describe("createContextFromMap", () => {
+describe("readContextFromMap", () => {
   describe("#extractLayerModel", () => {
     describe("XYZ", () => {
       let layerModel: MapContextLayer;
@@ -57,7 +57,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -93,7 +93,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -123,7 +123,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -180,7 +180,7 @@ describe("createContextFromMap", () => {
           },
           { timeout: 1000, interval: 10 },
         );
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -214,7 +214,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -247,7 +247,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -285,7 +285,7 @@ describe("createContextFromMap", () => {
         map.addLayer(layer);
         // Wait for async source to be ready
         await new Promise((resolve) => setTimeout(resolve, 100));
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -320,7 +320,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -355,7 +355,7 @@ describe("createContextFromMap", () => {
         const layer = await createLayer(layerModel);
         const map = new Map({});
         map.addLayer(layer);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
 
@@ -387,7 +387,7 @@ describe("createContextFromMap", () => {
         map.setSize([100, 100]);
         const view = createView(viewModel, map);
         map.setView(view);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedView = context.view;
       });
 
@@ -417,7 +417,7 @@ describe("createContextFromMap", () => {
         const map = new Map({});
         const view = createView(null, map);
         map.setView(view);
-        const context = createContextFromMap(map);
+        const context = readContextFromMap(map);
         extractedView = context.view;
       });
 
@@ -429,7 +429,7 @@ describe("createContextFromMap", () => {
     });
   });
 
-  describe("#createContextFromMap", () => {
+  describe("#readContextFromMap", () => {
     describe("full map context", () => {
       let originalContext: MapContext;
       let extractedContext: MapContext;
@@ -437,7 +437,7 @@ describe("createContextFromMap", () => {
       beforeEach(async () => {
         originalContext = MAP_CTX_FIXTURE;
         const map = await createMapFromContext(originalContext);
-        extractedContext = createContextFromMap(map);
+        extractedContext = readContextFromMap(map);
       });
 
       it("extracts the correct number of layers", () => {
@@ -479,7 +479,7 @@ describe("createContextFromMap", () => {
         map.addLayer(wmsLayer);
         map.addLayer(geojsonLayer);
         map.setView(createView(MAP_CTX_VIEW_FIXTURE, map));
-        extractedContext = createContextFromMap(map);
+        extractedContext = readContextFromMap(map);
       });
 
       it("extracts all layers in correct order", () => {
@@ -500,7 +500,7 @@ describe("createContextFromMap", () => {
       beforeEach(() => {
         const map = new Map({});
         map.setView(new View({ center: [0, 0], zoom: 1 }));
-        extractedContext = createContextFromMap(map);
+        extractedContext = readContextFromMap(map);
       });
 
       it("returns empty layers array", () => {
@@ -518,9 +518,9 @@ describe("createContextFromMap", () => {
       it("should produce equivalent context after roundtrip", async () => {
         const originalContext = MAP_CTX_FIXTURE;
         const map = await createMapFromContext(originalContext);
-        const extractedContext = createContextFromMap(map);
+        const extractedContext = readContextFromMap(map);
         const map2 = await createMapFromContext(extractedContext);
-        const extractedContext2 = createContextFromMap(map2);
+        const extractedContext2 = readContextFromMap(map2);
 
         // Compare layer types
         expect(extractedContext2.layers.map((l) => l.type)).toEqual(

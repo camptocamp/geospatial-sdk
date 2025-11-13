@@ -247,7 +247,7 @@ function extractViewModel(map: Map): MapContextView | null {
  * Create a MapContext from an OpenLayers map
  * @param map
  */
-export function createContextFromMap(map: Map): MapContext {
+export function readContextFromMap(map: Map): MapContext {
   const layers: MapContextLayer[] = [];
 
   map.getLayers().forEach((layer) => {
