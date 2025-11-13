@@ -145,7 +145,9 @@ describe("createContextFromMap", () => {
       });
 
       it("extracts the style", () => {
-        expect((extractedLayerModel as MapContextLayerWms).style).toBe("default");
+        expect((extractedLayerModel as MapContextLayerWms).style).toBe(
+          "default",
+        );
       });
 
       it("extracts layer properties", () => {
@@ -169,12 +171,15 @@ describe("createContextFromMap", () => {
         const map = new Map({});
         map.addLayer(layer);
         // Wait for the promise chain to complete (mock resolves immediately but .then is async)
-        await vi.waitFor(() => {
-          const source = layer.getSource();
-          if (!source) {
-            throw new Error("Source not ready yet");
-          }
-        }, { timeout: 1000, interval: 10 });
+        await vi.waitFor(
+          () => {
+            const source = layer.getSource();
+            if (!source) {
+              throw new Error("Source not ready yet");
+            }
+          },
+          { timeout: 1000, interval: 10 },
+        );
         const context = createContextFromMap(map);
         extractedLayerModel = context.layers[0];
       });
@@ -258,7 +263,9 @@ describe("createContextFromMap", () => {
       });
 
       it("does not have inline data", () => {
-        expect((extractedLayerModel as MapContextLayerGeojson).data).toBeUndefined();
+        expect(
+          (extractedLayerModel as MapContextLayerGeojson).data,
+        ).toBeUndefined();
       });
 
       it("extracts layer properties", () => {
@@ -293,7 +300,9 @@ describe("createContextFromMap", () => {
       });
 
       it("extracts the layer name", () => {
-        expect((extractedLayerModel as MapContextLayerWmts)?.name).toBeDefined();
+        expect(
+          (extractedLayerModel as MapContextLayerWmts)?.name,
+        ).toBeDefined();
       });
 
       it("extracts layer properties", () => {
@@ -452,7 +461,9 @@ describe("createContextFromMap", () => {
       it("extracts the view", () => {
         expect(extractedContext.view).toBeTruthy();
         expect((extractedContext.view as any)?.center).toBeDefined();
-        expect((extractedContext.view as any)?.zoom).toBe((originalContext.view as any)?.zoom);
+        expect((extractedContext.view as any)?.zoom).toBe(
+          (originalContext.view as any)?.zoom,
+        );
       });
     });
 
@@ -517,7 +528,9 @@ describe("createContextFromMap", () => {
         );
 
         // Compare view zoom
-        expect((extractedContext2.view as any)?.zoom).toBe((extractedContext.view as any)?.zoom);
+        expect((extractedContext2.view as any)?.zoom).toBe(
+          (extractedContext.view as any)?.zoom,
+        );
 
         // Compare view center with tolerance
         expect((extractedContext2.view as any)?.center[0]).toBeCloseTo(

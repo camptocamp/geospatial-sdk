@@ -1,5 +1,9 @@
 import Map from "ol/Map";
-import { MapContext, MapContextLayer, MapContextLayerXyz, MapContextView } from "@geospatial-sdk/core";
+import {
+  MapContext,
+  MapContextLayer,
+  MapContextView,
+} from "@geospatial-sdk/core";
 import { toLonLat, get as getProjection } from "ol/proj";
 import Layer from "ol/layer/Layer";
 import TileLayer from "ol/layer/Tile";
@@ -22,7 +26,7 @@ const GEOJSON = new GeoJSON();
  */
 function extractLayerModel(layer: Layer): MapContextLayer | null {
   const source = layer.getSource();
-  
+
   if (!source) {
     return null;
   }
@@ -30,12 +34,12 @@ function extractLayerModel(layer: Layer): MapContextLayer | null {
   // Common properties
   const attributionsFn = source.getAttributions();
   let attributionsString: string | undefined = undefined;
-  
+
   if (attributionsFn) {
     // @ts-expect-error- OpenLayers AttributionLike can be called without arguments
     const attributionsResult = attributionsFn();
     if (attributionsResult) {
-      attributionsString = Array.isArray(attributionsResult) 
+      attributionsString = Array.isArray(attributionsResult)
         ? attributionsResult.join(", ")
         : attributionsResult;
     }
@@ -143,18 +147,17 @@ function extractLayerModel(layer: Layer): MapContextLayer | null {
   }
 
   // Vector layers (GeoJSON, WFS)
-  if (layer instanceof VectorLayer && source instanceof VectorSource) {    
+  if (layer instanceof VectorLayer && source instanceof VectorSource) {
     const getStyle = layer.getStyle();
     let style: string | undefined = undefined;
     if (getStyle && typeof getStyle === "string") {
       style = getStyle;
-    }
-    else {
-        style = undefined;
+    } else {
+      style = undefined;
     }
 
     const url = source.getUrl();
-    
+
     // WFS layers have a function URL, not a string
     if (url && typeof url === "function") {
       // Call the function with dummy parameters to get the actual URL
@@ -162,10 +165,10 @@ function extractLayerModel(layer: Layer): MapContextLayer | null {
       const dummyResolution = 1;
       const dummyProjection = getProjection("EPSG:3857")!;
       const urlString = url(dummyExtent, dummyResolution, dummyProjection);
-      
+
       // Extract the base URL (before the ?)
       const baseUrl = urlString.split("?")[0];
-      
+
       return {
         type: "wfs",
         url: baseUrl,
@@ -174,7 +177,7 @@ function extractLayerModel(layer: Layer): MapContextLayer | null {
         ...baseProperties,
       };
     }
-    
+
     if (url && typeof url === "string") {
       // Check if it's a WFS layer by looking at the URL
       if (url.includes("wfs") || url.includes("WFS")) {
@@ -207,8 +210,7 @@ function extractLayerModel(layer: Layer): MapContextLayer | null {
         data: featureCollection,
         ...baseProperties,
       };
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -234,7 +236,7 @@ function extractViewModel(map: Map): MapContextView | null {
   }
 
   const centerLonLat = toLonLat(center, view.getProjection());
-  
+
   return {
     center: centerLonLat as [number, number],
     zoom,
@@ -247,11 +249,11 @@ function extractViewModel(map: Map): MapContextView | null {
  */
 export function createContextFromMap(map: Map): MapContext {
   const layers: MapContextLayer[] = [];
-  
+
   map.getLayers().forEach((layer) => {
     const layerModel = extractLayerModel(layer as Layer);
     if (layerModel) {
-    layers.push(layerModel);
+      layers.push(layerModel);
     }
   });
 
