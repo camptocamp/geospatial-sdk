@@ -71,11 +71,11 @@ interface LayerGeojson extends MapContextBaseLayer {
   type: "geojson";
   style?: VectorStyle;
 }
-interface LayerGeojsonWithUrl extends LayerGeojson {
+export interface LayerGeojsonWithUrl extends LayerGeojson {
   url: string;
   data?: never;
 }
-interface LayerGeojsonWithData extends LayerGeojson {
+export interface LayerGeojsonWithData extends LayerGeojson {
   data: FeatureCollection<Geometry | null> | string;
   url?: never;
 }
