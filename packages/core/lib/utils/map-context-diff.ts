@@ -6,7 +6,6 @@ import {
   MapContextLayerReordered,
 } from "../model";
 import { isLayerSame, isLayerSameAndUnchanged } from "./map-context";
-import { getHash } from "./hash";
 
 /**
  * The following logic is produced by identifying layers in both context
@@ -92,9 +91,7 @@ export function computeMapContextDiff(
   }
 
   let viewChanges =
-    getHash(nextContext.view) !== getHash(previousContext.view)
-      ? nextContext.view
-      : undefined;
+    nextContext.view !== previousContext.view ? nextContext.view : undefined;
   if (viewChanges !== null && viewChanges !== undefined) {
     viewChanges = { ...viewChanges }; // copy the view to avoid unexpected mutations
   }
