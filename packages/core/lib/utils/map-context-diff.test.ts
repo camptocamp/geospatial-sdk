@@ -8,7 +8,7 @@ import {
   SAMPLE_LAYER4,
   SAMPLE_LAYER5,
 } from "../../fixtures/map-context.fixtures";
-import { describe } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 
 describe("Context diff utils", () => {
   describe("computeMapContextDiff", () => {
@@ -291,6 +291,37 @@ describe("Context diff utils", () => {
             viewChanges: {
               center: [0, 0],
               zoom: 1,
+            },
+          });
+        });
+      });
+      describe("same content but different reference", () => {
+        beforeEach(() => {
+          contextOld = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [5, 10],
+              zoom: 3,
+            },
+          };
+          contextNew = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [5, 10],
+              zoom: 3,
+            },
+          };
+        });
+        it("output the correct diff", () => {
+          diff = computeMapContextDiff(contextNew, contextOld);
+          expect(diff).toEqual({
+            layersAdded: [],
+            layersChanged: [],
+            layersRemoved: [],
+            layersReordered: [],
+            viewChanges: {
+              center: [5, 10],
+              zoom: 3,
             },
           });
         });
