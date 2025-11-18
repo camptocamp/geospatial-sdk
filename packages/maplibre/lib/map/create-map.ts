@@ -12,7 +12,7 @@ import {
   WfsEndpoint,
   WmsEndpoint,
 } from "@camptocamp/ogc-client";
-import { createDatasetFromGeoJsonLayer } from "../helpers/map.helpers";
+import { createDatasetFromGeoJsonLayer, generateLayerId } from "../helpers/map.helpers";
 import { Dataset, PartialStyleSpecification } from "../maplibre.models";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
@@ -27,8 +27,8 @@ export async function createLayer(
 
   switch (type) {
     case "wms": {
-      const sourceId = `${layerModel.name}`;
-      const layerId = `${layerModel.name}`;
+      const layerId = generateLayerId(layerModel);
+      const sourceId = layerId;
 
       const endpoint = await new WmsEndpoint(layerModel.url).isReady();
       let url = endpoint.getMapUrl([layerModel.name], {
@@ -39,7 +39,7 @@ export async function createLayer(
         crs: "EPSG:3857",
       });
       url = removeSearchParams(url, ["bbox"]);
-      url = `${url.toString()}&bbox={bbox-epsg-3857}`;
+      url = `${url.toString()}&BBOX={bbox-epsg-3857}`;
 
       const dataset: Dataset = {
         sources: {
@@ -66,8 +66,7 @@ export async function createLayer(
         asJson: true,
         outputCrs: "EPSG:4326",
       });
-      const geojson = await fetchGeoJson(url);
-      return createDatasetFromGeoJsonLayer(layerModel, geojson!);
+      return createDatasetFromGeoJsonLayer(layerModel, url);
     }
     case "geojson": {
       let geojson;
@@ -93,22 +92,17 @@ export async function createLayer(
       let layerUrl: string;
       if (layerModel.useTiles) {
         console.warn("[Warning] OGC API - Tiles not yet implemented.");
-        // if (layerModel.useTiles === "vector") {
-        // } else if (layerModel.useTiles === "map") {
-        // }
       } else {
         layerUrl = await ogcEndpoint.getCollectionItemsUrl(
           layerModel.collection,
           { ...layerModel.options, asJson: true },
         );
-        const geojson = await fetchGeoJson(layerUrl).catch(
-          () => featureCollection,
-        );
-        return createDatasetFromGeoJsonLayer(layerModel, geojson);
+        return createDatasetFromGeoJsonLayer(layerModel, layerUrl);
       }
       break;
     }
     case "maplibre-style": {
+      console.warn("[Warning] Maplibre style - Not yet fully implemented.");
       const style = await fetch(layerModel.styleUrl).then((res) => res.json());
       return style;
     }
@@ -117,7 +111,7 @@ export async function createLayer(
 }
 
 /**
- * Create an OpenLayers map from a context; optionally specify a target (root element) for the map
+ * Create an Maplibre map from a context; optionally specify a target (root element) for the map
  * @param context
  * @param target
  */
@@ -157,14 +151,4 @@ export async function resetMapFromContext(
     partialMLStyle.layers.map((layer) => map.addLayer(layer));
   }
   return map;
-}
-
-async function fetchGeoJson(url: string): Promise<FeatureCollection> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `[Error] Maplibre.util:: ${response.status} ${response.statusText}`,
-    );
-  }
-  return await response.json();
 }

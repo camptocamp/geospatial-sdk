@@ -1,7 +1,7 @@
 import { MapContextDiff } from "@geospatial-sdk/core";
 import { Map } from "maplibre-gl";
 import { createLayer } from "./create-map";
-import { removeLayersFromSource } from "../helpers/map.helpers";
+import { generateLayerId, removeLayersFromSource } from "../helpers/map.helpers";
 
 /**
  * Apply a context diff to an MapLibre map
@@ -52,7 +52,7 @@ export async function applyContextDiffToMap(
 
   // recreate changed layers
   for (const layerChanged of contextDiff.layersChanged) {
-    const sourceId = layerChanged.layer.id as string;
+    const sourceId = generateLayerId(layerChanged.layer);
     removeLayersFromSource(map, sourceId);
     createLayer(layerChanged.layer).then((styleDiff) => {
       styleDiff.layers.map((layer) => map.addLayer(layer));

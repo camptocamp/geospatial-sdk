@@ -6,6 +6,8 @@ import {
 } from "../maplibre.models";
 import { FeatureCollection, Geometry } from "geojson";
 import { contextStyleToMaplibreLayers } from "./style.helpers";
+import { getHash } from "@geospatial-sdk/core/dist/utils/hash";
+import { MapContextLayer } from "@geospatial-sdk/core";
 
 /**
  * Remove all layers from a given source in the map.
@@ -34,9 +36,7 @@ export function createDatasetFromGeoJsonLayer(
   layerModel: LayerContextWithStyle,
   geojson: FeatureCollection<Geometry | null> | string,
 ): Dataset {
-  const sourceId =
-    layerModel.id || Math.floor(Math.random() * 1000000).toString();
-
+  const sourceId = generateLayerId(layerModel);
   const partialLayers = contextStyleToMaplibreLayers(layerModel.style);
   const layers = partialLayers.map((layer) => ({
     ...layer,
@@ -56,4 +56,8 @@ export function createDatasetFromGeoJsonLayer(
     layers,
   } as StyleSpecification;
   return dataset;
+}
+
+export function generateLayerId(layerModel: MapContextLayer) {
+  return getHash(layerModel, ["name", "style", "visibility"]);
 }

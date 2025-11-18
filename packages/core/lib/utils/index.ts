@@ -1,5 +1,6 @@
 export * from "./url";
 export * from "./freeze";
+export * from "./hash";
 export { computeMapContextDiff } from "./map-context-diff";
 export {
   getLayerPosition,

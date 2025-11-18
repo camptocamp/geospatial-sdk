@@ -40,6 +40,7 @@ export function contextStyleToMaplibreLayers(
           "fill-opacity": colorProps.opacity,
         }),
       },
+      filter: ["==", "$type", "Polygon"],
     });
   }
   if (style["stroke-color"] || style["stroke-width"]) {

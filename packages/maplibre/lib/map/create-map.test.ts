@@ -19,7 +19,7 @@ import {
   FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
 } from "@geospatial-sdk/core/fixtures/geojson.fixtures";
 import { PartialStyleSpecification } from "../maplibre.models";
-import { GeoJSONSource, RasterSourceSpecification } from "maplibre-gl";
+import { RasterSourceSpecification } from "maplibre-gl";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -220,7 +220,7 @@ describe("MapContextService", () => {
         expect(id).toBe("ms:commune_actuelle_3857");
         expect(source.data).toEqual(FEATURE_COLLECTION_POLYGON_FIXTURE_4326);
       });
-      it("create 3 layerS", () => {
+      it("create a layer", () => {
         expect(style.layers).toBeTruthy();
         expect(style.layers.length).toBe(1);
         const layer = style.layers[0] as RasterLayerSpecification;
