@@ -36,9 +36,9 @@ export function contextStyleToMaplibreLayers(
       type: "fill",
       paint: {
         "fill-color": colorProps.color,
-        ...(colorProps.opacity !== undefined && {
-          "fill-opacity": colorProps.opacity,
-        }),
+        // ...(colorProps.opacity !== undefined && {
+        //   "fill-opacity": colorProps.opacity,
+        // }),
       },
       filter: ["==", "$type", "Polygon"],
     });

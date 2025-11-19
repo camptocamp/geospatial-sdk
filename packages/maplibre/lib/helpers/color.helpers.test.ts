@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import chroma from "chroma-js";
-import { createColor, DEFAULT_COLOR, colorToRgbaString } from "./color.helpers";
+import { createColor, DEFAULT_COLOR } from "./color.helpers";
 
 describe("createColor", () => {
   it("returns default color if input is null/undefined", () => {
@@ -16,23 +15,20 @@ describe("createColor", () => {
 
   it("converts RGB array to hex", () => {
     const result = createColor([255, 0, 0]);
-    expect(result).toEqual({ color: chroma.rgb(255, 0, 0).hex() });
-    expect(result.color).toEqual("#ff0000");
+    expect(result).toEqual({ color: "rgb(255,0,0)" });
   });
 
   it("conVerts RGB array to hex + opacity", () => {
     const result = createColor([0, 255, 0, 0.5]);
     expect(result).toEqual({
-      color: chroma.rgb(0, 255, 0).hex(),
+      color: "rgb(0,255,0)",
       opacity: 0.5,
     });
-    expect(result.color).toEqual("#00ff00");
-    expect(result.opacity).toBeCloseTo(0.5);
   });
 
   it("converts a named CSS color", () => {
     const result = createColor("blue");
-    expect(result.color).toBe(chroma("blue").hex());
+    expect(result.color).toBe("blue");
     expect(result.opacity).toBeUndefined();
   });
 
@@ -57,38 +53,5 @@ describe("createColor", () => {
   it("returns default color if input is not valid", () => {
     expect(createColor(123 as any)).toEqual({ color: DEFAULT_COLOR });
     expect(createColor({} as any)).toEqual({ color: DEFAULT_COLOR });
-  });
-});
-
-describe("colorToRgbaString", () => {
-  it("returns undefined if color is undefined", () => {
-    expect(colorToRgbaString({})).toBeUndefined();
-    expect(colorToRgbaString({ opacity: 0.5 })).toBeUndefined();
-  });
-
-  it("returns hex color if opacity is undefined", () => {
-    expect(colorToRgbaString({ color: "#ff0000" })).toBe("#ff0000");
-    expect(colorToRgbaString({ color: "#00ff00", opacity: undefined })).toBe(
-      "#00ff00",
-    );
-  });
-
-  it("returns rgba string if opacity is defined", () => {
-    expect(colorToRgbaString({ color: "#ff0000", opacity: 0.5 })).toBe(
-      "rgba(255,0,0,0.5)",
-    );
-    expect(colorToRgbaString({ color: "#00ff00", opacity: 0.25 })).toBe(
-      "rgba(0,255,0,0.25)",
-    );
-  });
-
-  it("handles named colors with opacity", () => {
-    expect(colorToRgbaString({ color: "blue", opacity: 0.2 })).toBe(
-      "rgba(0,0,255,0.2)",
-    );
-  });
-
-  it("handles named colors without opacity", () => {
-    expect(colorToRgbaString({ color: "blue" })).toBe("blue");
   });
 });

@@ -1,4 +1,3 @@
-import chroma from "chroma-js";
 import { ColorExpression } from "ol/style/flat";
 
 export interface ColorProps {
@@ -19,12 +18,12 @@ export function createColor(input: ColorExpression): ColorProps {
   // Color as Array [red, green, blue, alpha?]
   if (Array.isArray(input) && typeof input[0] === "number") {
     if (input.length === 3) {
-      return { color: chroma.rgb(input[0], input[1], input[2]).hex() };
+      return { color: `rgb(${input[0]},${input[1]},${input[2]})` };
     }
     if (input.length === 4) {
       const [r, g, b, a] = input;
       return {
-        color: chroma.rgb(r, g, b).hex(),
+        color: `rgb(${r},${g},${b})`,
         opacity: a,
       };
     }
@@ -32,21 +31,10 @@ export function createColor(input: ColorExpression): ColorProps {
 
   // String eg 'black
   if (typeof input === "string") {
-    const c = chroma(input);
-    const alpha = c.alpha();
     return {
-      color: c.hex("rgb"),
-      opacity: alpha < 1 ? alpha : undefined,
+      color: input,
     };
   }
-  return { color: DEFAULT_COLOR };
-}
 
-export function colorToRgbaString(color: ColorProps): string | undefined {
-  if (color.color === undefined) return undefined;
-  if (color.opacity !== undefined) {
-    const c = chroma(color.color).alpha(color.opacity);
-    return c.css();
-  }
-  return color.color;
+  return { color: DEFAULT_COLOR };
 }
