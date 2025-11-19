@@ -26,7 +26,8 @@
   },
   "plugins": ["@typescript-eslint", "vue"],
   "rules": {
-    "@typescript-eslint/no-explicit-any": 1
+    "@typescript-eslint/no-explicit-any": 1,
+    "no-prototype-builtins": "off"
   },
   "ignorePatterns": ["**/*.test.ts", "apps", "**/mocks", "**/dist/**"]
 }
