@@ -12,7 +12,10 @@ import {
   WfsEndpoint,
   WmsEndpoint,
 } from "@camptocamp/ogc-client";
-import { createDatasetFromGeoJsonLayer, generateLayerId } from "../helpers/map.helpers";
+import {
+  createDatasetFromGeoJsonLayer,
+  generateLayerId,
+} from "../helpers/map.helpers";
 import { Dataset, PartialStyleSpecification } from "../maplibre.models";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
