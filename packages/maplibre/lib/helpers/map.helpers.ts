@@ -59,5 +59,12 @@ export function createDatasetFromGeoJsonLayer(
 }
 
 export function generateLayerId(layerModel: MapContextLayer) {
-  return getHash(layerModel, ["name", "style", "visibility"]);
+  return getHash(layerModel, [
+    "name",
+    "style",
+    "visibility",
+    "opacity",
+    "version",
+    "extras",
+  ]);
 }
