@@ -1,7 +1,10 @@
 import { ImageTile, Tile } from "ol";
 import TileState from "ol/TileState.js";
 import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
-import { handleTileError, tileLoadErrorCatchFunction } from "./handle-errors";
+import {
+  handleTileError,
+  imageTileLoadErrorCatchFunction,
+} from "./handle-errors";
 import { Map } from "ol";
 import { describe } from "node:test";
 import TileLayer from "ol/layer/Tile";
@@ -35,7 +38,7 @@ describe("handle-errors", () => {
       TileState.IDLE,
       "",
       null,
-      () => tileLoadErrorCatchFunction,
+      () => imageTileLoadErrorCatchFunction,
     );
   });
 
