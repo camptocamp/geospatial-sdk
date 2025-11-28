@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MapContext,
   MapContextDiff,
@@ -14,7 +15,6 @@ import {
 import { Map, StyleSpecification } from "maplibre-gl";
 import { createLayer, createMapFromContext } from "./create-map";
 import { applyContextDiffToMap } from "./apply-context-diff";
-import { beforeEach } from "vitest";
 
 async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
   const reference = (await createLayer(layerModel)) as any;

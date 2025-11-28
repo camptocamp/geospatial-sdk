@@ -14,6 +14,10 @@ export type LayerSpecificationWithSource = Exclude<
   BackgroundLayerSpecification
 >;
 
+export interface LayerMetadataSpecification {
+  sourcePosition: number;
+}
+
 export type LayerContextWithStyle =
   | MapContextLayerWfs
   | MapContextLayerOgcApi

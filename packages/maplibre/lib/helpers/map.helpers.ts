@@ -2,6 +2,7 @@ import { Map, StyleSpecification } from "maplibre-gl";
 import {
   Dataset,
   LayerContextWithStyle,
+  LayerMetadataSpecification,
   LayerSpecificationWithSource,
 } from "../maplibre.models";
 import { FeatureCollection, Geometry } from "geojson";
@@ -31,10 +32,12 @@ export function removeLayersFromSource(map: Map, sourceId: string) {
  * Create a Maplibre source and layers from a GeoJSON MapContextLayer and its style.
  * @param layerModel
  * @param geojson
+ * @param sourcePosition
  */
 export function createDatasetFromGeoJsonLayer(
   layerModel: LayerContextWithStyle,
   geojson: FeatureCollection<Geometry | null> | string,
+  sourcePosition: number,
 ): Dataset {
   const sourceId = generateLayerId(layerModel);
   const partialLayers = contextStyleToMaplibreLayers(layerModel.style);
@@ -45,8 +48,11 @@ export function createDatasetFromGeoJsonLayer(
     layout: {
       visibility: layerModel.visibility === false ? "none" : "visible",
     },
+    metadata: {
+      sourcePosition,
+    },
   }));
-  const dataset = {
+  return {
     sources: {
       [sourceId]: {
         type: "geojson",
@@ -55,7 +61,32 @@ export function createDatasetFromGeoJsonLayer(
     },
     layers,
   } as StyleSpecification;
-  return dataset;
+}
+
+export function getLayersAtPosition(
+  map: Map,
+  position: number,
+): LayerSpecificationWithSource[] {
+  const layers = map.getStyle().layers;
+  const layersWithSource = layers.filter(
+    (layer) => layer.type !== "background", //TODO background layers is not managed
+  ) as LayerSpecificationWithSource[];
+  return layersWithSource.filter(
+    (layer) =>
+      (layer.metadata as LayerMetadataSpecification)?.sourcePosition ===
+      position,
+  );
+}
+
+export function getBeforeId(map: Map, position: number): string | undefined {
+  const beforeLayer = map
+    .getStyle()
+    .layers.find(
+      (layer) =>
+        (layer.metadata as LayerMetadataSpecification).sourcePosition ===
+        position + 1,
+    );
+  return beforeLayer ? beforeLayer.id : undefined;
 }
 
 export function generateLayerId(layerModel: MapContextLayer) {

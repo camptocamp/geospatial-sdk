@@ -3,6 +3,8 @@ import { Map } from "maplibre-gl";
 import { createLayer } from "./create-map";
 import {
   generateLayerId,
+  getBeforeId,
+  getLayersAtPosition,
   removeLayersFromSource,
 } from "../helpers/map.helpers";
 
@@ -21,44 +23,48 @@ export async function applyContextDiffToMap(
       (a, b) => b.position - a.position,
     );
     for (const layerRemoved of removed) {
-      const maplibreLayer = map.getStyle().layers[layerRemoved.position];
-      if (maplibreLayer.type === "background") {
+      const mlLayers = getLayersAtPosition(map, layerRemoved.position);
+      if (mlLayers.length === 0) {
         console.warn(
-          "[Warning] applyContextDiffToMap: removing background layer is not supported.",
+          `[Warning] applyContextDiffToMap: no layer found at position ${layerRemoved.position} to remove.`,
         );
         continue;
       }
-      const sourceId = maplibreLayer.source;
-      map.removeLayer(maplibreLayer.id);
+      const sourceId = mlLayers[0].source;
+      mlLayers.forEach((layer) => {
+        map.removeLayer(layer.id);
+      });
       map.removeSource(sourceId);
     }
   }
 
   // insert added layers
   const newLayers = await Promise.all(
-    contextDiff.layersAdded.map((layerAdded) => createLayer(layerAdded.layer)),
+    contextDiff.layersAdded.map((layerAdded) =>
+      createLayer(layerAdded.layer, layerAdded.position),
+    ),
   );
   newLayers.forEach((style, index) => {
     const position = contextDiff.layersAdded[index].position;
-    const beforeId = map.getLayersOrder()[position]; // can be undefined
+    let beforeId = getBeforeId(map, position);
     Object.keys(style.sources).forEach((sourceId) =>
       map.addSource(sourceId, style.sources[sourceId]),
     );
     style.layers.map((layer) => {
-      if (position >= map.getLayersOrder().length) {
-        map.addLayer(layer);
-      } else {
-        map.addLayer(layer, beforeId);
-      }
+      map.addLayer(layer, beforeId);
     });
   });
 
   // recreate changed layers
   for (const layerChanged of contextDiff.layersChanged) {
-    const sourceId = generateLayerId(layerChanged.layer);
+    const { layer, position } = layerChanged;
+    const sourceId = generateLayerId(layer);
     removeLayersFromSource(map, sourceId);
-    createLayer(layerChanged.layer).then((styleDiff) => {
-      styleDiff.layers.map((layer) => map.addLayer(layer));
+    let beforeId = getBeforeId(map, position);
+    createLayer(layer, position).then((styleDiff) => {
+      styleDiff.layers.map((layer) => {
+        map.addLayer(layer, beforeId);
+      });
     });
   }
 

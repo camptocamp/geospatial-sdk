@@ -5,7 +5,12 @@ import {
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 
-import { Map, StyleSpecification } from "maplibre-gl";
+import {
+  LayerSpecification,
+  Map,
+  MapOptions,
+  StyleSpecification,
+} from "maplibre-gl";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -25,6 +30,7 @@ const featureCollection: FeatureCollection<Geometry | null> = {
 
 export async function createLayer(
   layerModel: MapContextLayer,
+  sourcePosition: number,
 ): Promise<PartialStyleSpecification> {
   const { type } = layerModel;
 
@@ -58,6 +64,9 @@ export async function createLayer(
             type: "raster",
             source: sourceId,
             paint: {},
+            metadata: {
+              sourcePosition,
+            },
           },
         ],
       };
@@ -69,7 +78,7 @@ export async function createLayer(
         asJson: true,
         outputCrs: "EPSG:4326",
       });
-      return createDatasetFromGeoJsonLayer(layerModel, url);
+      return createDatasetFromGeoJsonLayer(layerModel, url, sourcePosition);
     }
     case "geojson": {
       let geojson;
@@ -88,7 +97,7 @@ export async function createLayer(
           geojson = data;
         }
       }
-      return createDatasetFromGeoJsonLayer(layerModel, geojson);
+      return createDatasetFromGeoJsonLayer(layerModel, geojson, sourcePosition);
     }
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
@@ -100,13 +109,20 @@ export async function createLayer(
           layerModel.collection,
           { ...layerModel.options, asJson: true },
         );
-        return createDatasetFromGeoJsonLayer(layerModel, layerUrl);
+        return createDatasetFromGeoJsonLayer(
+          layerModel,
+          layerUrl,
+          sourcePosition,
+        );
       }
       break;
     }
     case "maplibre-style": {
       console.warn("[Warning] Maplibre style - Not yet fully implemented.");
       const style = await fetch(layerModel.styleUrl).then((res) => res.json());
+      style.layers?.forEach(
+        (layer: LayerSpecification) => (layer.metadata = { sourcePosition }),
+      );
       return style;
     }
   }
@@ -120,11 +136,9 @@ export async function createLayer(
  */
 export async function createMapFromContext(
   context: MapContext,
-  container: string | HTMLElement,
+  mapOptions: MapOptions,
 ): Promise<Map> {
-  const map = new Map({
-    container,
-  });
+  const map = new Map(mapOptions);
   return await resetMapFromContext(map, context);
 }
 
@@ -140,8 +154,10 @@ export async function resetMapFromContext(
   map.setZoom((context.view as ViewByZoomAndCenter).zoom);
   map.setCenter((context.view as ViewByZoomAndCenter).center);
 
-  for (const layerModel of context.layers) {
-    const partialMLStyle = await createLayer(layerModel);
+  for (let i = 0; i < context.layers.length; i++) {
+    const layerModel = context.layers[i];
+    const partialMLStyle = await createLayer(layerModel, i);
+
     if (partialMLStyle.glyphs) {
       map.setGlyphs(partialMLStyle.glyphs);
     }
