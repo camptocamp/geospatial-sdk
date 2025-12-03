@@ -5,9 +5,9 @@ import { type MapContext, type MapContextLayerWms } from '@geospatial-sdk/core'
 
 const Layers = {
   maplibre: {
-    type: "maplibre-style",
-    styleUrl: "https://demo.baremaps.com/style.json",
-    accessToken: "abcdefgh",
+    type: 'maplibre-style',
+    styleUrl: 'https://demo.baremaps.com/style.json',
+    accessToken: 'abcdefgh'
   },
   wms: {
     type: 'wms',
@@ -15,13 +15,13 @@ const Layers = {
     name: 'INSEE.FILOSOFI.POPULATION'
   } as MapContextLayerWms,
   wfs: {
-    type: "wfs",
-    url: "https://data.lillemetropole.fr/geoserver/dsp_ilevia/ows?REQUEST=GetCapabilities&SERVICE=WFS&VERSION=2.0.0",
-    featureType: "ilevia_traceslignes",
-    label: "Tracé des lignes de bus",
+    type: 'wfs',
+    url: 'https://data.lillemetropole.fr/geoserver/dsp_ilevia/ows?REQUEST=GetCapabilities&SERVICE=WFS&VERSION=2.0.0',
+    featureType: 'ilevia_traceslignes',
+    label: 'Tracé des lignes de bus',
     visibility: true,
-    attributions: "camptocamp",
-    opacity: 0.5,
+    attributions: 'camptocamp',
+    opacity: 0.5
   },
   geojson: {
     id: 'geojson',
@@ -29,9 +29,9 @@ const Layers = {
     url: 'https://data.lillemetropole.fr/data/ogcapi/collections/roubaix:implantation_des_arceaux_velos_a_roubaix/items?f=geojson&limit=-1'
   },
   ogcapi: {
-    type: "ogcapi",
-    url: "https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:abris_velo/items?f=json&limit=-1",
-    collection: "ilevia:abris_velo",
+    type: 'ogcapi',
+    url: 'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:abris_velo/items?f=json&limit=-1',
+    collection: 'ilevia:abris_velo'
   }
 }
 
@@ -41,11 +41,13 @@ let context = {
     zoom: 10,
     center: [3.1626248124366176, 50.67829080457065]
   },
-  layers: Object.keys(Layers).map(key => Layers[key as keyof typeof Layers]),
+  layers: Object.keys(Layers).map(key => Layers[key as keyof typeof Layers])
 }
 
 onMounted(async () => {
-  await createMapFromContext(<MapContext>context, <HTMLElement>mapRoot.value)
+  await createMapFromContext(<MapContext>context, {
+    container: <HTMLElement>mapRoot.value
+  })
 })
 
 </script>

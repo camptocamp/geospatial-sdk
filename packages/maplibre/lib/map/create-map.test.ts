@@ -15,11 +15,15 @@ import {
 } from "@maplibre/maplibre-gl-style-spec";
 import {
   FEATURE_COLLECTION_LINESTRING_FIXTURE_4326,
-  FEATURE_COLLECTION_POINT_FIXTURE_4326,
   FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
 } from "@geospatial-sdk/core/fixtures/geojson.fixtures";
 import { PartialStyleSpecification } from "../maplibre.models";
-import { RasterSourceSpecification } from "maplibre-gl";
+import {
+  CircleLayerSpecification,
+  LayerSpecification,
+  LineLayerSpecification,
+  RasterSourceSpecification,
+} from "maplibre-gl";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -28,7 +32,7 @@ describe("MapContextService", () => {
     describe("WMS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WMS_FIXTURE),
-          (style = await createLayer(layerModel));
+          (style = await createLayer(layerModel, 0));
       });
       it("create a tile layer", () => {
         expect(style).toBeTruthy();
@@ -38,9 +42,9 @@ describe("MapContextService", () => {
         expect(sourcesIds.length).toBe(1);
         const id = sourcesIds[0];
         const source = style.sources[id] as RasterSourceSpecification;
-        expect(id).toBe("commune_actuelle_3857");
+        expect(id).toBe("1046815418");
         expect(source.tiles).toEqual([
-          "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&bbox={bbox-epsg-3857}",
+          "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&BBOX={bbox-epsg-3857}",
         ]);
       });
       it("create a layer", () => {
@@ -48,8 +52,8 @@ describe("MapContextService", () => {
         expect(style.layers.length).toBe(1);
 
         const layer = style.layers[0] as RasterLayerSpecification;
-        expect(layer.id).toBe("commune_actuelle_3857");
-        expect(layer.source).toBe("commune_actuelle_3857");
+        expect(layer.id).toBe("1046815418");
+        expect(layer.source).toBe("1046815418");
         expect(layer.type).toBe(`raster`);
       });
     });
@@ -57,7 +61,7 @@ describe("MapContextService", () => {
       describe("with inline data", () => {
         beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
-          style = await createLayer(layerModel);
+          style = await createLayer(layerModel, 0);
           Math.random = vi.fn(() => 0.027404);
         });
         it("create a VectorLayer", () => {
@@ -66,23 +70,23 @@ describe("MapContextService", () => {
         it("create a source", () => {
           const sourcesIds = Object.keys(style.sources);
           expect(sourcesIds.length).toBe(1);
-          expect(sourcesIds[0]).toBe("27404");
+          expect(sourcesIds[0]).toBe("2792250259");
         });
         it("create 3 layers", () => {
           expect(style.layers).toBeTruthy();
           expect(style.layers.length).toBe(3);
 
           let layer = style.layers[0] as RasterLayerSpecification;
-          expect(layer.id).toBe("27404-fill");
-          expect(layer.source).toBe("27404");
+          expect(layer.id).toBe("2792250259-fill");
+          expect(layer.source).toBe("2792250259");
 
           layer = style.layers[1] as RasterLayerSpecification;
-          expect(layer.id).toBe("27404-line");
-          expect(layer.source).toBe("27404");
+          expect(layer.id).toBe("2792250259-line");
+          expect(layer.source).toBe("2792250259");
 
           layer = style.layers[2] as RasterLayerSpecification;
-          expect(layer.id).toBe("27404-circle");
-          expect(layer.source).toBe("27404");
+          expect(layer.id).toBe("2792250259-circle");
+          expect(layer.source).toBe("2792250259");
         });
 
         it("set correct source properties", () => {
@@ -96,15 +100,14 @@ describe("MapContextService", () => {
         it("set correct layer properties", () => {
           const layer = style.layers[0] as FillLayerSpecification;
           expect(layer.type).toBe(`fill`);
-          expect(layer.paint["fill-color"]).toBe("#ffffff");
-          expect(layer.paint["fill-opacity"]).toBe(0.4);
+          expect(layer.paint["fill-color"]).toBe("rgba(255,255,255,0.4)");
         });
       });
       describe("with inline data as string", () => {
         beforeEach(async () => {
           layerModel = { ...MAP_CTX_LAYER_GEOJSON_FIXTURE };
           layerModel.data = JSON.stringify(layerModel.data);
-          style = await createLayer(layerModel);
+          style = await createLayer(layerModel, 0);
         });
         it("create a VectorLayer", () => {
           expect(style).toBeTruthy();
@@ -130,8 +133,8 @@ describe("MapContextService", () => {
         it("set correct layer properties", () => {
           const layer = style.layers[0] as FillLayerSpecification;
           expect(layer.type).toBe(`fill`);
-          expect(layer.paint["fill-color"]).toBe("#ffffff");
-          expect(layer.paint["fill-opacity"]).toBe(0.4);
+          expect(layer.paint["fill-color"]).toBe("rgba(255,255,255,0.4)");
+          expect(layer.paint["fill-opacity"]).toBeUndefined();
         });
       });
       describe("with invalid inline data as string", () => {
@@ -143,7 +146,7 @@ describe("MapContextService", () => {
             url: undefined,
             data: "blargz",
           } as LayerGeojsonWithData;
-          style = await createLayer(layerModel);
+          style = await createLayer(layerModel, 0);
         });
         it("create a VectorLayer", () => {
           expect(style).toBeTruthy();
@@ -153,7 +156,7 @@ describe("MapContextService", () => {
         });
         it("create an empty VectorSource source", () => {
           expect(style.sources).toEqual({
-            "27404": {
+            "3631250040": {
               data: {
                 features: [],
                 type: "FeatureCollection",
@@ -172,7 +175,7 @@ describe("MapContextService", () => {
                   Promise.resolve(FEATURE_COLLECTION_POLYGON_FIXTURE_4326),
               }),
             );
-            style = await createLayer(layerModel);
+            style = await createLayer(layerModel, 0);
           });
           it("create a VectorLayer", () => {
             expect(style).toBeTruthy();
@@ -192,14 +195,16 @@ describe("MapContextService", () => {
               sourcesIds[0]
             ] as GeoJSONSourceSpecification;
             expect(source.type).toBe("geojson");
-            expect(source.data).toEqual(MAP_CTX_LAYER_GEOJSON_FIXTURE.data);
+            expect(source.data).toEqual(
+              "https://my.host.com/data/regions.json",
+            );
           });
 
           it("set correct layer properties", () => {
             const layer = style.layers[0] as FillLayerSpecification;
             expect(layer.type).toBe(`fill`);
-            expect(layer.paint["fill-color"]).toBe("#ffffff");
-            expect(layer.paint["fill-opacity"]).toBe(0.4);
+            expect(layer.paint["fill-color"]).toBe("rgba(255,255,255,0.4)");
+            expect(layer.paint["fill-opacity"]).toBeUndefined();
           });
         });
       });
@@ -207,7 +212,7 @@ describe("MapContextService", () => {
     describe("WFS", () => {
       beforeEach(async () => {
         (layerModel = MAP_CTX_LAYER_WFS_FIXTURE),
-          (style = await createLayer(layerModel));
+          (style = await createLayer(layerModel, 1));
       });
       it("create a vector layer", () => {
         expect(style).toBeTruthy();
@@ -217,54 +222,30 @@ describe("MapContextService", () => {
         expect(sourcesIds.length).toBe(1);
         const id = sourcesIds[0];
         const source = style.sources[id] as GeoJSONSourceSpecification;
-        expect(id).toBe("ms:commune_actuelle_3857");
-        expect(source.data).toEqual(FEATURE_COLLECTION_POLYGON_FIXTURE_4326);
+        expect(id).toBe("985400327");
+        expect(source.data).toEqual(
+          "https://www.datagrandest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
+        );
       });
-      it("create a layer", () => {
+      it("create 3 layers", () => {
         expect(style.layers).toBeTruthy();
-        expect(style.layers.length).toBe(1);
-        const layer = style.layers[0] as RasterLayerSpecification;
-        expect(layer.id).toBe("ms:commune_actuelle_3857-fill");
-        expect(layer.source).toBe("ms:commune_actuelle_3857");
-      });
+        expect(style.layers.length).toBe(3);
 
-      describe("when data type is Polygon", () => {
-        it("set a line paint", () => {
-          const layer = style.layers[0] as RasterLayerSpecification;
-          expect(layer.type).toBe(`fill`);
-        });
-      });
-      describe("when data type is Point", () => {
-        beforeEach(async () => {
-          global.fetch = vi.fn(() =>
-            Promise.resolve({
-              ok: true,
-              json: () =>
-                Promise.resolve(FEATURE_COLLECTION_POINT_FIXTURE_4326),
-            }),
-          );
-          style = await createLayer(layerModel);
-        });
-        it("set a point paint", () => {
-          const layer = style.layers[0] as RasterLayerSpecification;
-          expect(layer.type).toBe(`circle`);
-        });
-      });
-      describe("when data type is LineString", () => {
-        beforeEach(async () => {
-          global.fetch = vi.fn(() =>
-            Promise.resolve({
-              ok: true,
-              json: () =>
-                Promise.resolve(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326),
-            }),
-          );
-          style = await createLayer(layerModel);
-        });
-        it("set a line paint", () => {
-          const layer = style.layers[0] as RasterLayerSpecification;
-          expect(layer.type).toBe(`line`);
-        });
+        let layer: LayerSpecification = style
+          .layers[0] as FillLayerSpecification;
+        expect(layer.id).toBe("985400327-fill");
+        expect(layer.source).toBe("985400327");
+        expect(layer.metadata.sourcePosition).toBe(1);
+
+        layer = style.layers[1] as LineLayerSpecification;
+        expect(layer.id).toBe("985400327-line");
+        expect(layer.source).toBe("985400327");
+        expect(layer.metadata.sourcePosition).toBe(1);
+
+        layer = style.layers[2] as CircleLayerSpecification;
+        expect(layer.id).toBe("985400327-circle");
+        expect(layer.source).toBe("985400327");
+        expect(layer.metadata.sourcePosition).toBe(1);
       });
     });
     describe("OGCAPI", () => {
@@ -278,7 +259,7 @@ describe("MapContextService", () => {
         );
 
         (layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE),
-          (style = await createLayer(layerModel));
+          (style = await createLayer(layerModel, 0));
       });
       it("create a vector layer", () => {
         expect(style).toBeTruthy();
@@ -287,16 +268,19 @@ describe("MapContextService", () => {
         const sourcesIds = Object.keys(style.sources);
         expect(sourcesIds.length).toBe(1);
         const id = sourcesIds[0];
-        const source = style.sources[id];
-        expect(id).toBe("airports");
-        expect(source.data).toEqual(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326);
+        const source = style.sources[id] as GeoJSONSourceSpecification;
+        expect(id).toBe("504003385");
+        expect(source.data).toEqual(
+          "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
+        );
       });
-      it("create a layer", () => {
+      it("create 3 layers", () => {
         expect(style.layers).toBeTruthy();
-        expect(style.layers.length).toBe(1);
-        const layer = style.layers[0] as RasterLayerSpecification;
-        expect(layer.id).toBe("airports-line");
-        expect(layer.source).toBe("airports");
+        expect(style.layers.length).toBe(3);
+        const layer = style.layers[0] as FillLayerSpecification;
+        expect(layer.id).toBe("504003385-fill");
+        expect(layer.source).toBe("504003385");
+        expect(layer.metadata.sourcePosition).toBe(0);
       });
     });
   });

@@ -1,7 +1,6 @@
 import { VectorStyle } from "@geospatial-sdk/core/dist/model/style";
-import { createColor } from "./color.helpers";
 import { LayerSpecification } from "maplibre-gl";
-import { FlatStyle, Rule } from "ol/style/flat";
+import { FlatFill, FlatStyle, Rule } from "ol/style/flat";
 
 const defaultOltStyle: FlatStyle = {
   "fill-color": "rgba(255,255,255,0.4)",
@@ -31,32 +30,19 @@ export function contextStyleToMaplibreLayers(
   style = { ...defaultOltStyle, ...style };
 
   if (style["fill-color"]) {
-    const colorProps = createColor(style["fill-color"]);
     layers.push({
       type: "fill",
       paint: {
-        "fill-color": colorProps.color,
-        // ...(colorProps.opacity !== undefined && {
-        //   "fill-opacity": colorProps.opacity,
-        // }),
+        "fill-color": (style as FlatFill)["fill-color"] as string,
       },
       filter: ["==", "$type", "Polygon"],
     });
   }
   if (style["stroke-color"] || style["stroke-width"]) {
-    let colorProps;
-    if (style["stroke-color"]) {
-      colorProps = createColor(style["stroke-color"]);
-    }
     layers.push({
       type: "line",
       paint: {
-        ...(colorProps?.opacity !== undefined && {
-          "line-opacity": colorProps.opacity,
-        }),
-        ...(colorProps?.color !== undefined && {
-          "line-color": colorProps.color,
-        }),
+        "line-color": style["stroke-color"] as string,
         ...(style["stroke-width"] !== undefined && {
           "line-width": style["stroke-width"] as number,
         }),
@@ -67,29 +53,12 @@ export function contextStyleToMaplibreLayers(
     });
   }
   if (style["circle-radius"]) {
-    let fillColorPropsProps, strokeColorProps;
-    if (style["circle-fill-color"]) {
-      fillColorPropsProps = createColor(style["circle-fill-color"]);
-    }
-    if (style["circle-stroke-color"]) {
-      strokeColorProps = createColor(style["circle-stroke-color"]);
-    }
     layers.push({
       type: "circle",
       paint: {
         "circle-radius": style["circle-radius"],
-        ...(fillColorPropsProps?.opacity !== undefined && {
-          "circle-opacity": fillColorPropsProps.opacity,
-        }),
-        ...(fillColorPropsProps?.color !== undefined && {
-          "circle-color": fillColorPropsProps.color,
-        }),
-        ...(strokeColorProps?.opacity !== undefined && {
-          "circle-stroke-opacity": strokeColorProps.opacity,
-        }),
-        ...(strokeColorProps?.color !== undefined && {
-          "circle-stroke-color": strokeColorProps.color,
-        }),
+        "circle-stroke-color": style["circle-stroke-color"] as string,
+        "circle-color": style["circle-fill-color"] as string,
         "circle-stroke-width": style["circle-stroke-width"] as number,
       },
       filter: ["==", "$type", "Point"],

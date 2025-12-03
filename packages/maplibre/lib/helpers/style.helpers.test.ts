@@ -4,14 +4,14 @@ import { contextStyleToMaplibreLayers } from "./style.helpers";
 const defautlMaplibreFill = {
   type: "fill",
   paint: {
-    "fill-color": "#ffffff",
-    "fill-opacity": 0.4,
+    "fill-color": "rgba(255,255,255,0.4)",
   },
+  filter: ["==", "$type", "Polygon"],
 };
 const defaultMaplibreLine = {
   type: "line",
   paint: {
-    "line-color": "#3399cc",
+    "line-color": "#3399CC",
     "line-width": 1.25,
   },
 };
@@ -19,10 +19,9 @@ const defaultMaplibreCircle = {
   type: "circle",
   filter: ["==", "$type", "Point"],
   paint: {
-    "circle-color": "#ffffff",
-    "circle-opacity": 0.4,
+    "circle-color": "rgba(255,255,255,0.4)",
     "circle-radius": 5,
-    "circle-stroke-color": "#3399cc",
+    "circle-stroke-color": "#3399CC",
     "circle-stroke-width": 1.25,
   },
 };
@@ -45,9 +44,10 @@ describe("createPaint", () => {
       } as any);
       expect(result).toEqual([
         {
+          filter: ["==", "$type", "Polygon"],
           type: "fill",
           paint: {
-            "fill-color": "#ff0000",
+            "fill-color": "red",
           },
         },
         defaultMaplibreLine,
@@ -67,8 +67,7 @@ describe("createPaint", () => {
         {
           type: "line",
           paint: {
-            "line-opacity": 0.5,
-            "line-color": "#1e43f6",
+            "line-color": "rgba(30, 67, 246, 0.5)",
             "line-width": 3,
           },
         },
@@ -81,7 +80,7 @@ describe("createPaint", () => {
       expect(result[1]).toEqual({
         type: "line",
         paint: {
-          "line-color": "#3399cc",
+          "line-color": "#3399CC",
           "line-width": 3,
         },
       });
@@ -95,7 +94,7 @@ describe("createPaint", () => {
       expect(result[1]).toEqual({
         type: "line",
         paint: {
-          "line-color": "#ff0000",
+          "line-color": "red",
           "line-dasharray": [2, 4],
           "line-width": 1.25,
         },
@@ -122,8 +121,8 @@ describe("createPaint", () => {
           filter: ["==", "$type", "Point"],
           paint: {
             "circle-radius": 10,
-            "circle-color": "#ff0000",
-            "circle-stroke-color": "#0000ff",
+            "circle-color": "red",
+            "circle-stroke-color": "blue",
             "circle-stroke-width": 2,
           },
         },
@@ -138,15 +137,14 @@ describe("createPaint", () => {
       const result = contextStyleToMaplibreLayers(style as any);
 
       expect(result[2].paint).toEqual({
-        "circle-color": "#ffffff",
-        "circle-opacity": 0.4,
+        "circle-color": "rgba(255,255,255,0.4)",
         "circle-radius": 5,
-        "circle-stroke-color": "#3399cc",
+        "circle-stroke-color": "#3399CC",
         "circle-stroke-width": 1.25,
       });
     });
 
-    it("respects opacity from createColor for fill and stroke", () => {
+    it("respects colors and opacity", () => {
       const style = {
         "circle-radius": 8,
         "circle-fill-color": "rgba(255,0,0,0.3)",
@@ -155,8 +153,8 @@ describe("createPaint", () => {
 
       const result = contextStyleToMaplibreLayers(style as any);
 
-      expect(result[2].paint["circle-opacity"]).toBe(0.3); // mocked
-      expect(result[2].paint["circle-stroke-opacity"]).toBe(0.6); // mocked
+      expect(result[2].paint["circle-color"]).toBe("rgba(255,0,0,0.3)"); // mocked
+      expect(result[2].paint["circle-stroke-color"]).toBe("rgba(0,0,255,0.6)"); // mocked
     });
   });
 });
