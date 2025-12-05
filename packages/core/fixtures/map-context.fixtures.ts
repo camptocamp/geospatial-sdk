@@ -1,6 +1,8 @@
 import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures";
 import {
   Extent,
+  LayerGeojsonWithData,
+  LayerGeojsonWithUrl,
   MapContext,
   MapContextLayerGeojson,
   MapContextLayerMapLibreStyle,
@@ -19,7 +21,7 @@ export const MAP_CTX_LAYER_XYZ_FIXTURE: MapContextLayerXyz = deepFreeze({
 });
 export const MAP_CTX_LAYER_WMS_FIXTURE: MapContextLayerWms = deepFreeze({
   type: "wms",
-  url: "https://www.geograndest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WMS",
+  url: "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WMS",
   name: "commune_actuelle_3857",
   label: "Communes",
   visibility: false,
@@ -29,7 +31,7 @@ export const MAP_CTX_LAYER_WMS_FIXTURE: MapContextLayerWms = deepFreeze({
 });
 export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayerWfs = deepFreeze({
   type: "wfs",
-  url: "https://www.geograndest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WFS&VERSION=1.1.0",
+  url: "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WFS&VERSION=1.1.0",
   featureType: "ms:commune_actuelle_3857",
   label: "Communes",
   visibility: true,
@@ -38,7 +40,7 @@ export const MAP_CTX_LAYER_WFS_FIXTURE: MapContextLayerWfs = deepFreeze({
 });
 export const MAP_CTX_LAYER_WMTS_FIXTURE: MapContextLayerWmts = deepFreeze({
   type: "wmts",
-  url: "https://www.geograndest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WMTS",
+  url: "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetCapabilities&SERVICE=WMTS",
   name: "commune_actuelle_3857",
 });
 export const MAP_CTX_LAYER_OGCAPI_FIXTURE: MapContextLayerOgcApi = deepFreeze({
@@ -46,14 +48,14 @@ export const MAP_CTX_LAYER_OGCAPI_FIXTURE: MapContextLayerOgcApi = deepFreeze({
   url: "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
   collection: "airports",
 });
-export const MAP_CTX_LAYER_GEOJSON_FIXTURE: MapContextLayerGeojson =
-  deepFreeze<MapContextLayerGeojson>({
+export const MAP_CTX_LAYER_GEOJSON_FIXTURE: LayerGeojsonWithData =
+  deepFreeze<LayerGeojsonWithData>({
     type: "geojson",
     data: FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
     label: "Regions",
     opacity: 0.8,
   });
-export const MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE: MapContextLayerGeojson =
+export const MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE: LayerGeojsonWithUrl =
   deepFreeze({
     type: "geojson",
     url: "https://my.host.com/data/regions.json",

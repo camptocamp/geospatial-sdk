@@ -57312,3 +57312,24 @@ export const FEATURE_COLLECTION_POINT_FIXTURE_4326: FeatureCollection<Geometry |
       },
     ],
   });
+
+export const FEATURE_COLLECTION_LINESTRING_FIXTURE_4326: FeatureCollection<Geometry | null> =
+  deepFreeze({
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        id: 0,
+        properties: {
+          name: "name",
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [2.290332, 51.052483],
+            [2.290332, 51.052483],
+          ],
+        },
+      },
+    ],
+  });
