@@ -33,12 +33,15 @@ import { MapboxVectorLayer } from "ol-mapbox-style";
 import { Tile } from "ol";
 import {
   handleEndpointError,
-  tileLoadErrorCatchFunction,
+  imageTileLoadErrorCatchFunction,
+  vectorTileLoadErrorCatchFunction,
 } from "./handle-errors";
 import VectorTile from "ol/source/VectorTile";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
+
+type TileSource = VectorTile | XYZ;
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
@@ -54,20 +57,21 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               attributions: layerModel.attributions,
             }),
           });
+          const source = <VectorTile>layer.getSource();
+          source.setTileLoadFunction((tile: Tile, src: string) =>
+            vectorTileLoadErrorCatchFunction(<VectorTileLayer>layer, tile, src),
+          );
         } else {
-          layer = new TileLayer({});
-          const source = new XYZ({
-            url: layerModel.url,
-            attributions: layerModel.attributions,
+          layer = new TileLayer({
+            source: new XYZ({
+              url: layerModel.url,
+              attributions: layerModel.attributions,
+            }),
           });
-          source.setTileLoadFunction(function (tile: Tile, src: string) {
-            return tileLoadErrorCatchFunction(
-              layer as TileLayer<XYZ>,
-              tile,
-              src,
-            );
-          });
-          layer.setSource(source);
+          const source = <XYZ>layer.getSource();
+          source.setTileLoadFunction((tile: Tile, src: string) =>
+            imageTileLoadErrorCatchFunction(<Layer>layer, tile, src),
+          );
         }
       }
       break;
@@ -84,7 +88,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           attributions: layerModel.attributions,
         });
         source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(
+          return imageTileLoadErrorCatchFunction(
             layer as TileLayer<TileWMS>,
             tile,
             src,
