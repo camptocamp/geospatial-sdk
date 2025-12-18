@@ -1,12 +1,12 @@
 import { MapContextDiff } from "@geospatial-sdk/core";
 import { Map } from "maplibre-gl";
-import { createLayer } from "./create-map";
+import { createLayer } from "./create-map.ts";
 import {
   generateLayerId,
   getBeforeId,
   getLayersAtPosition,
   removeLayersFromSource,
-} from "../helpers/map.helpers";
+} from "../helpers/map.helpers.ts";
 
 /**
  * Apply a context diff to an MapLibre map

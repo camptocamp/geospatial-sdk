@@ -4,26 +4,26 @@ import {
   MapContextView,
   removeSearchParams,
 } from "@geospatial-sdk/core";
-import Map from "ol/Map";
-import View from "ol/View";
-import Layer from "ol/layer/Layer";
-import TileLayer from "ol/layer/Tile";
-import XYZ from "ol/source/XYZ";
-import TileWMS from "ol/source/TileWMS";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import GeoJSON from "ol/format/GeoJSON";
-import Feature from "ol/Feature";
-import Geometry from "ol/geom/Geometry";
-import SimpleGeometry from "ol/geom/SimpleGeometry";
-import { fromLonLat, transformExtent } from "ol/proj";
-import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import { defaultStyle } from "./styles";
-import VectorTileLayer from "ol/layer/VectorTile";
-import OGCMapTile from "ol/source/OGCMapTile";
-import OGCVectorTile from "ol/source/OGCVectorTile";
-import WMTS from "ol/source/WMTS";
-import MVT from "ol/format/MVT";
+import Map from "ol/Map.js";
+import View from "ol/View.js";
+import Layer from "ol/layer/Layer.js";
+import TileLayer from "ol/layer/Tile.js";
+import XYZ from "ol/source/XYZ.js";
+import TileWMS from "ol/source/TileWMS.js";
+import VectorLayer from "ol/layer/Vector.js";
+import VectorSource from "ol/source/Vector.js";
+import GeoJSON from "ol/format/GeoJSON.js";
+import Feature from "ol/Feature.js";
+import Geometry from "ol/geom/Geometry.js";
+import SimpleGeometry from "ol/geom/SimpleGeometry.js";
+import { fromLonLat, transformExtent } from "ol/proj.js";
+import { bbox as bboxStrategy } from "ol/loadingstrategy.js";
+import { defaultStyle } from "./styles.js";
+import VectorTileLayer from "ol/layer/VectorTile.js";
+import OGCMapTile from "ol/source/OGCMapTile.js";
+import OGCVectorTile from "ol/source/OGCVectorTile.js";
+import WMTS from "ol/source/WMTS.js";
+import MVT from "ol/format/MVT.js";
 import {
   OgcApiEndpoint,
   WfsEndpoint,
@@ -34,8 +34,8 @@ import { Tile } from "ol";
 import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
-} from "./handle-errors";
-import VectorTile from "ol/source/VectorTile";
+} from "./handle-errors.ts";
+import VectorTile from "ol/source/VectorTile.js";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;

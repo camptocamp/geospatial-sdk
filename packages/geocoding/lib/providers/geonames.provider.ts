@@ -1,4 +1,4 @@
-import { GeocodingResult } from "../model";
+import { GeocodingResult } from "../model/index.ts";
 import { Geometry } from "geojson";
 
 const baseUrl = "https://secure.geonames.org/searchJSON";

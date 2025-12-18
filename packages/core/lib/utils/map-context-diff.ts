@@ -4,8 +4,8 @@ import {
   MapContextLayer,
   MapContextLayerPositioned,
   MapContextLayerReordered,
-} from "../model";
-import { isLayerSame, isLayerSameAndUnchanged } from "./map-context";
+} from "../model/index.ts";
+import { isLayerSame, isLayerSameAndUnchanged } from "./map-context.ts";
 
 /**
  * The following logic is produced by identifying layers in both context

@@ -1,4 +1,4 @@
-import { MapContextLayer, MapContextView } from "./map-context";
+import { MapContextLayer, MapContextView } from "./map-context.ts";
 
 /**
  * Associates a position to a layer; the position is the index of

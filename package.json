@@ -16,6 +16,7 @@
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
     "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vue": "^9.20.1",
     "jsdom": "^23.2.0",
     "lerna": "^8.0.2",

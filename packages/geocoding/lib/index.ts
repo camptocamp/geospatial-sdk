@@ -1,2 +1,2 @@
-export * from "./providers";
-export * from "./model";
+export * from "./providers/index.ts";
+export * from "./model/index.ts";

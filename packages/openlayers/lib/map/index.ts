@@ -1,4 +1,4 @@
-export * from "./styles";
-export { createMapFromContext, resetMapFromContext } from "./create-map";
-export { applyContextDiffToMap } from "./apply-context-diff";
-export { listen } from "./register-events";
+export * from "./styles.ts";
+export { createMapFromContext, resetMapFromContext } from "./create-map.ts";
+export { applyContextDiffToMap } from "./apply-context-diff.ts";
+export { listen } from "./register-events.ts";
