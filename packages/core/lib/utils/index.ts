@@ -10,3 +10,4 @@ export {
   changeLayerPositionInContext,
 } from "./map-context";
 export { createViewFromLayer } from "./view";
+export { createXyzFromTms } from "./tms";
