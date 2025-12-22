@@ -1,4 +1,4 @@
-import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures";
+import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures.js";
 import {
   Extent,
   LayerGeojsonWithData,
@@ -12,8 +12,8 @@ import {
   MapContextLayerWmts,
   MapContextLayerXyz,
   MapContextView,
-} from "../lib/model";
-import { deepFreeze } from "../lib/utils";
+} from "../lib/model/index.js";
+import { deepFreeze } from "../lib/utils/index.js";
 
 export const MAP_CTX_LAYER_XYZ_FIXTURE: MapContextLayerXyz = deepFreeze({
   type: "xyz",
