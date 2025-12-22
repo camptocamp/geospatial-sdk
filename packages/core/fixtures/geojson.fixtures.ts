@@ -1,4 +1,4 @@
-import { deepFreeze } from "../lib/utils";
+import { deepFreeze } from "../lib/utils/index.js";
 import { FeatureCollection, Geometry } from "geojson";
 
 export const FEATURE_COLLECTION_POLYGON_FIXTURE_4326: FeatureCollection<Geometry | null> =

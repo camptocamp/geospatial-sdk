@@ -1,2 +1,2 @@
-export * from "./map";
-export * from "./maplibre.models";
+export * from "./map/index.js";
+export * from "./maplibre.models.js";

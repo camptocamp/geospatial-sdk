@@ -1,6 +1,6 @@
-import { VectorStyle } from "@geospatial-sdk/core/dist/model/style";
+import { VectorStyle } from "@geospatial-sdk/core/dist/model/style.js";
 import { LayerSpecification } from "maplibre-gl";
-import { FlatFill, FlatStyle, Rule } from "ol/style/flat";
+import { FlatFill, FlatStyle, Rule } from "ol/style/flat.js";
 
 const defaultOltStyle: FlatStyle = {
   "fill-color": "rgba(255,255,255,0.4)",

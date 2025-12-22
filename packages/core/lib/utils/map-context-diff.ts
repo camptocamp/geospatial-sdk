@@ -4,8 +4,8 @@ import {
   MapContextLayer,
   MapContextLayerPositioned,
   MapContextLayerReordered,
-} from "../model";
-import { isLayerSame, isLayerSameAndUnchanged } from "./map-context";
+} from "../model/index.js";
+import { isLayerSame, isLayerSameAndUnchanged } from "./map-context.js";
 
 /**
  * The following logic is produced by identifying layers in both context

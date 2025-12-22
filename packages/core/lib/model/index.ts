@@ -1,3 +1,3 @@
-export * from "./map-context";
-export * from "./map-context-diff";
-export * from "./events";
+export * from "./map-context.js";
+export * from "./map-context-diff.js";
+export * from "./events.js";

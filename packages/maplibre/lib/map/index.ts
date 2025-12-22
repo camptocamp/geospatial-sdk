@@ -1,2 +1,2 @@
-export { createMapFromContext, resetMapFromContext } from "./create-map";
-export { applyContextDiffToMap } from "./apply-context-diff";
+export { createMapFromContext, resetMapFromContext } from "./create-map.js";
+export { applyContextDiffToMap } from "./apply-context-diff.js";

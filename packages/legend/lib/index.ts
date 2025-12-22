@@ -1,1 +1,1 @@
-export * from "./create-legend";
+export * from "./create-legend/index.js";

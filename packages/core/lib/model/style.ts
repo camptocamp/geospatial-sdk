@@ -1,3 +1,3 @@
-import { FlatStyleLike } from "ol/style/flat";
+import { FlatStyleLike } from "ol/style/flat.js";
 
 export type VectorStyle = FlatStyleLike;

@@ -1,11 +1,11 @@
 import { EndpointError } from "@camptocamp/ogc-client";
 import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
 import { ImageTile, Tile } from "ol";
-import { Layer } from "ol/layer";
-import TileLayer from "ol/layer/Tile";
-import VectorLayer from "ol/layer/Vector";
-import TileSource from "ol/source/Tile";
-import VectorSource from "ol/source/Vector";
+import { Layer } from "ol/layer.js";
+import TileLayer from "ol/layer/Tile.js";
+import VectorLayer from "ol/layer/Vector.js";
+import TileSource from "ol/source/Tile.js";
+import VectorSource from "ol/source/Vector.js";
 import TileState from "ol/TileState.js";
 
 export function handleEndpointError(

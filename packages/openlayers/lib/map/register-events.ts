@@ -1,4 +1,4 @@
-import Map, { MapObjectEventTypes } from "ol/Map";
+import Map, { MapObjectEventTypes } from "ol/Map.js";
 import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
@@ -7,20 +7,20 @@ import {
   MapEventsByType,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
-import { toLonLat, transformExtent } from "ol/proj";
-import GeoJSON from "ol/format/GeoJSON";
-import OlFeature from "ol/Feature";
-import BaseEvent from "ol/events/Event";
+import { toLonLat, transformExtent } from "ol/proj.js";
+import GeoJSON from "ol/format/GeoJSON.js";
+import OlFeature from "ol/Feature.js";
+import BaseEvent from "ol/events/Event.js";
 import { MapBrowserEvent } from "ol";
-import { Coordinate } from "ol/coordinate";
-import TileWMS from "ol/source/TileWMS";
-import ImageWMS from "ol/source/ImageWMS";
-import Layer from "ol/layer/Layer";
-import { Pixel } from "ol/pixel";
+import { Coordinate } from "ol/coordinate.js";
+import TileWMS from "ol/source/TileWMS.js";
+import ImageWMS from "ol/source/ImageWMS.js";
+import Layer from "ol/layer/Layer.js";
+import { Pixel } from "ol/pixel.js";
 import type { Feature, FeatureCollection } from "geojson";
 import throttle from "lodash.throttle";
-import { BaseLayerObjectEventTypes } from "ol/layer/Base";
-import { equals } from "ol/extent";
+import { BaseLayerObjectEventTypes } from "ol/layer/Base.js";
+import { equals } from "ol/extent.js";
 
 const GEOJSON = new GeoJSON();
 
@@ -103,7 +103,7 @@ async function readFeaturesAtPixel(
 function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
 
-  map.on("click", async (event) => {
+  map.on("click", async (event: any) => {
     const features = await readFeaturesAtPixel(map, event);
     map.dispatchEvent({
       type: FeaturesClickEventType,
@@ -117,7 +117,7 @@ function registerFeatureClickEvent(map: Map) {
 function registerFeatureHoverEvent(map: Map) {
   if (map.get(FeaturesHoverEventType)) return;
 
-  map.on("pointermove", async (event) => {
+  map.on("pointermove", async (event: any) => {
     const features = await readFeaturesAtPixel(map, event);
     map.dispatchEvent({
       type: FeaturesHoverEventType,
@@ -170,19 +170,19 @@ export function listen<T extends keyof MapEventsByType>(
     case FeaturesClickEventType:
       registerFeatureClickEvent(map);
       // we're using a custom event type here so we need to cast to unknown first
-      map.on(eventType as unknown as MapObjectEventTypes, (event) => {
+      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
         (callback as (event: unknown) => void)(event);
       });
       break;
     case FeaturesHoverEventType:
       registerFeatureHoverEvent(map);
       // see comment above
-      map.on(eventType as unknown as MapObjectEventTypes, (event) => {
+      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
         (callback as (event: unknown) => void)(event);
       });
       break;
     case MapClickEventType:
-      map.on("click", (event) => {
+      map.on("click", (event: any) => {
         const coordinate = toLonLat(
           event.coordinate,
           map.getView().getProjection(),
@@ -196,7 +196,7 @@ export function listen<T extends keyof MapEventsByType>(
     case MapExtentChangeEventType:
       registerMapExtentChangeEvent(map);
       // see comment above
-      map.on(eventType as unknown as MapObjectEventTypes, (event) => {
+      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
         (callback as (event: unknown) => void)(event);
       });
       break;
@@ -214,7 +214,7 @@ export function listen<T extends keyof MapEventsByType>(
         }
       });
       //attach event listener when layer is added
-      map.getLayers().on("add", (event) => {
+      map.getLayers().on("add", (event: any) => {
         const layer = event.element as Layer;
         if (layer) {
           layer.on(
@@ -224,7 +224,7 @@ export function listen<T extends keyof MapEventsByType>(
         }
       });
       //remove event listener when layer is removed
-      map.getLayers().on("remove", (event) => {
+      map.getLayers().on("remove", (event: any) => {
         const layer = event.element as Layer;
         if (layer) {
           layer.un(

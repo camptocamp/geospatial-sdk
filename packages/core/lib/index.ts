@@ -1,3 +1,3 @@
 // PUBLIC API
-export * from "./utils";
-export * from "./model";
+export * from "./utils/index.js";
+export * from "./model/index.js";
