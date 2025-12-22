@@ -1,6 +1,6 @@
 import { transformExtent } from "ol/proj.js";
 import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
-import { LONLAT_CRS_CODES } from "../constant/projections.ts";
+import { LONLAT_CRS_CODES } from "../constant/projections.js";
 import { fromEPSGCode, register } from "ol/proj/proj4.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import { extend } from "ol/extent.js";
@@ -14,7 +14,7 @@ import {
   MapContextLayerWmts,
   MapContextView,
   ViewByExtent,
-} from "../model/index.ts";
+} from "../model/index.js";
 import { FeatureCollection, Geometry } from "geojson";
 
 const GEOJSON = new GeoJSON();

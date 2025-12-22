@@ -20,8 +20,8 @@ import {
 import {
   createDatasetFromGeoJsonLayer,
   generateLayerId,
-} from "../helpers/map.helpers";
-import { Dataset, PartialStyleSpecification } from "../maplibre.models";
+} from "../helpers/map.helpers.js";
+import { Dataset, PartialStyleSpecification } from "../maplibre.models.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",

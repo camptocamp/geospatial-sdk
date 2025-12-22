@@ -34,7 +34,7 @@ import { Tile } from "ol";
 import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
-} from "./handle-errors.ts";
+} from "./handle-errors.js";
 import VectorTile from "ol/source/VectorTile.js";
 
 const GEOJSON = new GeoJSON();

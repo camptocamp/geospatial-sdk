@@ -1,5 +1,5 @@
-import { MapContext, MapContextLayer } from "../model/index.ts";
-import { getHash } from "./hash.ts";
+import { MapContext, MapContextLayer } from "../model/index.js";
+import { getHash } from "./hash.js";
 
 export function getLayerHash(
   layer: MapContextLayer,

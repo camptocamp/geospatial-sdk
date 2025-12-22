@@ -1,4 +1,4 @@
-import { GeocodingResult } from "../model/index.ts";
+import { GeocodingResult } from "../model/index.js";
 import { BBox, FeatureCollection, Geometry } from "geojson";
 
 // from https://github.com/geoblocks/ga-search

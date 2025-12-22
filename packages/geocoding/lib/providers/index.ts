@@ -1,3 +1,3 @@
-export * from "./geoadmin.provider";
-export * from "./data-gouv-fr.provider";
-export * from "./geonames.provider";
+export * from "./geoadmin.provider.js";
+export * from "./data-gouv-fr.provider.js";
+export * from "./geonames.provider.js";

@@ -1,2 +1,2 @@
-export * from "./providers/index.ts";
-export * from "./model/index.ts";
+export * from "./providers/index.js";
+export * from "./model/index.js";

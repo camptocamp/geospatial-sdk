@@ -1,1 +1,1 @@
-export * from "./create-legend/index.ts";
+export * from "./create-legend/index.js";

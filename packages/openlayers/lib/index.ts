@@ -1,2 +1,2 @@
 // PUBLIC API
-export * from "./map/index.ts";
+export * from "./map/index.js";

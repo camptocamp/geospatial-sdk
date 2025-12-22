@@ -1,7 +1,7 @@
 import { EndpointError } from "@camptocamp/ogc-client";
 import { Feature } from "geojson";
-import BaseEvent from "ol/events/Event";
-import { Extent } from "ol/extent";
+import BaseEvent from "ol/events/Event.js";
+import { Extent } from "ol/extent.js";
 
 export const FeaturesClickEventType = "features-click";
 export interface FeaturesClickEvent {

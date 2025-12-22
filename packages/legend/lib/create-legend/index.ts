@@ -1,1 +1,1 @@
-export { createLegendFromLayer } from "./from-layer.ts";
+export { createLegendFromLayer } from "./from-layer.js";

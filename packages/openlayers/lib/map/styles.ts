@@ -1,6 +1,6 @@
-import { Circle, Fill, Stroke, Style } from "ol/style";
-import { StyleFunction } from "ol/style/Style";
-import { FeatureLike } from "ol/Feature";
+import { Circle, Fill, Stroke, Style } from "ol/style.js";
+import { StyleFunction } from "ol/style/Style.js";
+import { FeatureLike } from "ol/Feature.js";
 import chroma from "chroma-js";
 
 export interface CreateStyleOptions {

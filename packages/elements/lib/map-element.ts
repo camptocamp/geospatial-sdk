@@ -1,7 +1,7 @@
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { computeMapContextDiff, MapContext } from "@geospatial-sdk/core";
-import OlMap from "ol/Map";
+import OlMap from "ol/Map.js";
 import {
   applyContextDiffToMap,
   createMapFromContext,

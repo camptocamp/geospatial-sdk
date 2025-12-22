@@ -1,5 +1,5 @@
 import { FeatureCollection, Geometry } from "geojson";
-import { VectorStyle } from "./style.ts";
+import { VectorStyle } from "./style.js";
 
 export type LayerDimensions = Record<string, string>;
 

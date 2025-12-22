@@ -4,10 +4,10 @@ import {
   LayerContextWithStyle,
   LayerMetadataSpecification,
   LayerSpecificationWithSource,
-} from "../maplibre.models";
+} from "../maplibre.models.js";
 import { FeatureCollection, Geometry } from "geojson";
-import { contextStyleToMaplibreLayers } from "./style.helpers";
-import { getHash } from "@geospatial-sdk/core/dist/utils/hash";
+import { contextStyleToMaplibreLayers } from "./style.helpers.js";
+import { getHash } from "@geospatial-sdk/core/dist/utils/hash.js";
 import { MapContextLayer } from "@geospatial-sdk/core";
 
 /**
