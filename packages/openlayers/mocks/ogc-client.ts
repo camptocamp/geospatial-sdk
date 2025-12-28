@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import WMTSTileGrid from "ol/tilegrid/WMTS";
+import WMTSTileGrid from "ol/tilegrid/WMTS.js";
 
 export class WmtsEndpoint {
   constructor(private url) {}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contextStyleToMaplibreLayers } from "./style.helpers";
+import { contextStyleToMaplibreLayers } from "./style.helpers.js";
 
 const defautlMaplibreFill = {
   type: "fill",

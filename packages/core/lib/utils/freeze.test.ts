@@ -1,4 +1,4 @@
-import { deepFreeze } from "./freeze";
+import { deepFreeze } from "./freeze.js";
 
 describe("freeze util", () => {
   describe("deepFreeze", () => {

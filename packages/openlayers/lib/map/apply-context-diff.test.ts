@@ -10,12 +10,12 @@ import {
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
   SAMPLE_LAYER5,
-} from "@geospatial-sdk/core/fixtures/map-context.fixtures";
-import Map from "ol/Map";
-import { createLayer, createMapFromContext } from "./create-map";
-import { applyContextDiffToMap } from "./apply-context-diff";
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
+import Map from "ol/Map.js";
+import { createLayer, createMapFromContext } from "./create-map.js";
+import { applyContextDiffToMap } from "./apply-context-diff.js";
 import { beforeEach } from "vitest";
-import BaseLayer from "ol/layer/Base";
+import BaseLayer from "ol/layer/Base.js";
 
 async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
   const reference = (await createLayer(layerModel)) as any;

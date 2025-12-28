@@ -1,11 +1,13 @@
 import { ImageTile, Tile } from "ol";
 import TileState from "ol/TileState.js";
 import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
-import { handleTileError, tileLoadErrorCatchFunction } from "./handle-errors";
-import { Map } from "ol";
+import {
+  handleTileError,
+  tileLoadErrorCatchFunction,
+} from "./handle-errors.js";
 import { describe } from "node:test";
-import TileLayer from "ol/layer/Tile";
-import VectorLayer from "ol/layer/Vector";
+import TileLayer from "ol/layer/Tile.js";
+import VectorLayer from "ol/layer/Vector.js";
 import { EndpointError } from "@camptocamp/ogc-client";
 
 global.URL.createObjectURL = vi.fn(() => "blob:http://example.com/blob");
@@ -25,11 +27,9 @@ global.fetch = vi.fn().mockImplementation((url: string) => {
 });
 
 describe("handle-errors", () => {
-  let map: Map;
   let tile: Tile;
 
   beforeEach(() => {
-    map = new Map();
     tile = new ImageTile(
       [0, 0, 0],
       TileState.IDLE,

@@ -1,15 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MapContext, MapContextDiff } from "@geospatial-sdk/core";
+import { MapContextDiff } from "@geospatial-sdk/core";
 import {
-  SAMPLE_CONTEXT,
   SAMPLE_LAYER1,
   SAMPLE_LAYER2,
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
-} from "@geospatial-sdk/core/fixtures/map-context.fixtures";
-import { applyContextDiffToMap } from "./apply-context-diff";
-import * as mapHelpers from "../helpers/map.helpers";
-import { getBeforeId } from "../helpers/map.helpers";
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
+import { applyContextDiffToMap } from "./apply-context-diff.js";
+import * as mapHelpers from "../helpers/map.helpers.js";
 
 // Helper to create a fresh mock Map instance for each test
 function createMockMap() {
@@ -26,15 +24,10 @@ function createMockMap() {
 }
 
 describe("applyContextDiffToMap (mocked Map)", () => {
-  let context: MapContext;
   let diff: MapContextDiff;
   let map: ReturnType<typeof createMockMap>;
 
   beforeEach(async () => {
-    context = {
-      ...SAMPLE_CONTEXT,
-      layers: [SAMPLE_LAYER2, SAMPLE_LAYER1],
-    };
     map = createMockMap();
     map.getStyle.mockReturnValue({ layers: [], sources: {} });
   });
@@ -89,9 +82,6 @@ describe("applyContextDiffToMap (mocked Map)", () => {
   it("calls addLayer for changed layers", async () => {
     const generateLayerIdSpy = vi
       .spyOn(mapHelpers, "generateLayerId")
-      .mockReturnValue("azreza");
-    const getBeforeId = vi
-      .spyOn(mapHelpers, "getBeforeId")
       .mockReturnValue("azreza");
     const removeLayersFromSourceSpy = vi.spyOn(
       mapHelpers,

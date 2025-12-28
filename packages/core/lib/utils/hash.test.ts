@@ -1,4 +1,4 @@
-import { getHash } from "./hash";
+import { getHash } from "./hash.js";
 
 describe("getHash", () => {
   it("generates a hash representing the deep value of an object", () => {

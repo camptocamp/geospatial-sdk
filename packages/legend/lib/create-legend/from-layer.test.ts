@@ -1,9 +1,5 @@
-import { createLegendFromLayer } from "./from-layer";
-import {
-  MapContextLayer,
-  MapContextLayerWms,
-  MapContextLayerWmts,
-} from "@geospatial-sdk/core";
+import { createLegendFromLayer } from "./from-layer.js";
+import { MapContextLayerWms, MapContextLayerWmts } from "@geospatial-sdk/core";
 import { WmtsEndpoint } from "@camptocamp/ogc-client";
 
 // Mock dependencies

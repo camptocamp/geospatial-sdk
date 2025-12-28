@@ -1,20 +1,20 @@
-import Map from "ol/Map";
+import Map from "ol/Map.js";
 import { Mock } from "vitest";
 import {
   getFeaturesFromVectorSources,
   getFeaturesFromWmsSources,
   getGFIUrl,
   listen,
-} from "./register-events";
+} from "./register-events.js";
 import { Collection, MapBrowserEvent, Object as BaseObject } from "ol";
-import View from "ol/View";
-import { toLonLat } from "ol/proj";
-import TileWMS from "ol/source/TileWMS";
-import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
-import Point from "ol/geom/Point";
-import TileLayer from "ol/layer/Tile";
-import OlFeature from "ol/Feature";
+import View from "ol/View.js";
+import { toLonLat } from "ol/proj.js";
+import TileWMS from "ol/source/TileWMS.js";
+import VectorSource from "ol/source/Vector.js";
+import VectorLayer from "ol/layer/Vector.js";
+import Point from "ol/geom/Point.js";
+import TileLayer from "ol/layer/Tile.js";
+import OlFeature from "ol/Feature.js";
 
 const EXPECTED_MAP_EXTENT_EPSG4326 = [
   -0.0035932611364780857, -0.0026949458513598756, 0.0035932611364780857,
