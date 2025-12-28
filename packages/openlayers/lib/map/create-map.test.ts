@@ -54,6 +54,10 @@ vi.mock("./handle-errors", async (importOriginal) => {
   };
 });
 
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
 describe("MapContextService", () => {
   describe("#createLayer", () => {
     let layerModel: MapContextLayer, layer: Layer;
@@ -330,11 +334,8 @@ describe("MapContextService", () => {
 
     describe("WMTS", () => {
       beforeEach(async () => {
-        (layerModel = MAP_CTX_LAYER_WMTS_FIXTURE),
-          (layer = await createLayer(layerModel));
-      });
-      afterEach(() => {
-        vi.clearAllMocks();
+        layerModel = MAP_CTX_LAYER_WMTS_FIXTURE;
+        layer = await createLayer(layerModel);
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -344,7 +345,9 @@ describe("MapContextService", () => {
         expect(layer.getVisible()).toBe(true);
         expect(layer.getOpacity()).toBe(1);
         expect(layer.get("label")).toBeUndefined();
-        expect(layer.getSource()?.getAttributions()).toBeNull();
+        const source = layer.getSource() as WMTS;
+        expect(source.getAttributions()).toBeNull();
+        expect(source.getStyle()).toBe("default");
       });
       it("create a WMTS source", () => {
         const source = layer.getSource();
@@ -372,15 +375,25 @@ describe("MapContextService", () => {
       it("should call handleEndpointError", () => {
         expect(handleEndpointError).toHaveBeenCalled();
       });
-      afterEach(() => {
-        vi.clearAllMocks();
+    });
+    describe("WMTS without default style given", () => {
+      beforeEach(async () => {
+        layerModel = {
+          ...MAP_CTX_LAYER_WMTS_FIXTURE,
+          url: "https://wmts/no-default-style",
+        };
+        layer = await createLayer(layerModel);
+      });
+      it("uses the first style as default", async () => {
+        const source = layer.getSource() as WMTS;
+        expect(source.getStyle()).toEqual("first");
       });
     });
 
     describe("Maplibre Style", () => {
       beforeEach(async () => {
-        (layerModel = MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE),
-          (layer = await createLayer(layerModel));
+        layerModel = MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE;
+        layer = await createLayer(layerModel);
       });
       it("create a tile layer", () => {
         expect(layer).toBeTruthy();
@@ -399,8 +412,8 @@ describe("MapContextService", () => {
 
     describe("MVT", () => {
       beforeEach(async () => {
-        (layerModel = MAP_CTX_LAYER_MVT_FIXTURE),
-          (layer = await createLayer(layerModel));
+        layerModel = MAP_CTX_LAYER_MVT_FIXTURE;
+        layer = await createLayer(layerModel);
       });
       it("create a VectorTileLayer", () => {
         expect(layer).toBeTruthy();

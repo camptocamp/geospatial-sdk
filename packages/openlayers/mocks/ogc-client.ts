@@ -17,6 +17,10 @@ export class WmtsEndpoint {
           abstract: "",
           styles: [
             {
+              title: "First Style",
+              name: "first",
+            },
+            {
               title: "Default Style",
               name: "default",
             },
@@ -40,7 +44,8 @@ export class WmtsEndpoint {
               limits: [],
             },
           ],
-          defaultStyle: "default",
+          defaultStyle:
+            this.url.indexOf("no-default-style") > -1 ? undefined : "default",
           latLonBoundingBox: [
             8.73730142520394, 46.847419134101315, 9.748085959426389,
             47.53980655003323,
