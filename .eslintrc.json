@@ -28,7 +28,19 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": 1,
     "no-prototype-builtins": "off",
-    "import/extensions": ["error", "ignorePackages"]
+    "import/extensions": [
+      "error",
+      "always",
+      {
+        "ignorePackages": true,
+        "pathGroupOverrides": [
+          {
+            "pattern": "ol/{*,*/**}",
+            "action": "enforce"
+          }
+        ]
+      }
+    ]
   },
-  "ignorePatterns": ["**/*.test.ts", "apps", "**/mocks", "**/dist/**"]
+  "ignorePatterns": ["apps", "**/mocks", "**/dist/**"]
 }
