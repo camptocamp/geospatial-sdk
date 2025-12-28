@@ -1,5 +1,8 @@
-import { GeocodingResult } from "../model";
-import { DataGouvFrResponse, queryDataGouvFr } from "./data-gouv-fr.provider";
+import { GeocodingResult } from "../model/index.js";
+import {
+  DataGouvFrResponse,
+  queryDataGouvFr,
+} from "./data-gouv-fr.provider.js";
 
 const RESULTS_FIXTURE: DataGouvFrResponse = {
   type: "FeatureCollection",

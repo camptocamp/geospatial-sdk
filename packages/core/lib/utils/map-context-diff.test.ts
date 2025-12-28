@@ -1,5 +1,5 @@
-import { MapContext, MapContextDiff, MapContextLayer } from "../model";
-import { computeMapContextDiff } from "./map-context-diff";
+import { MapContext, MapContextDiff, MapContextLayer } from "../model/index.js";
+import { computeMapContextDiff } from "./map-context-diff.js";
 import {
   SAMPLE_CONTEXT,
   SAMPLE_LAYER1,
@@ -7,8 +7,8 @@ import {
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
   SAMPLE_LAYER5,
-} from "../../fixtures/map-context.fixtures";
-import { describe, it, expect, beforeEach } from "vitest";
+} from "../../fixtures/map-context.fixtures.js";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Context diff utils", () => {
   describe("computeMapContextDiff", () => {

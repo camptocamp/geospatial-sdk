@@ -1,5 +1,5 @@
-import { queryGeonames } from "./geonames.provider";
-import { GeocodingResult } from "../model";
+import { queryGeonames } from "./geonames.provider.js";
+import { GeocodingResult } from "../model/index.js";
 import { describe } from "vitest";
 
 const MOCK_DATA = {

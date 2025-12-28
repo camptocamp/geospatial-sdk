@@ -1,10 +1,10 @@
-import { createViewFromLayer } from "./view";
+import { createViewFromLayer } from "./view.js";
 import {
   MapContextLayerGeojson,
   MapContextLayerWfs,
   MapContextLayerWms,
   MapContextLayerWmts,
-} from "../model";
+} from "../model/index.js";
 
 vitest.mock("@camptocamp/ogc-client", () => ({
   WmsEndpoint: class {
@@ -46,7 +46,7 @@ vitest.mock("@camptocamp/ogc-client", () => ({
     isReady() {
       return Promise.resolve({
         getSingleLayerName: () => "layerName",
-        getLayerByName: (name: string) => ({
+        getLayerByName: () => ({
           latLonBoundingBox: [1, 2.6, 3.3, 4.2],
         }),
       });

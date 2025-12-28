@@ -1,15 +1,15 @@
 import chroma from "chroma-js";
-import Style from "ol/style/Style";
-import Feature from "ol/Feature";
-import { LineString, Point, Polygon } from "ol/geom";
+import Style, { StyleFunction } from "ol/style/Style.js";
+import Feature from "ol/Feature.js";
+import { LineString, Point, Polygon } from "ol/geom.js";
 import {
   createGeometryStyles,
   createStyleFunction,
   defaultHighlightStyle,
   defaultStyle,
   StyleByGeometryType,
-} from "./styles";
-import CircleStyle from "ol/style/Circle";
+} from "./styles.js";
+import CircleStyle from "ol/style/Circle.js";
 
 describe("MapStyleService", () => {
   describe("#createGeometryStyles", () => {
@@ -139,7 +139,7 @@ describe("MapStyleService", () => {
   });
 
   describe("#createStyleFunction", () => {
-    let styleFn: Function;
+    let styleFn: StyleFunction;
     let feature: Feature;
     it("returns a function", () => {
       styleFn = createStyleFunction(
@@ -154,7 +154,7 @@ describe("MapStyleService", () => {
         feature.setGeometry(new LineString([]));
       });
       it("resolves to a double style with stroke", () => {
-        const style = styleFn(feature, 1);
+        const style = styleFn(feature, 1) as Style[];
         expect(style).toEqual([expect.any(Style), expect.any(Style)]);
         expect(style[0].getStroke()).toBeTruthy();
         expect(style[0].getFill()).toBeFalsy();
@@ -166,7 +166,7 @@ describe("MapStyleService", () => {
         feature.setGeometry(new Point([]));
       });
       it("resolves to a style with image", () => {
-        const style = styleFn(feature, 1);
+        const style = styleFn(feature, 1) as Style;
         expect(style.getImage()).toBeTruthy();
         expect(style.getFill()).toBeFalsy();
         expect(style.getStroke()).toBeFalsy();
@@ -177,7 +177,7 @@ describe("MapStyleService", () => {
         feature.setGeometry(new Polygon([]));
       });
       it("resolves to a style with fill and stroke", () => {
-        const style = styleFn(feature, 1);
+        const style = styleFn(feature, 1) as Style;
         expect(style.getFill()).toBeTruthy();
         expect(style.getStroke()).toBeTruthy();
         expect(style.getImage()).toBeFalsy();

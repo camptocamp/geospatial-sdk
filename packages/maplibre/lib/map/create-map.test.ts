@@ -5,9 +5,9 @@ import {
   MAP_CTX_LAYER_OGCAPI_FIXTURE,
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
-} from "@geospatial-sdk/core/fixtures/map-context.fixtures";
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import { LayerGeojsonWithData, MapContextLayer } from "@geospatial-sdk/core";
-import { createLayer } from "./create-map";
+import { createLayer } from "./create-map.js";
 import {
   FillLayerSpecification,
   GeoJSONSourceSpecification,
@@ -16,8 +16,8 @@ import {
 import {
   FEATURE_COLLECTION_LINESTRING_FIXTURE_4326,
   FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
-} from "@geospatial-sdk/core/fixtures/geojson.fixtures";
-import { PartialStyleSpecification } from "../maplibre.models";
+} from "@geospatial-sdk/core/fixtures/geojson.fixtures.js";
+import { PartialStyleSpecification } from "../maplibre.models.js";
 import {
   CircleLayerSpecification,
   LayerSpecification,

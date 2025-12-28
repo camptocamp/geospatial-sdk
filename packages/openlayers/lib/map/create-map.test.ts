@@ -1,12 +1,12 @@
 import { FeatureCollection } from "geojson";
-import TileLayer from "ol/layer/Tile";
-import VectorLayer from "ol/layer/Vector";
-import Map from "ol/Map";
-import TileWMS from "ol/source/TileWMS";
-import VectorSource from "ol/source/Vector";
-import XYZ from "ol/source/XYZ";
-import View from "ol/View";
-import GeoJSON from "ol/format/GeoJSON";
+import TileLayer from "ol/layer/Tile.js";
+import VectorLayer from "ol/layer/Vector.js";
+import Map from "ol/Map.js";
+import TileWMS from "ol/source/TileWMS.js";
+import VectorSource from "ol/source/Vector.js";
+import XYZ from "ol/source/XYZ.js";
+import View from "ol/View.js";
+import GeoJSON from "ol/format/GeoJSON.js";
 import {
   MAP_CTX_EXTENT_FIXTURE,
   MAP_CTX_FIXTURE,
@@ -19,34 +19,35 @@ import {
   MAP_CTX_LAYER_WMS_FIXTURE,
   MAP_CTX_LAYER_WMTS_FIXTURE,
   MAP_CTX_LAYER_XYZ_FIXTURE,
-} from "@geospatial-sdk/core/fixtures/map-context.fixtures";
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import {
   MapContext,
   MapContextLayer,
   MapContextLayerGeojson,
   MapContextLayerWms,
-  SourceLoadErrorEvent,
 } from "@geospatial-sdk/core";
-import Layer from "ol/layer/Layer";
+import Layer from "ol/layer/Layer.js";
 import {
   createLayer,
   createMapFromContext,
   createView,
   resetMapFromContext,
-} from "./create-map";
-import WMTS from "ol/source/WMTS";
-import { VectorTile } from "ol/source";
+} from "./create-map.js";
+import WMTS from "ol/source/WMTS.js";
+import { VectorTile } from "ol/source.js";
 import { MapboxVectorLayer } from "ol-mapbox-style";
 import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
-} from "./handle-errors";
-import { ImageTile } from "ol";
+} from "./handle-errors.js";
+import ImageTile from "ol/ImageTile.js";
 import TileState from "ol/TileState.js";
-import VectorTileLayer from "ol/layer/VectorTile";
+import VectorTileLayer from "ol/layer/VectorTile.js";
+import { FeatureUrlFunction } from "ol/featureloader.js";
 
 vi.mock("./handle-errors", async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual =
+    (await importOriginal()) as typeof import("./handle-errors.js");
   return {
     ...actual,
     tileLoadErrorCatchFunction: vi.fn(),
@@ -144,7 +145,7 @@ describe("MapContextService", () => {
         expect(layer.getVisible()).toBe(false);
         expect(layer.getOpacity()).toBe(0.5);
         expect(layer.get("label")).toBe("Communes");
-        // @ts-ignore
+        // @ts-expect-error TS2554 we're not providing a view extent here
         expect(layer.getSource()?.getAttributions()!()).toEqual(["camptocamp"]);
       });
       it("create a TileWMS source", () => {
@@ -204,7 +205,7 @@ describe("MapContextService", () => {
 
         const attributions = layer.getSource()?.getAttributions();
         expect(attributions).not.toBeNull();
-        // @ts-ignore
+        // @ts-expect-error TS2554 we're not providing a view extent here
         expect(attributions!()).toEqual(["camptocamp"]);
       });
       it("create a Vector source", () => {
@@ -213,7 +214,8 @@ describe("MapContextService", () => {
       });
       it("set correct url load function", () => {
         const source = layer.getSource() as VectorSource;
-        const urlLoader = source.getUrl() as Function;
+        const urlLoader = source.getUrl() as FeatureUrlFunction;
+        // @ts-expect-error TS2345
         expect(urlLoader([10, 20, 30, 40])).toBe(
           "https://www.datagrandest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
         );

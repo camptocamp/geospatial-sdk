@@ -1,5 +1,5 @@
-import { GeoadminResponse, queryGeoadmin } from "./geoadmin.provider";
-import { GeocodingResult } from "../model";
+import { GeoadminResponse, queryGeoadmin } from "./geoadmin.provider.js";
+import { GeocodingResult } from "../model/index.js";
 
 const RESULTS_FIXTURE: GeoadminResponse = {
   type: "FeatureCollection",

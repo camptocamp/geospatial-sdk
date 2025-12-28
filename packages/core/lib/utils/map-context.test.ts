@@ -8,14 +8,14 @@ import {
   isLayerSameAndUnchanged,
   removeLayerFromContext,
   replaceLayerInContext,
-} from "./map-context";
-import { MapContext } from "../model";
+} from "./map-context.js";
+import { MapContext } from "../model/index.js";
 import {
   SAMPLE_CONTEXT,
   SAMPLE_LAYER1,
   SAMPLE_LAYER2,
   SAMPLE_LAYER3,
-} from "../../fixtures/map-context.fixtures";
+} from "../../fixtures/map-context.fixtures.js";
 
 describe("Map context utils", () => {
   describe("isLayerSame", () => {
@@ -78,6 +78,7 @@ describe("Map context utils", () => {
             extras: undefined,
           }),
         ).toBe(true);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { extras, ...layer } = SAMPLE_LAYER1;
         expect(isLayerSame(SAMPLE_LAYER1, layer)).toBe(true);
       });
@@ -179,6 +180,7 @@ describe("Map context utils", () => {
             extras: undefined,
           }),
         ).toBe(false);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { extras, ...layer } = SAMPLE_LAYER1;
         expect(isLayerSameAndUnchanged(SAMPLE_LAYER1, layer)).toBe(false);
       });
