@@ -27,21 +27,21 @@ npm install @geospatial-sdk/core
 Define map configurations in a declarative, serializable format:
 
 ```typescript
-import { MapContext, MapContextLayerWms } from '@geospatial-sdk/core';
+import { MapContext, MapContextLayerWms } from "@geospatial-sdk/core";
 
 const context: MapContext = {
   view: {
     center: [6.5, 46.5],
-    zoom: 8
+    zoom: 8,
   },
   layers: [
     {
-      type: 'wms',
-      url: 'https://example.com/wms',
-      name: 'layer_name',
-      opacity: 0.8
-    }
-  ]
+      type: "wms",
+      url: "https://example.com/wms",
+      name: "layer_name",
+      opacity: 0.8,
+    },
+  ],
 };
 ```
 
@@ -50,21 +50,22 @@ const context: MapContext = {
 Automatically extract geographic extents from layers:
 
 ```typescript
-import { createViewFromLayer } from '@geospatial-sdk/core';
+import { createViewFromLayer } from "@geospatial-sdk/core";
 
 const layer = {
-  type: 'wms',
-  url: 'https://example.com/wms',
-  name: 'myLayer'
+  type: "wms",
+  url: "https://example.com/wms",
+  name: "myLayer",
 };
 
 const view = await createViewFromLayer(layer);
 if (view) {
-  console.log('Extent:', view.extent); // [minLon, minLat, maxLon, maxLat]
+  console.log("Extent:", view.extent); // [minLon, minLat, maxLon, maxLat]
 }
 ```
 
 **Supported layer types for extent retrieval:**
+
 - WMS (from GetCapabilities)
 - WMTS (from GetCapabilities)
 - WFS (from GetCapabilities)
@@ -82,8 +83,8 @@ import {
   removeLayerFromContext,
   replaceLayerInContext,
   changeLayerPositionInContext,
-  getLayerPosition
-} from '@geospatial-sdk/core';
+  getLayerPosition,
+} from "@geospatial-sdk/core";
 
 // Add a layer at a specific position
 const newContext = addLayerToContext(context, newLayer, 0);
@@ -100,7 +101,7 @@ const reorderedContext = changeLayerPositionInContext(context, layer, 2);
 Compute differences between contexts for efficient updates:
 
 ```typescript
-import { computeMapContextDiff } from '@geospatial-sdk/core';
+import { computeMapContextDiff } from "@geospatial-sdk/core";
 
 const diff = computeMapContextDiff(newContext, oldContext);
 console.log(diff);
@@ -117,15 +118,15 @@ console.log(diff);
 
 The SDK supports 7 layer types:
 
-| Type | Description | Extent Support |
-|------|-------------|----------------|
-| **WMS** | OGC Web Map Service | ✅ Yes |
-| **WMTS** | OGC Web Map Tile Service | ✅ Yes |
-| **WFS** | OGC Web Feature Service | ✅ Yes |
-| **GeoJSON** | Vector data in GeoJSON format | ✅ Yes |
-| **XYZ** | Tile-based raster layers | ❌ No |
-| **OGC API** | OGC API - Features/Tiles | ❌ No |
-| **MapLibre Style** | MapLibre Style Specification | ❌ No |
+| Type               | Description                   | Extent Support |
+| ------------------ | ----------------------------- | -------------- |
+| **WMS**            | OGC Web Map Service           | ✅ Yes         |
+| **WMTS**           | OGC Web Map Tile Service      | ✅ Yes         |
+| **WFS**            | OGC Web Feature Service       | ✅ Yes         |
+| **GeoJSON**        | Vector data in GeoJSON format | ✅ Yes         |
+| **XYZ**            | Tile-based raster layers      | ❌ No          |
+| **OGC API**        | OGC API - Features/Tiles      | ❌ No          |
+| **MapLibre Style** | MapLibre Style Specification  | ❌ No          |
 
 ## View Types
 
@@ -136,7 +137,7 @@ Three ways to define map views:
 ```typescript
 const view = {
   center: [6.5, 46.5], // [lon, lat] in EPSG:4326
-  zoom: 10
+  zoom: 10,
 };
 ```
 
@@ -144,7 +145,7 @@ const view = {
 
 ```typescript
 const view = {
-  extent: [6.0, 46.0, 7.0, 47.0] // [minLon, minLat, maxLon, maxLat]
+  extent: [6.0, 46.0, 7.0, 47.0], // [minLon, minLat, maxLon, maxLat]
 };
 ```
 
@@ -153,9 +154,17 @@ const view = {
 ```typescript
 const view = {
   geometry: {
-    type: 'Polygon',
-    coordinates: [[[6.0, 46.0], [7.0, 46.0], [7.0, 47.0], [6.0, 47.0], [6.0, 46.0]]]
-  }
+    type: "Polygon",
+    coordinates: [
+      [
+        [6.0, 46.0],
+        [7.0, 46.0],
+        [7.0, 47.0],
+        [6.0, 47.0],
+        [6.0, 46.0],
+      ],
+    ],
+  },
 };
 ```
 
@@ -171,8 +180,8 @@ import type {
   MapContextView,
   ViewByExtent,
   Extent,
-  Coordinate
-} from '@geospatial-sdk/core';
+  Coordinate,
+} from "@geospatial-sdk/core";
 ```
 
 ## Usage with Map Libraries
@@ -186,7 +195,7 @@ npm install @geospatial-sdk/openlayers
 ```
 
 ```typescript
-import { createMapFromContext } from '@geospatial-sdk/openlayers';
+import { createMapFromContext } from "@geospatial-sdk/openlayers";
 
 const map = await createMapFromContext(context, mapElement);
 ```
@@ -198,7 +207,7 @@ npm install @geospatial-sdk/maplibre
 ```
 
 ```typescript
-import { createMapFromContext } from '@geospatial-sdk/maplibre';
+import { createMapFromContext } from "@geospatial-sdk/maplibre";
 
 const map = await createMapFromContext(context, mapElement);
 ```

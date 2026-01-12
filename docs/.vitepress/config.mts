@@ -9,11 +9,18 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Guides', link: '/guides/layer-extent' },
       { text: 'API Reference', link: '/api/' },
       { text: 'Examples', link: 'https://camptocamp.github.io/geospatial-sdk/',  }
     ],
 
     sidebar: [
+      {
+        text: 'Guides',
+        items: [
+          { text: 'Layer Extent Retrieval', link: '/guides/layer-extent' }
+        ]
+      },
       {
         text: 'API Reference',
         items: typedocSidebar,
