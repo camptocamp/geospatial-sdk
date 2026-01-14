@@ -19,6 +19,28 @@ import { FeatureCollection, Geometry } from "geojson";
 
 const GEOJSON = new GeoJSON();
 
+/**
+ * Creates a view from a layer by extracting its geographic extent. The returned extent is
+ * always expressed in EPSG:4326 (longitude/latitude) coordinates.
+ *
+ * @param layer - The map context layer to extract the extent from
+ * @returns A Promise resolving to a `ViewByExtent` object, or `null` if the extent cannot be determined
+ * @throws {Error} If the layer type is not supported
+ *
+ * @example
+ * ```typescript
+ * const wmsLayer: MapContextLayerWms = {
+ *   type: 'wms',
+ *   url: 'https://example.com/wms',
+ *   name: 'myLayer'
+ * };
+ *
+ * const view = await createViewFromLayer(wmsLayer);
+ * if (view) {
+ *   console.log('Extent:', view.extent); // [minX, minY, maxX, maxY] in EPSG:4326
+ * }
+ * ```
+ */
 export async function createViewFromLayer(
   layer: MapContextLayer,
 ): Promise<MapContextView | null> {

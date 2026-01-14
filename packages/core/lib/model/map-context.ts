@@ -1,8 +1,14 @@
 import { FeatureCollection, Geometry } from "geojson";
 import { VectorStyle } from "./style.js";
 
+/**
+ * @private
+ */
 export type LayerDimensions = Record<string, string>;
 
+/**
+ * @private
+ */
 export type LayerExtras = Record<string, unknown>;
 
 export interface MapContextBaseLayer {
@@ -71,10 +77,16 @@ interface LayerGeojson extends MapContextBaseLayer {
   type: "geojson";
   style?: VectorStyle;
 }
+/**
+ * @private
+ */
 export interface LayerGeojsonWithUrl extends LayerGeojson {
   url: string;
   data?: never;
 }
+/**
+ * @private
+ */
 export interface LayerGeojsonWithData extends LayerGeojson {
   data: FeatureCollection<Geometry | null> | string;
   url?: never;
@@ -87,6 +99,7 @@ export type MapContextLayerGeojson = LayerGeojsonWithUrl | LayerGeojsonWithData;
 
 /**
  * @interface
+ * A layer that can be used in a map context.
  */
 export type MapContextLayer =
   | MapContextLayerWms
@@ -100,7 +113,7 @@ export type MapContextLayer =
 export type Coordinate = [number, number];
 
 /**
- * Min X, min Y, max X, max Y
+ * Array components are respectively: minX, minY, maxX, maxY
  */
 export type Extent = [number, number, number, number];
 
@@ -121,12 +134,21 @@ export interface ViewByExtent {
 }
 
 /**
- * @property geometry Expressed in longitude/latitude
+ * @property geometry Expressed in GeoJSON
  */
 export interface ViewByGeometry {
   geometry: Geometry;
 }
 
+/**
+ * @interface
+ * A description of a map viewport in one of three ways:
+ *  * by center and zoom level,
+ *  * by extent,
+ *  * by geometry (in GeoJSON)
+ *
+ * Also allows specifying constraints for zoom and extent.
+ */
 export type MapContextView = (
   | ViewByZoomAndCenter
   | ViewByExtent
@@ -136,7 +158,13 @@ export type MapContextView = (
   maxExtent?: Extent;
 };
 
+/**
+ * @interface
+ * A map context, containing layers and a view.
+ *
+ * Note: setting the `view` property to `null` indicates that the map should use a default global view.
+ */
 export interface MapContext {
   layers: MapContextLayer[];
-  view: MapContextView | null; // a view of "null" means the map will show a default view;
+  view: MapContextView | null;
 }

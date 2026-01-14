@@ -33,5 +33,5 @@ export interface MapContextDiff {
   layersReordered: MapContextLayerReordered[];
   layersRemoved: MapContextLayerPositioned[];
   layersAdded: MapContextLayerPositioned[];
-  viewChanges?: MapContextView | null;
+  viewChanges?: MapContextView | null; // this is both optional (meaning no view change) and nullable (meaning reset to default view)
 }
