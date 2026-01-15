@@ -9,6 +9,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
+      { text: "Guides", link: "/guides/introduction" },
       { text: "API Reference", link: "/api/" },
       {
         text: "Examples",
@@ -20,6 +21,7 @@ export default defineConfig({
       {
         text: "Guides",
         items: [
+          { text: "Introduction", link: "/guides/introduction" },
           { text: "Map Context", link: "/guides/map-context" },
           { text: "Map Context Diff", link: "/guides/map-context-diff" },
           { text: "Layer Extent", link: "/guides/layer-extent" },
@@ -27,12 +29,17 @@ export default defineConfig({
       },
       {
         text: "API Reference",
+        link: "/api/",
         items: typedocSidebar,
       },
     ],
 
     socialLinks: [
-      { icon: "github", link: "https://github.com/vuejs/vitepress" },
+      { icon: "github", link: "https://github.com/camptocamp/geospatial-sdk" },
     ],
+
+    search: {
+      provider: "local",
+    },
   },
 });
