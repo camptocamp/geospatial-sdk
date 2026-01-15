@@ -2,7 +2,7 @@
 
 <!-- #region body -->
 
-This package provides framework-agnostic [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with [Lit](https://lit.dev/) that allow you to display interactive maps using the Map Context model. 
+This package provides framework-agnostic [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with [Lit](https://lit.dev/) that allow you to display interactive maps using the Map Context model.
 
 ## Installation
 
@@ -14,14 +14,14 @@ npm install @geospatial-sdk/elements
 
 ```html
 <script type="module">
-  import '@geospatial-sdk/elements';
-  
-  const mapElement = document.querySelector('geosdk-map');
+  import "@geospatial-sdk/elements";
+
+  const mapElement = document.querySelector("geosdk-map");
   mapElement.context = {
     layers: [
-      { type: 'xyz', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' }
+      { type: "xyz", url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png" },
     ],
-    view: { center: [6, 48.5], zoom: 5 }
+    view: { center: [6, 48.5], zoom: 5 },
   };
 </script>
 

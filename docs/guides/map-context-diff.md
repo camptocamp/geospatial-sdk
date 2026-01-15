@@ -29,8 +29,9 @@ await applyContextDiffToMap(openlayersMap, diff)
 ```
 
 Important things to note:
-* The diff computation is done by the `@geospatial-sdk/core` package, as is everything that relates to abstract Map Context objects
-* The diff is then applied to an existing map using a function from the `@geospatial-sdk/openlayers` package (the same function exists in the `@geospatial-sdk/maplibre` package for MapLibre GL JS maps); this is because applying a diff involved API calls for that specific mapping library
+
+- The diff computation is done by the `@geospatial-sdk/core` package, as is everything that relates to abstract Map Context objects
+- The diff is then applied to an existing map using a function from the `@geospatial-sdk/openlayers` package (the same function exists in the `@geospatial-sdk/maplibre` package for MapLibre GL JS maps); this is because applying a diff involved API calls for that specific mapping library
 
 ## `MapContextDiff` Structure
 
@@ -38,11 +39,11 @@ A diff object contains five properties describing the changes between a "prev" (
 
 ```typescript
 interface MapContextDiff {
-  layersAdded: MapContextLayerPositioned[]      // New layers with their positions
-  layersRemoved: MapContextLayerPositioned[]    // Removed layers with their positions
-  layersChanged: MapContextLayerPositioned[]    // Modified layers with their positions
-  layersReordered: MapContextLayerReordered[]   // Layers with their old and new positions
-  viewChanges?: MapContextView | null           // New view (undefined if unchanged)
+  layersAdded: MapContextLayerPositioned[]; // New layers with their positions
+  layersRemoved: MapContextLayerPositioned[]; // Removed layers with their positions
+  layersChanged: MapContextLayerPositioned[]; // Modified layers with their positions
+  layersReordered: MapContextLayerReordered[]; // Layers with their old and new positions
+  viewChanges?: MapContextView | null; // New view (undefined if unchanged)
 }
 ```
 
@@ -55,12 +56,13 @@ interface MapContextDiff {
 In order to figure out whether layers were moved and/or updated the SDK needs a way to track layers across several contexts.
 
 ::: info
-The SDK **does not use reference equality** when trying to figure out whether layers are the same or not. It always looks at _what the layer objects contain_! 
+The SDK **does not use reference equality** when trying to figure out whether layers are the same or not. It always looks at _what the layer objects contain_!
 :::
 
 The SDK uses two strategies to recognize layers across several contexts:
 
 ### Layers with an `id` property
+
 - **Identity**: Two layers having the same `id` are **considered the same** (non-strict equality: `'2'` == `2`)
 - **Change detection**: Two layers having the same `id` but different values in their `version` properties are **considered to be two versions of the same** (i.e. the layer was changed between the two contexts)
 
@@ -78,7 +80,7 @@ When the SDK compares two layers having the same `id` _and no `version` property
 If any of the two layers being compared does not have an `id` property, the SDK falls back to these rules for comparison:
 
 - **Identity**: Two layers having the same content (deep comparison, hash-based) are **considered the same**; this does not include the contents of the `extras` property!
-- **Change detection**: Two layers having the same content (deep comparison) _including the `extras` property_ are 
+- **Change detection**: Two layers having the same content (deep comparison) _but different contents in the `extras` property_ are **considered to be two versions of the same**
 
 ```typescript
 { type: 'wms', url: '...', name: 'roads' }
@@ -97,5 +99,3 @@ When applying a diff, operations must follow this order to obtain the correct fi
 The `applyContextDiffToMap` functions from `@geospatial-sdk/openlayers` and `@geospatial-sdk/maplibre` are implemented to follow that consideration.
 
 The view changes can be applied independently.
-
-

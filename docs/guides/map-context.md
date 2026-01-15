@@ -10,8 +10,8 @@ A **Map Context** is a plain JavaScript object that declaratively describes a ma
 
 ```typescript
 interface MapContext {
-  layers: MapContextLayer[]
-  view: MapContextView | null
+  layers: MapContextLayer[];
+  view: MapContextView | null;
 }
 ```
 
@@ -36,18 +36,19 @@ Note: all layers derive from the [`MapContextBaseLayer`](../api/core/lib/interfa
 ### Layer Identification
 
 All layers have two optional properties for identification:
+
 - **`id`**: A unique identifier, string or numeric; if provided, will be used to track the layer across context updates.
 - **`version`**: A number that indicates whether the layer was changed.
 
 What this means is that _using an `id` for layers is optional, and changes the way the application code works_:
-* with an `id`, layers will be persistent across context updates and their version number should be incremented regularly by the application code;
-* without `id`, layers will simply be recreated whenever they change without consideration for persistence.
 
-|                | ✅ Pros                                                                 | 🚩 Cons                                                                                           |
-|----------------|------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+- with an `id`, layers will be persistent across context updates and their version number should be incremented regularly by the application code;
+- without `id`, layers will simply be recreated whenever they change without consideration for persistence.
+
+|                | ✅ Pros                                                                | 🚩 Cons                                                                                           |
+| -------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Using `id`     | Map layers can be updated without being recreated (better performance) | The application has to generate them or ask the user to input them and make sure they are unique! |
 | Not using `id` | The map context is easier to generate (one less field necessary)       | Map layers will have to be recreated each time a property on the layer object changes             |
-  
 
 ### Vector Styles
 
@@ -94,14 +95,16 @@ The `view` property of the map context can be left to `null`; in that case, a de
 ## Creating Maps
 
 ```typescript
-import { createMapFromContext } from '@geospatial-sdk/openlayers'
+import { createMapFromContext } from "@geospatial-sdk/openlayers";
 
 const context = {
-  layers: [{ type: 'xyz', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' }],
-  view: { center: [0, 0], zoom: 2 }
-}
+  layers: [
+    { type: "xyz", url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png" },
+  ],
+  view: { center: [0, 0], zoom: 2 },
+};
 
-const map = await createMapFromContext(context, document.getElementById('map'))
+const map = await createMapFromContext(context, document.getElementById("map"));
 ```
 
 ## Manipulating Contexts
@@ -109,15 +112,15 @@ const map = await createMapFromContext(context, document.getElementById('map'))
 Use immutable utilities from `@geospatial-sdk/core`:
 
 ```typescript
-import { 
-  addLayerToContext, 
+import {
+  addLayerToContext,
   removeLayerFromContext,
   replaceLayerInContext,
   changeLayerPositionInContext,
-  getLayerPosition 
-} from '@geospatial-sdk/core'
+  getLayerPosition,
+} from "@geospatial-sdk/core";
 
-const newContext = addLayerToContext(context, layer, position)
+const newContext = addLayerToContext(context, layer, position);
 ```
 
 Each of these utilities will produce a new object without mutating the original context.

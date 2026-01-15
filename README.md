@@ -20,7 +20,7 @@ This monorepo contains the following packages:
 
 - **`@geospatial-sdk/core`**: Core types and utilities, including the Map Context model and diff algorithms
 - **`@geospatial-sdk/openlayers`**: OpenLayers integration for creating and managing maps from Map Context
-- **`@geospatial-sdk/maplibre`**: MapLibre GL integration for creating and managing maps from Map Context  
+- **`@geospatial-sdk/maplibre`**: MapLibre GL integration for creating and managing maps from Map Context
 - **`@geospatial-sdk/geocoding`**: Geocoding providers and utilities
 - **`@geospatial-sdk/legend`**: Generate legends from map layers
 - **`@geospatial-sdk/elements`**: Web Components for displaying a map from a Map Context
@@ -30,22 +30,22 @@ This monorepo contains the following packages:
 ### Quick Example
 
 ```typescript
-import { createMapFromContext } from '@geospatial-sdk/openlayers'
+import { createMapFromContext } from "@geospatial-sdk/openlayers";
 
 const mapContext = {
   layers: [
     {
-      type: 'xyz',
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-    }
+      type: "xyz",
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    },
   ],
   view: {
     zoom: 5,
-    center: [6, 48.5]
-  }
-}
+    center: [6, 48.5],
+  },
+};
 
-createMapFromContext(mapContext, document.getElementById('map'))
+createMapFromContext(mapContext, document.getElementById("map"));
 ```
 
 ### Learn More

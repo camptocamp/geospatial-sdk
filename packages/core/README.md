@@ -22,16 +22,16 @@ npm install @geospatial-sdk/core
 ## Usage
 
 ```typescript
-import { computeMapContextDiff, type MapContext } from '@geospatial-sdk/core';
+import { computeMapContextDiff, type MapContext } from "@geospatial-sdk/core";
 
 const oldContext: MapContext = {
-  layers: [{ type: 'xyz', url: 'https://example.com/{z}/{x}/{y}.png' }],
-  view: { center: [0, 0], zoom: 2 }
+  layers: [{ type: "xyz", url: "https://example.com/{z}/{x}/{y}.png" }],
+  view: { center: [0, 0], zoom: 2 },
 };
 
 const newContext: MapContext = {
-  layers: [{ type: 'xyz', url: 'https://example.com/{z}/{x}/{y}.png' }],
-  view: { center: [5, 45], zoom: 5 }
+  layers: [{ type: "xyz", url: "https://example.com/{z}/{x}/{y}.png" }],
+  view: { center: [5, 45], zoom: 5 },
 };
 
 const diff = computeMapContextDiff(newContext, oldContext);

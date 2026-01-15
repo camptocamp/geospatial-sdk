@@ -11,8 +11,9 @@ This guide explains how the Geospatial SDK retrieves and manages geographic exte
 ## Overview
 
 The geographic extent of a layer represents its bounding box in geographic coordinates (EPSG:4326). The SDK provides automated extent retrieval through the `createViewFromLayer()` function, which looks for the layer extent asynchronously in various ways depending on the layer type:
-* either the service capabilities will be fetched using [`ogc-client`](https://github.com/camptocamp/ogc-client)
-* or the data is parsed and analyzed in memory to compute the encompassing bounds
+
+- either the service capabilities will be fetched using [`ogc-client`](https://github.com/camptocamp/ogc-client)
+- or the data is parsed and analyzed in memory to compute the encompassing bounds
 
 ```typescript
 import { createViewFromLayer } from "@geospatial-sdk/core";
@@ -33,7 +34,7 @@ if (view) {
 
 For now, only certain layer types are supported:
 
-* WMS
-* WMTS
-* WFS
-* GeoJSON (if the data is passed inline with the layer object)
+- WMS
+- WMTS
+- WFS
+- GeoJSON (if the data is passed inline with the layer object)

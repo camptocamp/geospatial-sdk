@@ -13,23 +13,26 @@ npm install @geospatial-sdk/openlayers
 ## Usage
 
 ```typescript
-import { createMapFromContext } from '@geospatial-sdk/openlayers';
-import type { MapContext } from '@geospatial-sdk/core';
+import { createMapFromContext } from "@geospatial-sdk/openlayers";
+import type { MapContext } from "@geospatial-sdk/core";
 
 const mapContext: MapContext = {
   layers: [
     {
-      type: 'xyz',
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-    }
+      type: "xyz",
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    },
   ],
   view: {
     center: [6, 48.5],
-    zoom: 5
-  }
+    zoom: 5,
+  },
 };
 
-const map = await createMapFromContext(mapContext, document.getElementById('map'));
+const map = await createMapFromContext(
+  mapContext,
+  document.getElementById("map"),
+);
 ```
 
 <!-- #endregion body -->
