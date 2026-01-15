@@ -1,10 +1,8 @@
-# `legend`
+# `@geospatial-sdk/legend`
 
-> A library to get legend graphics from the map-context.
+This package provides utilities to automatically create map legends from layer definitions in a Map Context.
 
 ## Installation
-
-To install the package, use npm:
 
 ```sh
 npm install @geospatial-sdk/legend
@@ -29,7 +27,3 @@ createLegendFromLayer(layer).then((legendDiv) => {
 ## Documentation
 
 For more detailed API documentation, see the [documentation website](https://camptocamp.github.io/geospatial-sdk/docs/).
-
-## Examples
-
-For examples and demos, see the [examples website](https://camptocamp.github.io/geospatial-sdk/).
