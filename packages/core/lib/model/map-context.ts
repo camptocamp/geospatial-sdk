@@ -3,11 +3,13 @@ import { VectorStyle } from "./style.js";
 
 /**
  * @private
+ * @inline
  */
 export type LayerDimensions = Record<string, string>;
 
 /**
  * @private
+ * @inline
  */
 export type LayerExtras = Record<string, unknown>;
 
@@ -77,16 +79,10 @@ interface LayerGeojson extends MapContextBaseLayer {
   type: "geojson";
   style?: VectorStyle;
 }
-/**
- * @private
- */
 export interface LayerGeojsonWithUrl extends LayerGeojson {
   url: string;
   data?: never;
 }
-/**
- * @private
- */
 export interface LayerGeojsonWithData extends LayerGeojson {
   data: FeatureCollection<Geometry | null> | string;
   url?: never;

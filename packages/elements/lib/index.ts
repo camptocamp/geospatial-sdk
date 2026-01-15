@@ -1,6 +1,7 @@
 /**
  * {@include ../README.md#body}
  *
+ * @hideGroups
  * @module 📦 elements
  */
 
