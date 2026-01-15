@@ -1,8 +1,16 @@
 import { FeatureCollection, Geometry } from "geojson";
 import { VectorStyle } from "./style.js";
 
+/**
+ * @private
+ * @inline
+ */
 export type LayerDimensions = Record<string, string>;
 
+/**
+ * @private
+ * @inline
+ */
 export type LayerExtras = Record<string, unknown>;
 
 export interface MapContextBaseLayer {
@@ -79,14 +87,10 @@ export interface LayerGeojsonWithData extends LayerGeojson {
   data: FeatureCollection<Geometry | null> | string;
   url?: never;
 }
-
-/**
- * @interface
- */
 export type MapContextLayerGeojson = LayerGeojsonWithUrl | LayerGeojsonWithData;
 
 /**
- * @interface
+ * A layer that can be used in a map context.
  */
 export type MapContextLayer =
   | MapContextLayerWms
@@ -100,7 +104,7 @@ export type MapContextLayer =
 export type Coordinate = [number, number];
 
 /**
- * Min X, min Y, max X, max Y
+ * Array components are respectively: minX, minY, maxX, maxY
  */
 export type Extent = [number, number, number, number];
 
@@ -121,12 +125,20 @@ export interface ViewByExtent {
 }
 
 /**
- * @property geometry Expressed in longitude/latitude
+ * @property geometry Expressed in GeoJSON
  */
 export interface ViewByGeometry {
   geometry: Geometry;
 }
 
+/**
+ * A description of a map viewport in one of three ways:
+ *  * by center and zoom level,
+ *  * by extent,
+ *  * by geometry (in GeoJSON)
+ *
+ * Also allows specifying constraints for zoom and extent.
+ */
 export type MapContextView = (
   | ViewByZoomAndCenter
   | ViewByExtent
@@ -136,7 +148,12 @@ export type MapContextView = (
   maxExtent?: Extent;
 };
 
+/**
+ * A map context, containing layers and a view.
+ *
+ * Note: setting the `view` property to `null` indicates that the map should use a default global view.
+ */
 export interface MapContext {
   layers: MapContextLayer[];
-  view: MapContextView | null; // a view of "null" means the map will show a default view;
+  view: MapContextView | null;
 }

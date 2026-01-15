@@ -1,11 +1,35 @@
-# `elements`
+# `@geospatial-sdk/elements`
 
-> TODO: description
+<!-- #region body -->
+
+This package provides framework-agnostic [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with [Lit](https://lit.dev/) that allow you to display interactive maps using the Map Context model.
+
+## Installation
+
+```sh
+npm install @geospatial-sdk/elements
+```
 
 ## Usage
 
-```
-const openlayers = require('elements');
+```html
+<script type="module">
+  import "@geospatial-sdk/elements";
 
-// TODO: DEMONSTRATE API
+  const mapElement = document.querySelector("geosdk-map");
+  mapElement.context = {
+    layers: [
+      { type: "xyz", url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png" },
+    ],
+    view: { center: [6, 48.5], zoom: 5 },
+  };
+</script>
+
+<geosdk-map style="width: 800px; height: 600px;"></geosdk-map>
 ```
+
+<!-- #endregion body -->
+
+## Documentation
+
+For more detailed API documentation, see the [documentation website](https://camptocamp.github.io/geospatial-sdk/docs/).

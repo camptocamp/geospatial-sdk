@@ -99,20 +99,8 @@ describe("Map context utils", () => {
   });
 
   describe("isLayerSameAndUnchanged", () => {
-    describe("layers with id", () => {
+    describe("layers with id and version", () => {
       it("compares non-strictly by id and version field", () => {
-        expect(
-          isLayerSameAndUnchanged(
-            { ...SAMPLE_LAYER1, id: "a" },
-            { ...SAMPLE_LAYER1, id: "b" },
-          ),
-        ).toBe(false);
-        expect(
-          isLayerSameAndUnchanged(
-            { ...SAMPLE_LAYER1, id: "a" },
-            { ...SAMPLE_LAYER2, id: "a" },
-          ),
-        ).toBe(true);
         expect(
           isLayerSameAndUnchanged(
             { ...SAMPLE_LAYER1, id: "ab", version: 2 },
@@ -129,6 +117,40 @@ describe("Map context utils", () => {
           isLayerSameAndUnchanged(
             { ...SAMPLE_LAYER1, id: 1 },
             { ...SAMPLE_LAYER1, id: "01", version: 3 },
+          ),
+        ).toBe(false);
+      });
+    });
+    describe("layers with id and both without version", () => {
+      it("compares by properties, including extras", () => {
+        expect(
+          isLayerSameAndUnchanged(
+            { ...SAMPLE_LAYER1, id: "a" },
+            { ...SAMPLE_LAYER1, id: "b" },
+          ),
+        ).toBe(false);
+        expect(
+          isLayerSameAndUnchanged(
+            { ...SAMPLE_LAYER1, id: "a" },
+            { ...SAMPLE_LAYER2, id: "a" },
+          ),
+        ).toBe(false);
+        expect(
+          isLayerSameAndUnchanged(
+            { ...SAMPLE_LAYER1, id: "a" },
+            { ...SAMPLE_LAYER1, id: "a" },
+          ),
+        ).toBe(true);
+        expect(
+          isLayerSameAndUnchanged(
+            { ...SAMPLE_LAYER2, id: "b", extras: { hello: "world" } },
+            { ...SAMPLE_LAYER2, id: "b", extras: { hello: "world" } },
+          ),
+        ).toBe(true);
+        expect(
+          isLayerSameAndUnchanged(
+            { ...SAMPLE_LAYER2, id: "b", extras: { hello: "world" } },
+            { ...SAMPLE_LAYER2, id: "b", extras: { foo: "bar" } },
           ),
         ).toBe(false);
       });

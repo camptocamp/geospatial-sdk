@@ -22,7 +22,11 @@ export function isLayerSameAndUnchanged(
   layerA: MapContextLayer,
   layerB: MapContextLayer,
 ): boolean {
-  if ("id" in layerA && "id" in layerB) {
+  if (
+    "id" in layerA &&
+    "id" in layerB &&
+    ("version" in layerA || "version" in layerB)
+  ) {
     return layerA.id == layerB.id && layerA.version == layerB.version;
   }
   return getLayerHash(layerA, true) === getLayerHash(layerB, true);

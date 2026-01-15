@@ -1,13 +1,35 @@
 {
   "entryPoints": ["../packages/*/lib/index.ts"],
-  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-vitepress-theme",
+    "typedoc-plugin-frontmatter"
+  ],
   "githubPages": false,
   "readme": "none",
   "indexFormat": "table",
-  "useCodeBlocks": true,
-  "disableSources": false,
+  "parametersFormat": "table",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "typeAliasPropertiesFormat": "table",
+  "enumMembersFormat": "table",
+  "propertyMembersFormat": "table",
+  "typeDeclarationFormat": "table",
+  "useCodeBlocks": false,
+  "disableSources": true,
   "textContentMappings": {
     "title.indexPage": "API Reference",
     "title.memberPage": "{name}"
+  },
+  "navigation": {
+    "includeCategories": false,
+    "includeGroups": true,
+    "includeFolders": true,
+    "compactFolders": false,
+    "excludeReferences": false
+  },
+  "hideBreadcrumbs": true,
+  "frontmatterGlobals": {
+    "aside": false
   }
 }

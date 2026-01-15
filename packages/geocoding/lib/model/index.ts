@@ -1,3 +1,8 @@
+/**
+ * @group Types
+ * @packageDocumentation
+ */
+
 import { type Geometry } from "geojson";
 
 export interface GeocodingResult {

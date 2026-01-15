@@ -1,3 +1,8 @@
+/**
+ * @group Utils
+ * @packageDocumentation
+ */
+
 export * from "./url.js";
 export * from "./freeze.js";
 export * from "./hash.js";
