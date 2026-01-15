@@ -1,7 +1,10 @@
 # `@geospatial-sdk/core`
 
+<!-- #region body -->
 
-This package provides the foundation for the Geospatial SDK. It includes:
+This package provides the foundation for the Geospatial SDK.
+
+It includes:
 
 - **Map Context model**: TypeScript types and interfaces for declaratively defining maps, layers, and views
 - **Diff algorithms**: Utilities to compute differences between Map Context objects (`computeMapContextDiff`)
@@ -33,6 +36,8 @@ const newContext: MapContext = {
 
 const diff = computeMapContextDiff(newContext, oldContext);
 ```
+
+<!-- #endregion body -->
 
 ## Documentation
 

@@ -1,5 +1,7 @@
 # `@geospatial-sdk/elements`
 
+<!-- #region body -->
+
 This package provides framework-agnostic [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with [Lit](https://lit.dev/) that allow you to display interactive maps using the Map Context model. 
 
 ## Installation
@@ -25,6 +27,8 @@ npm install @geospatial-sdk/elements
 
 <geosdk-map style="width: 800px; height: 600px;"></geosdk-map>
 ```
+
+<!-- #endregion body -->
 
 ## Documentation
 

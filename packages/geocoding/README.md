@@ -1,5 +1,7 @@
 # `@geospatial-sdk/geocoding`
 
+<!-- #region body -->
+
 This package provides a unified interface for working with various geocoding services.
 
 ## Installation
@@ -17,6 +19,8 @@ const results = await queryDataGouvFr('Paris, France');
 console.log(results[0].label); // "Paris 75000"
 console.log(results[0].geom); // GeoJSON Geometry object
 ```
+
+<!-- #endregion body -->
 
 ## Documentation
 

@@ -5,9 +5,10 @@
   "readme": "none",
   "indexFormat": "table",
   "useCodeBlocks": true,
-  "disableSources": false,
+  "disableSources": true,
   "textContentMappings": {
     "title.indexPage": "API Reference",
     "title.memberPage": "{name}"
-  }
+  },
+  "includeVersion": true
 }

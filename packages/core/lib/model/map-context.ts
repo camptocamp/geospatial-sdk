@@ -91,14 +91,9 @@ export interface LayerGeojsonWithData extends LayerGeojson {
   data: FeatureCollection<Geometry | null> | string;
   url?: never;
 }
-
-/**
- * @interface
- */
 export type MapContextLayerGeojson = LayerGeojsonWithUrl | LayerGeojsonWithData;
 
 /**
- * @interface
  * A layer that can be used in a map context.
  */
 export type MapContextLayer =
@@ -141,7 +136,6 @@ export interface ViewByGeometry {
 }
 
 /**
- * @interface
  * A description of a map viewport in one of three ways:
  *  * by center and zoom level,
  *  * by extent,
@@ -159,7 +153,6 @@ export type MapContextView = (
 };
 
 /**
- * @interface
  * A map context, containing layers and a view.
  *
  * Note: setting the `view` property to `null` indicates that the map should use a default global view.

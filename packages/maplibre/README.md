@@ -1,5 +1,7 @@
 # `@geospatial-sdk/maplibre`
 
+<!-- #region body -->
+
 This package provides utilities to create and manage [MapLibre GL JS](https://maplibre.org/) maps using the declarative Map Context model from `@geospatial-sdk/core`.
 
 ## Installation
@@ -29,6 +31,8 @@ const mapContext: MapContext = {
 
 const map = await createMapFromContext(mapContext, document.getElementById('map'));
 ```
+
+<!-- #endregion body -->
 
 ## Documentation
 

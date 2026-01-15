@@ -1,5 +1,7 @@
 # `@geospatial-sdk/legend`
 
+<!-- #region body -->
+
 This package provides utilities to automatically create map legends from layer definitions in a Map Context.
 
 ## Installation
@@ -23,6 +25,8 @@ createLegendFromLayer(layer).then((legendDiv) => {
   document.body.appendChild(legendDiv);
 });
 ```
+
+<!-- #endregion body -->
 
 ## Documentation
 
