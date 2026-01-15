@@ -29,9 +29,9 @@ Each layer has a `type` property that determines its data source:
 
 Other options include `id` and `version` (see chapter below), `label`, `visibility` (hidden or not), `opacity` and `attributions`.
 
-See the API doc for [`MapContextLayer`](../api/core/lib/interfaces/MapContextLayer.html) and derived classes.
+See the API doc for [`MapContextLayer`](../api/%F0%9F%93%A6-core/type-aliases/MapContextLayer) and derived classes.
 
-Note: all layers derive from the [`MapContextBaseLayer`](../api/core/lib/interfaces/MapContextBaseLayer.html) interface.
+Note: all layers derive from the [`MapContextBaseLayer`](../api/%F0%9F%93%A6-core/interfaces/MapContextBaseLayer) interface.
 
 ### Layer Identification
 
@@ -86,7 +86,7 @@ Define the map position in one of three ways:
 
 Other options include `maxZoom` and `maxExtent`.
 
-See the API doc for [`MapContextView`](../api/core/lib/type-aliases/MapContextView.html).
+See the API doc for [`MapContextView`](../api/%F0%9F%93%A6-core/type-aliases/MapContextView.html).
 
 ### Default view
 
