@@ -127,6 +127,7 @@ describe("applyContextDiffToMap", () => {
               ...SAMPLE_LAYER2,
               url: "http://changed/",
             } as MapContextLayer,
+            previousLayer: SAMPLE_LAYER2,
             position: 0,
           },
           {
@@ -137,6 +138,7 @@ describe("applyContextDiffToMap", () => {
                 changed: true,
               },
             } as MapContextLayer,
+            previousLayer: SAMPLE_LAYER1,
             position: 1,
           },
         ],
@@ -150,6 +152,38 @@ describe("applyContextDiffToMap", () => {
       expect(layersArray.length).toEqual(2);
       assertEqualsToModel(layersArray[0], diff.layersChanged[0].layer);
       assertEqualsToModel(layersArray[1], diff.layersChanged[1].layer);
+    });
+
+    describe("layers changed (updatable properties only)", () => {
+      let prevOlLayer: BaseLayer;
+      let newOlLayer: BaseLayer;
+      beforeEach(() => {
+        diff = {
+          layersAdded: [],
+          layersChanged: [
+            {
+              layer: {
+                ...SAMPLE_LAYER1,
+                attributions: "new attributions!",
+              } as MapContextLayer,
+              previousLayer: SAMPLE_LAYER1,
+              position: 1,
+            },
+          ],
+          layersRemoved: [],
+          layersReordered: [],
+        };
+        prevOlLayer = map.getLayers().item(1);
+        applyContextDiffToMap(map, diff);
+        newOlLayer = map.getLayers().item(1);
+      });
+      it("modifies the layer without recreating it", () => {
+        expect(prevOlLayer).toBe(newOlLayer);
+        const newAttributions = (newOlLayer as any)
+          .getSource()
+          ?.getAttributions();
+        expect(newAttributions()).toEqual(["new attributions!"]);
+      });
     });
   });
 
@@ -319,6 +353,7 @@ describe("applyContextDiffToMap", () => {
         layersChanged: [
           {
             layer: changedLayer,
+            previousLayer: SAMPLE_LAYER3,
             position: 1,
           },
         ],

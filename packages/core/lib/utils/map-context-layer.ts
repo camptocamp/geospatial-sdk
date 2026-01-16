@@ -47,10 +47,13 @@ export function updateLayer(
     ...layer,
     ...updates,
   } as MapContextLayer;
+  const versionExplicitlyUpdated =
+    "version" in updates && updates.version !== undefined;
   if (
     "id" in updatedLayer &&
     "version" in updatedLayer &&
-    typeof updatedLayer.version === "number"
+    typeof updatedLayer.version === "number" &&
+    !versionExplicitlyUpdated
   ) {
     updatedLayer.version = updatedLayer.version + 1;
   }

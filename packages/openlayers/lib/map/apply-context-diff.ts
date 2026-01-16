@@ -1,6 +1,6 @@
 import Map from "ol/Map.js";
 import { MapContextDiff } from "@geospatial-sdk/core";
-import { createLayer, createView } from "./create-map.js";
+import { createLayer, createView, updateLayerInMap } from "./create-map.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";
@@ -58,12 +58,14 @@ export async function applyContextDiffToMap(
     map.setLayers([...layersArray]);
   }
 
-  // recreate changed layers
+  // update or recreate changed layers
   for (const layerChanged of contextDiff.layersChanged) {
-    layers.item(layerChanged.position).dispose();
-    createLayer(layerChanged.layer).then((layer) => {
-      layers.setAt(layerChanged.position, layer);
-    });
+    updateLayerInMap(
+      map,
+      layerChanged.layer,
+      layerChanged.position,
+      layerChanged.previousLayer,
+    );
   }
 
   if (typeof contextDiff.viewChanges !== "undefined") {

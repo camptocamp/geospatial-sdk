@@ -74,11 +74,14 @@ export function replaceLayerInContext(
 }
 
 /**
- * Replaces a layer in the context with a new layer.
+ * Updates an existing layer in the context by applying partial changes.
+ *
+ * Note: setting a property to `undefined` in the partial layer updates will remove that
+ * property from the existing layer.
  *
  * @param context The current map context.
- * @param layerModel The layer to be replaced.
- * @param layerUpdates The new layer that will replace the old one.
+ * @param layerModel The layer to be updated.
+ * @param layerUpdates A partial layer object containing the properties to update on the existing layer.
  * @returns The new map context with the updated layer.
  */
 
@@ -89,7 +92,7 @@ export function updateLayerInContext(
 ): MapContext {
   const position = getLayerPosition(context, layerModel);
   if (position >= 0) {
-    const existing = context.layers[getLayerPosition(context, layerModel)];
+    const existing = context.layers[position];
     const updated = updateLayer(existing, layerUpdates);
     return replaceLayerInContext(context, layerModel, updated);
   }

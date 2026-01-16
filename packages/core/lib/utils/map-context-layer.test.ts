@@ -347,5 +347,11 @@ describe("Map context layer utils", () => {
       const updated = updateLayer(layer, { opacity: 0.6 });
       expect(updated).not.toHaveProperty("version");
     });
+
+    it("does not change the version if it is explicitly specified in the partial changes", () => {
+      const layer = { ...SAMPLE_LAYER1, id: "123", version: 3 };
+      const updated = updateLayer(layer, { opacity: 0.6, version: 12 });
+      expect(updated.version).toBe(12);
+    });
   });
 });

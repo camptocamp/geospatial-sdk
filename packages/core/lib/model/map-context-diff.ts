@@ -19,6 +19,15 @@ export interface MapContextLayerReordered {
 }
 
 /**
+ * Describes a layer that was changed: both states before and after change are included
+ */
+export interface MapContextLayerChanged {
+  layer: MapContextLayer;
+  previousLayer: MapContextLayer;
+  position: number;
+}
+
+/**
  * Describes a delta between two contexts, in order to be
  * applied to an existing map.
  *
@@ -29,7 +38,7 @@ export interface MapContextLayerReordered {
  * 4. change layers
  */
 export interface MapContextDiff {
-  layersChanged: MapContextLayerPositioned[];
+  layersChanged: MapContextLayerChanged[];
   layersReordered: MapContextLayerReordered[];
   layersRemoved: MapContextLayerPositioned[];
   layersAdded: MapContextLayerPositioned[];
