@@ -2,6 +2,7 @@ import {
   MapContext,
   MapContextDiff,
   MapContextLayer,
+  MapContextLayerChanged,
   MapContextLayerPositioned,
   MapContextLayerReordered,
 } from "../model/index.js";
@@ -42,7 +43,7 @@ export function computeMapContextDiff(
     return -1;
   }
 
-  const layersChanged: MapContextLayerPositioned[] = [];
+  const layersChanged: MapContextLayerChanged[] = [];
   const layersReordered: MapContextLayerReordered[] = [];
   const layersRemoved: MapContextLayerPositioned[] = [];
   const layersAdded: MapContextLayerPositioned[] = [];
@@ -66,7 +67,7 @@ export function computeMapContextDiff(
     } else {
       const prevLayer = previousContext.layers[prevPosition];
       if (!isLayerSameAndUnchanged(layer, prevLayer)) {
-        layersChanged.push({ layer, position: i });
+        layersChanged.push({ layer, previousLayer: prevLayer, position: i });
       }
     }
   }

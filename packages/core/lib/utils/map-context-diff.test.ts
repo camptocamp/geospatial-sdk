@@ -6,7 +6,7 @@ import {
   SAMPLE_LAYER2,
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
-  SAMPLE_LAYER5,
+  SAMPLE_LAYER5
 } from "../../fixtures/map-context.fixtures.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -121,10 +121,12 @@ describe("Context diff utils", () => {
           layersChanged: [
             {
               layer: contextNew.layers[0],
+              previousLayer: contextOld.layers[0],
               position: 0,
             },
             {
               layer: contextNew.layers[1],
+              previousLayer: contextOld.layers[1],
               position: 1,
             },
           ],
@@ -356,6 +358,7 @@ describe("Context diff utils", () => {
           layersChanged: [
             {
               layer: changedLayer,
+              previousLayer: SAMPLE_LAYER3,
               position: 1,
             },
           ],
