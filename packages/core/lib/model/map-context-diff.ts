@@ -19,7 +19,7 @@ export interface MapContextLayerReordered {
 }
 
 /**
- * Describes a layer that was changed: both states before and after change are inclded
+ * Describes a layer that was changed: both states before and after change are included
  */
 export interface MapContextLayerChanged {
   layer: MapContextLayer;
