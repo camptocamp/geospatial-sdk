@@ -1,11 +1,15 @@
-import { MapContext, MapContextDiff, MapContextLayer } from "@geospatial-sdk/core";
+import {
+  MapContext,
+  MapContextDiff,
+  MapContextLayer,
+} from "@geospatial-sdk/core";
 import {
   SAMPLE_CONTEXT,
   SAMPLE_LAYER1,
   SAMPLE_LAYER2,
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
-  SAMPLE_LAYER5
+  SAMPLE_LAYER5,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import Map from "ol/Map.js";
 import { createLayer, createMapFromContext } from "./create-map.js";
@@ -151,8 +155,8 @@ describe("applyContextDiffToMap", () => {
     });
 
     describe("layers changed (updatable properties only)", () => {
-      let prevOlLayer: BaseLayer
-      let newOlLayer: BaseLayer
+      let prevOlLayer: BaseLayer;
+      let newOlLayer: BaseLayer;
       beforeEach(() => {
         diff = {
           layersAdded: [],
@@ -160,7 +164,7 @@ describe("applyContextDiffToMap", () => {
             {
               layer: {
                 ...SAMPLE_LAYER1,
-                attributions: 'new attributions!'
+                attributions: "new attributions!",
               } as MapContextLayer,
               previousLayer: SAMPLE_LAYER1,
               position: 1,
@@ -169,14 +173,16 @@ describe("applyContextDiffToMap", () => {
           layersRemoved: [],
           layersReordered: [],
         };
-        prevOlLayer = map.getLayers().item(1)
+        prevOlLayer = map.getLayers().item(1);
         applyContextDiffToMap(map, diff);
-        newOlLayer = map.getLayers().item(1)
+        newOlLayer = map.getLayers().item(1);
       });
       it("modifies the layer without recreating it", () => {
-        expect(prevOlLayer).toBe(newOlLayer)
-        const newAttributions = (newOlLayer as any).getSource()?.getAttributions()
-        expect(newAttributions()).toEqual(['new attributions!'])
+        expect(prevOlLayer).toBe(newOlLayer);
+        const newAttributions = (newOlLayer as any)
+          .getSource()
+          ?.getAttributions();
+        expect(newAttributions()).toEqual(["new attributions!"]);
       });
     });
   });

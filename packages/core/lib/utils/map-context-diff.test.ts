@@ -6,7 +6,7 @@ import {
   SAMPLE_LAYER2,
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
-  SAMPLE_LAYER5
+  SAMPLE_LAYER5,
 } from "../../fixtures/map-context.fixtures.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
