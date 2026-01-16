@@ -1,36 +1,5 @@
 import { MapContext, MapContextLayer } from "../model/index.js";
-import { getHash } from "./hash.js";
-
-export function getLayerHash(
-  layer: MapContextLayer,
-  includeExtras = false,
-): string {
-  return getHash(layer, includeExtras ? [] : ["extras"]);
-}
-
-export function isLayerSame(
-  layerA: MapContextLayer,
-  layerB: MapContextLayer,
-): boolean {
-  if ("id" in layerA && "id" in layerB) {
-    return layerA.id == layerB.id;
-  }
-  return getLayerHash(layerA) === getLayerHash(layerB);
-}
-
-export function isLayerSameAndUnchanged(
-  layerA: MapContextLayer,
-  layerB: MapContextLayer,
-): boolean {
-  if (
-    "id" in layerA &&
-    "id" in layerB &&
-    ("version" in layerA || "version" in layerB)
-  ) {
-    return layerA.id == layerB.id && layerA.version == layerB.version;
-  }
-  return getLayerHash(layerA, true) === getLayerHash(layerB, true);
-}
+import { isLayerSame, updateLayer } from "./map-context-layer.js";
 
 export function getLayerPosition(
   context: MapContext,
@@ -42,10 +11,10 @@ export function getLayerPosition(
 /**
  * Adds a layer to the context at a specific position or at the end if no position is specified.
  *
- * @param {MapContext} context - The current map context.
- * @param {MapContextLayer} layerModel - The layer to be added.
- * @param {number} [position] - The position at which to add the layer. If not specified, the layer is added at the end.
- * @returns {MapContext} - The new map context with the added layer.
+ * @param context The current map context.
+ * @param layerModel The layer to be added.
+ * @param [position] The position at which to add the layer. If not specified, the layer is added at the end.
+ * @returns The new map context with the added layer.
  */
 
 export function addLayerToContext(
@@ -65,9 +34,9 @@ export function addLayerToContext(
 /**
  * Removes a layer from the context.
  *
- * @param {MapContext} context - The current map context.
- * @param {MapContextLayer} layerModel - The layer to be removed.
- * @returns {MapContext} - The new map context without the removed layer.
+ * @param context The current map context.
+ * @param layerModel The layer to be removed.
+ * @returns The new map context without the removed layer.
  */
 
 export function removeLayerFromContext(
@@ -85,10 +54,10 @@ export function removeLayerFromContext(
 /**
  * Replaces a layer in the context with a new layer.
  *
- * @param {MapContext} context - The current map context.
- * @param {MapContextLayer} layerModel - The layer to be replaced.
- * @param {MapContextLayer} replacement - The new layer that will replace the old one.
- * @returns {MapContext} - The new map context with the replaced layer.
+ * @param context The current map context.
+ * @param layerModel The layer to be replaced.
+ * @param replacement The new layer that will replace the old one.
+ * @returns The new map context with the replaced layer.
  */
 
 export function replaceLayerInContext(
@@ -105,12 +74,37 @@ export function replaceLayerInContext(
 }
 
 /**
+ * Replaces a layer in the context with a new layer.
+ *
+ * @param context The current map context.
+ * @param layerModel The layer to be replaced.
+ * @param layerUpdates The new layer that will replace the old one.
+ * @returns The new map context with the updated layer.
+ */
+
+export function updateLayerInContext(
+  context: MapContext,
+  layerModel: MapContextLayer,
+  layerUpdates: Partial<MapContextLayer>,
+): MapContext {
+  const position = getLayerPosition(context, layerModel);
+  if (position >= 0) {
+    const existing = context.layers[getLayerPosition(context, layerModel)];
+    const updated = updateLayer(existing, layerUpdates);
+    return replaceLayerInContext(context, layerModel, updated);
+  }
+  // we're building a new context so that the reference is changed anyway; this is done to be
+  // consistent with other utilities that always change the context reference even if the layer wasn't found
+  return { ...context };
+}
+
+/**
  * Changes the position of a layer in the context.
  *
- * @param {MapContext} context - The current map context.
- * @param {MapContextLayer} layerModel - The layer whose position is to be changed.
- * @param {number} position - The new position for the layer.
- * @returns {MapContext} - The new map context with the layer moved to the new position.
+ * @param context The current map context.
+ * @param layerModel The layer whose position is to be changed.
+ * @param position The new position for the layer.
+ * @returns The new map context with the layer moved to the new position.
  */
 
 export function changeLayerPositionInContext(
