@@ -36,20 +36,13 @@ import {
   tileLoadErrorCatchFunction,
 } from "./handle-errors.js";
 import VectorTile from "ol/source/VectorTile.js";
-import { canDoIncrementalUpdate } from "./layer-update.js";
+import {
+  canDoIncrementalUpdate,
+  updateLayerProperties,
+} from "./layer-update.js";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
-
-function updateLayerProperties(layerModel: MapContextLayer, olLayer: Layer) {
-  typeof layerModel.visibility !== "undefined" &&
-    olLayer.setVisible(layerModel.visibility);
-  typeof layerModel.opacity !== "undefined" &&
-    olLayer.setOpacity(layerModel.opacity);
-  typeof layerModel.attributions !== "undefined" &&
-    olLayer.getSource()?.setAttributions(layerModel.attributions);
-  olLayer.set("label", layerModel.label);
-}
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
@@ -274,14 +267,14 @@ export function updateLayerInMap(
   map: Map,
   layerModel: MapContextLayer,
   layerPosition: number,
-  previousLayer: MapContextLayer,
+  previousLayerModel: MapContextLayer,
 ) {
   const layers = map.getLayers();
   const updatedLayer = layers.item(layerPosition) as Layer;
 
   // if an incremental update is possible, do it to avoid costly layer recreation
-  if (canDoIncrementalUpdate(previousLayer, layerModel)) {
-    updateLayerProperties(layerModel, updatedLayer);
+  if (canDoIncrementalUpdate(previousLayerModel, layerModel)) {
+    updateLayerProperties(layerModel, updatedLayer, previousLayerModel);
     return;
   }
 
