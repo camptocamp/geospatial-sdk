@@ -5,6 +5,8 @@ import {
   MAP_CTX_LAYER_OGCAPI_FIXTURE,
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
+  MAP_CTX_LAYER_WMTS_FIXTURE,
+  MAP_CTX_LAYER_XYZ_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import { LayerGeojsonWithData, MapContextLayer } from "@geospatial-sdk/core";
 import { createLayer } from "./create-map.js";
@@ -13,10 +15,7 @@ import {
   GeoJSONSourceSpecification,
   RasterLayerSpecification,
 } from "@maplibre/maplibre-gl-style-spec";
-import {
-  FEATURE_COLLECTION_LINESTRING_FIXTURE_4326,
-  FEATURE_COLLECTION_POLYGON_FIXTURE_4326,
-} from "@geospatial-sdk/core/fixtures/geojson.fixtures.js";
+import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "@geospatial-sdk/core/fixtures/geojson.fixtures.js";
 import { PartialStyleSpecification } from "../maplibre.models.js";
 import {
   CircleLayerSpecification,
@@ -31,8 +30,8 @@ describe("MapContextService", () => {
 
     describe("WMS", () => {
       beforeEach(async () => {
-        (layerModel = MAP_CTX_LAYER_WMS_FIXTURE),
-          (style = await createLayer(layerModel, 0));
+        layerModel = MAP_CTX_LAYER_WMS_FIXTURE;
+        style = (await createLayer(layerModel, 0)) as PartialStyleSpecification;
       });
       it("create a tile layer", () => {
         expect(style).toBeTruthy();
@@ -57,11 +56,15 @@ describe("MapContextService", () => {
         expect(layer.type).toBe(`raster`);
       });
     });
+
     describe("GEOJSON", () => {
       describe("with inline data", () => {
         beforeEach(async () => {
           layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
-          style = await createLayer(layerModel, 0);
+          style = (await createLayer(
+            layerModel,
+            0,
+          )) as PartialStyleSpecification;
           Math.random = vi.fn(() => 0.027404);
         });
         it("create a VectorLayer", () => {
@@ -209,10 +212,11 @@ describe("MapContextService", () => {
         });
       });
     });
+
     describe("WFS", () => {
       beforeEach(async () => {
-        (layerModel = MAP_CTX_LAYER_WFS_FIXTURE),
-          (style = await createLayer(layerModel, 1));
+        layerModel = MAP_CTX_LAYER_WFS_FIXTURE;
+        style = (await createLayer(layerModel, 1)) as PartialStyleSpecification;
       });
       it("create a vector layer", () => {
         expect(style).toBeTruthy();
@@ -248,18 +252,11 @@ describe("MapContextService", () => {
         expect(layer.metadata.sourcePosition).toBe(1);
       });
     });
+
     describe("OGCAPI", () => {
       beforeEach(async () => {
-        global.fetch = vi.fn(() =>
-          Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve(FEATURE_COLLECTION_LINESTRING_FIXTURE_4326),
-          }),
-        );
-
-        (layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE),
-          (style = await createLayer(layerModel, 0));
+        layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+        style = (await createLayer(layerModel, 0)) as PartialStyleSpecification;
       });
       it("create a vector layer", () => {
         expect(style).toBeTruthy();
@@ -281,6 +278,44 @@ describe("MapContextService", () => {
         expect(layer.id).toBe("504003385-fill");
         expect(layer.source).toBe("504003385");
         expect(layer.metadata.sourcePosition).toBe(0);
+      });
+    });
+
+    describe("XYZ", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_XYZ_FIXTURE;
+        style = (await createLayer(layerModel, 0)) as PartialStyleSpecification;
+      });
+      it("create a layer and source", () => {
+        expect(style).toEqual({
+          layers: [
+            {
+              id: "3863171382",
+              metadata: {
+                sourcePosition: 0,
+              },
+              paint: {},
+              source: "3863171382",
+              type: "raster",
+            },
+          ],
+          sources: {
+            "3863171382": {
+              tileSize: 256,
+              tiles: ["https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+              type: "raster",
+            },
+          },
+        });
+      });
+    });
+
+    describe("WMTS", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_WMTS_FIXTURE;
+      });
+      it("does not support this layer type", async () => {
+        expect(await createLayer(layerModel, 0)).toBe(null);
       });
     });
   });

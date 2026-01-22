@@ -44,13 +44,14 @@ export async function applyContextDiffToMap(
       createLayer(layerAdded.layer, layerAdded.position),
     ),
   );
-  newLayers.forEach((style: any, index: any) => {
+  newLayers.forEach((style, index) => {
+    if (!style) return;
     const position = contextDiff.layersAdded[index].position;
     const beforeId = getBeforeId(map, position);
     Object.keys(style.sources).forEach((sourceId) =>
       map.addSource(sourceId, style.sources[sourceId]),
     );
-    style.layers.map((layer: any) => {
+    style.layers.map((layer) => {
       map.addLayer(layer, beforeId);
     });
   });
@@ -62,7 +63,8 @@ export async function applyContextDiffToMap(
     removeLayersFromSource(map, sourceId);
     const beforeId = getBeforeId(map, position);
     createLayer(layer, position).then((styleDiff) => {
-      styleDiff.layers.map((layer: any) => {
+      if (!styleDiff) return;
+      styleDiff.layers.map((layer) => {
         map.addLayer(layer, beforeId);
       });
     });
