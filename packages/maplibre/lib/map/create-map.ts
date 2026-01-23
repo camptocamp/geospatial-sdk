@@ -69,7 +69,9 @@ export async function createLayer(
             id: layerId,
             type: "raster",
             source: sourceId,
-            paint: {},
+            layout: {
+              visibility: layerModel.visibility === false ? "none" : "visible",
+            },
             metadata,
           },
         ],
@@ -139,6 +141,9 @@ export async function createLayer(
             type: "raster",
             source: sourceId,
             paint: {},
+            layout: {
+              visibility: layerModel.visibility === false ? "none" : "visible",
+            },
             metadata,
           },
         ],
