@@ -16,7 +16,11 @@ import {
   createDatasetFromGeoJsonLayer,
   generateLayerId,
 } from "../helpers/map.helpers.js";
-import { PartialStyleSpecification } from "../maplibre.models.js";
+import {
+  LayerMetadataSpecification,
+  PartialStyleSpecification,
+} from "../maplibre.models.js";
+import { getLayerHash } from "@geospatial-sdk/core/dist/utils/map-context-layer.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
@@ -26,13 +30,15 @@ const featureCollection: FeatureCollection<Geometry | null> = {
 /**
  * Create a Maplibre layer from a MapContextLayer. Returns null if the layer could not be created.
  * @param layerModel
- * @param sourcePosition
  */
 export async function createLayer(
   layerModel: MapContextLayer,
-  sourcePosition: number,
 ): Promise<PartialStyleSpecification | null> {
   const { type } = layerModel;
+  const metadata: LayerMetadataSpecification =
+    "id" in layerModel
+      ? { layerId: layerModel.id }
+      : { layerHash: getLayerHash(layerModel) };
 
   switch (type) {
     case "wms": {
@@ -64,9 +70,7 @@ export async function createLayer(
             type: "raster",
             source: sourceId,
             paint: {},
-            metadata: {
-              sourcePosition,
-            },
+            metadata,
           },
         ],
       };
@@ -77,7 +81,7 @@ export async function createLayer(
         asJson: true,
         outputCrs: "EPSG:4326",
       });
-      return createDatasetFromGeoJsonLayer(layerModel, url, sourcePosition);
+      return createDatasetFromGeoJsonLayer(layerModel, url, metadata);
     }
     case "geojson": {
       let geojson;
@@ -96,7 +100,7 @@ export async function createLayer(
           geojson = data;
         }
       }
-      return createDatasetFromGeoJsonLayer(layerModel, geojson, sourcePosition);
+      return createDatasetFromGeoJsonLayer(layerModel, geojson, metadata);
     }
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
@@ -108,17 +112,13 @@ export async function createLayer(
         layerModel.collection,
         { ...layerModel.options, asJson: true },
       );
-      return createDatasetFromGeoJsonLayer(
-        layerModel,
-        layerUrl,
-        sourcePosition,
-      );
+      return createDatasetFromGeoJsonLayer(layerModel, layerUrl, metadata);
     }
     case "maplibre-style": {
       console.warn("[Warning] Maplibre style - Not yet fully implemented.");
       const style = await fetch(layerModel.styleUrl).then((res) => res.json());
       style.layers?.forEach(
-        (layer: LayerSpecification) => (layer.metadata = { sourcePosition }),
+        (layer: LayerSpecification) => (layer.metadata = metadata),
       );
       return style;
     }
@@ -139,9 +139,7 @@ export async function createLayer(
             type: "raster",
             source: sourceId,
             paint: {},
-            metadata: {
-              sourcePosition,
-            },
+            metadata,
           },
         ],
       };
@@ -184,7 +182,7 @@ export async function resetMapFromContext(
 
   for (let i = 0; i < context.layers.length; i++) {
     const layerModel = context.layers[i];
-    const partialMLStyle = await createLayer(layerModel, i);
+    const partialMLStyle = await createLayer(layerModel);
     if (!partialMLStyle) continue;
 
     if (partialMLStyle.glyphs) {

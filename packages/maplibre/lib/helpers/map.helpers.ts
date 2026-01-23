@@ -9,6 +9,7 @@ import { FeatureCollection, Geometry } from "geojson";
 import { contextStyleToMaplibreLayers } from "./style.helpers.js";
 import { getHash } from "@geospatial-sdk/core/dist/utils/hash.js";
 import { MapContextLayer } from "@geospatial-sdk/core";
+import { getLayerHash } from "@geospatial-sdk/core/dist/utils/map-context-layer.js";
 
 /**
  * Remove all layers from a given source in the map.
@@ -32,12 +33,12 @@ export function removeLayersFromSource(map: Map, sourceId: string) {
  * Create a Maplibre source and layers from a GeoJSON MapContextLayer and its style.
  * @param layerModel
  * @param geojson
- * @param sourcePosition
+ * @param metadata
  */
 export function createDatasetFromGeoJsonLayer(
   layerModel: LayerContextWithStyle,
   geojson: FeatureCollection<Geometry | null> | string,
-  sourcePosition: number,
+  metadata: LayerMetadataSpecification,
 ): Dataset {
   const sourceId = generateLayerId(layerModel);
   const partialLayers = contextStyleToMaplibreLayers(layerModel.style);
@@ -48,9 +49,7 @@ export function createDatasetFromGeoJsonLayer(
     layout: {
       visibility: layerModel.visibility === false ? "none" : "visible",
     },
-    metadata: {
-      sourcePosition,
-    },
+    metadata,
   }));
   return {
     sources: {
@@ -63,30 +62,55 @@ export function createDatasetFromGeoJsonLayer(
   } as StyleSpecification;
 }
 
-export function getLayersAtPosition(
+export function getLayersFromContextLayer(
   map: Map,
-  position: number,
+  layerModel: MapContextLayer,
 ): LayerSpecificationWithSource[] {
+  const layerId = layerModel.id;
+  const layerHash = getLayerHash(layerModel);
+
   const layers = map.getStyle().layers;
-  const layersWithSource = layers.filter(
-    (layer) => layer.type !== "background", //TODO background layers is not managed
-  ) as LayerSpecificationWithSource[];
-  return layersWithSource.filter(
-    (layer) =>
-      (layer.metadata as LayerMetadataSpecification)?.sourcePosition ===
-      position,
-  );
+  const result: LayerSpecificationWithSource[] = [];
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    const metadata = layer.metadata as LayerMetadataSpecification;
+    if (layerId !== undefined) {
+      if (metadata.layerId === layerId) {
+        result.push(layer as LayerSpecificationWithSource);
+      }
+    } else if (metadata.layerHash === layerHash) {
+      result.push(layer as LayerSpecificationWithSource);
+    }
+  }
+  return result;
 }
 
+/**
+ * This returns the id before which a MapLibre layer should be added/moved, in order for the
+ * layer to end up at the specified position.
+ * @param map
+ * @param position
+ */
 export function getBeforeId(map: Map, position: number): string | undefined {
-  const beforeLayer = map
-    .getStyle()
-    .layers.find(
-      (layer) =>
-        (layer.metadata as LayerMetadataSpecification).sourcePosition ===
-        position + 1,
-    );
-  return beforeLayer ? beforeLayer.id : undefined;
+  let layerId = undefined;
+  let layerHash = undefined;
+
+  const layers = map.getStyle().layers;
+  let currentPosition = -1;
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    const metadata = layer.metadata as LayerMetadataSpecification;
+    if (metadata.layerId !== layerId || metadata.layerHash !== layerHash) {
+      currentPosition++;
+      if (currentPosition === position + 1) {
+        return layer.id;
+      }
+
+      layerId = metadata.layerId;
+      layerHash = metadata.layerHash;
+    }
+  }
+  return undefined;
 }
 
 export function generateLayerId(layerModel: MapContextLayer) {
