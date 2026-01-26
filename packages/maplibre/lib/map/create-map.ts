@@ -14,13 +14,13 @@ import {
 } from "@camptocamp/ogc-client";
 import {
   createDatasetFromGeoJsonLayer,
+  generateLayerHashWithoutUpdatableProps,
   generateLayerId,
 } from "../helpers/map.helpers.js";
 import {
   LayerMetadataSpecification,
   PartialStyleSpecification,
 } from "../maplibre.models.js";
-import { getLayerHash } from "@geospatial-sdk/core/dist/utils/map-context-layer.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
@@ -38,11 +38,11 @@ export async function createLayer(
   const metadata: LayerMetadataSpecification =
     "id" in layerModel
       ? { layerId: layerModel.id }
-      : { layerHash: getLayerHash(layerModel) };
+      : { layerHash: generateLayerHashWithoutUpdatableProps(layerModel) };
+  const layerId = generateLayerId();
 
   switch (type) {
     case "wms": {
-      const layerId = generateLayerId(layerModel);
       const sourceId = layerId;
 
       const endpoint = await new WmsEndpoint(layerModel.url).isReady();
@@ -69,6 +69,9 @@ export async function createLayer(
             id: layerId,
             type: "raster",
             source: sourceId,
+            paint: {
+              "raster-opacity": layerModel.opacity ?? 1,
+            },
             layout: {
               visibility: layerModel.visibility === false ? "none" : "visible",
             },
@@ -125,7 +128,6 @@ export async function createLayer(
       return style;
     }
     case "xyz": {
-      const layerId = generateLayerId(layerModel);
       const sourceId = layerId;
       return {
         sources: {
@@ -140,7 +142,9 @@ export async function createLayer(
             id: layerId,
             type: "raster",
             source: sourceId,
-            paint: {},
+            paint: {
+              "raster-opacity": layerModel.opacity ?? 1,
+            },
             layout: {
               visibility: layerModel.visibility === false ? "none" : "visible",
             },

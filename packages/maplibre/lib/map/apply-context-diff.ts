@@ -1,12 +1,49 @@
-import { MapContextDiff } from "@geospatial-sdk/core";
+import { MapContextDiff, MapContextLayer } from "@geospatial-sdk/core";
 import type { Map } from "maplibre-gl";
 import { createLayer } from "./create-map.js";
 import {
-  generateLayerId,
-  getBeforeId,
+  canDoIncrementalUpdate,
+  getFirstLayerIdAtPosition,
+  getLayersAtPosition,
   getLayersFromContextLayer,
-  removeLayersFromSource,
+  updateLayerProperties,
 } from "../helpers/map.helpers.js";
+
+/**
+ * This will either update the layers in the map or recreate them;
+ * the returned promise resolves when the update is done
+ * @param map
+ * @param layerModel
+ * @param previousLayerModel
+ * @param layerPosition
+ */
+export async function updateLayerInMap(
+  map: Map,
+  layerModel: MapContextLayer,
+  previousLayerModel: MapContextLayer,
+  layerPosition: number,
+): Promise<void> {
+  // if an incremental update is possible, do it to avoid costly layer recreation
+  if (canDoIncrementalUpdate(previousLayerModel, layerModel)) {
+    // we can find the existing layers by using the hash or id of the layerModel
+    const mlUpdatedLayers = getLayersFromContextLayer(map, layerModel);
+    for (const layer of mlUpdatedLayers) {
+      updateLayerProperties(map, layer, layerModel, previousLayerModel);
+    }
+    return;
+  }
+
+  const mlLayersToRemove = getLayersAtPosition(map, layerPosition);
+  for (const layer of mlLayersToRemove) {
+    map.removeLayer(layer.id);
+  }
+  const styleDiff = await createLayer(layerModel);
+  if (!styleDiff) return;
+  const beforeId = getFirstLayerIdAtPosition(map, layerPosition);
+  styleDiff.layers.map((layer) => {
+    map.addLayer(layer, beforeId);
+  });
+}
 
 /**
  * Apply a context diff to an MapLibre map
@@ -45,7 +82,7 @@ export async function applyContextDiffToMap(
   newLayers.forEach((style, index) => {
     if (!style) return;
     const position = contextDiff.layersAdded[index].position;
-    const beforeId = getBeforeId(map, position);
+    const beforeId = getFirstLayerIdAtPosition(map, position);
     Object.keys(style.sources).forEach((sourceId) =>
       map.addSource(sourceId, style.sources[sourceId]),
     );
@@ -70,7 +107,10 @@ export async function applyContextDiffToMap(
       // for (const layerReordered of reordered) {
       const layerReordered = reordered[i];
       const mlLayers = mlLayersToMove[i];
-      const beforeId = getBeforeId(map, layerReordered.newPosition);
+      const beforeId = getFirstLayerIdAtPosition(
+        map,
+        layerReordered.newPosition + 1,
+      );
 
       if (mlLayers[0].id === beforeId) {
         // layer is already at the right position
@@ -85,20 +125,9 @@ export async function applyContextDiffToMap(
   }
 
   // recreate changed layers
-  const changedPromises: Promise<void>[] = [];
   for (const layerChanged of contextDiff.layersChanged) {
-    const { layer, position } = layerChanged;
-    const beforeId = getBeforeId(map, position);
-    const sourceId = generateLayerId(layer);
-    removeLayersFromSource(map, sourceId);
-    changedPromises.push(
-      createLayer(layer).then((styleDiff) => {
-        if (!styleDiff) return;
-        styleDiff.layers.map((layer) => {
-          map.addLayer(layer, beforeId);
-        });
-      }),
-    );
+    const { layer, previousLayer, position } = layerChanged;
+    await updateLayerInMap(map, layer, previousLayer, position);
   }
 
   if (typeof contextDiff.viewChanges !== "undefined") {
@@ -120,7 +149,5 @@ export async function applyContextDiffToMap(
     }
   }
 
-  // wait for all layers to be added
-  await Promise.all(changedPromises);
   return map;
 }

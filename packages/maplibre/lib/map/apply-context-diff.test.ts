@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap, RasterLayerSpecification } from "maplibre-gl";
 import { MapContextDiff, MapContextLayer } from "@geospatial-sdk/core";
 import {
@@ -10,9 +9,8 @@ import {
   SAMPLE_LAYER5,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import { applyContextDiffToMap } from "./apply-context-diff.js";
-import * as mapHelpers from "../helpers/map.helpers.js";
+import { generateLayerHashWithoutUpdatableProps } from "../helpers/map.helpers.js";
 import { resetMapFromContext } from "./create-map.js";
-import { getLayerHash } from "@geospatial-sdk/core/dist/utils/map-context-layer.js";
 
 // Helper to create a fresh mock Map instance for each test
 function createMockMap(): MapLibreMap {
@@ -72,6 +70,8 @@ function createMockMap(): MapLibreMap {
     getLayer: vi.fn((layerId) => {
       return state.layers.find((layer) => layer.id === layerId);
     }),
+    setLayoutProperty: vi.fn(),
+    setPaintProperty: vi.fn(),
   } as unknown as MapLibreMap;
 }
 
@@ -142,55 +142,129 @@ describe("applyContextDiffToMap (mocked Map)", () => {
     expect(map.removeSource).toHaveBeenCalledWith(layer2.source);
   });
 
-  it("calls addLayer for changed layers", async () => {
-    const generateLayerIdSpy = vi
-      .spyOn(mapHelpers, "generateLayerId")
-      .mockReturnValue("azreza");
-    const removeLayersFromSourceSpy = vi.spyOn(
-      mapHelpers,
-      "removeLayersFromSource",
-    );
+  describe("layer changes", () => {
+    beforeEach(async () => {
+      const context = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER3, SAMPLE_LAYER1],
+      };
+      await resetMapFromContext(map, context);
+      vi.clearAllMocks();
+    });
 
-    diff = {
-      layersAdded: [],
-      layersChanged: [
-        {
-          layer: {
-            ...SAMPLE_LAYER3,
-            data: '{ "type": "Feature", "properties": { "changed": true}}',
-          } as MapContextLayer,
-          previousLayer: SAMPLE_LAYER3,
-          position: 0,
-        },
-        {
-          layer: {
-            ...SAMPLE_LAYER1,
-            url: "http://changed/",
-            extras: { changed: true },
+    it("replace layers when non-updatable properties are changed", async () => {
+      const layer3Changed = {
+        ...SAMPLE_LAYER3,
+        data: '{ "type": "Feature", "properties": { "changed": true}}',
+      } as MapContextLayer;
+      const layer1Changed = {
+        ...SAMPLE_LAYER1,
+        url: "http://changed/",
+        extras: { changed: true },
+      };
+
+      diff = {
+        layersAdded: [],
+        layersChanged: [
+          {
+            layer: layer3Changed,
+            previousLayer: SAMPLE_LAYER3,
+            position: 0,
           },
-          previousLayer: SAMPLE_LAYER1,
-          position: 1,
-        },
-      ],
-      layersRemoved: [],
-      layersReordered: [],
-    };
-    await applyContextDiffToMap(map, diff);
+          {
+            layer: layer1Changed,
+            previousLayer: SAMPLE_LAYER1,
+            position: 1,
+          },
+        ],
+        layersRemoved: [],
+        layersReordered: [],
+      };
+      await applyContextDiffToMap(map, diff);
 
-    try {
-      expect(generateLayerIdSpy).toHaveBeenCalledWith(
-        diff.layersChanged[1].layer,
-      );
-      expect(generateLayerIdSpy).toHaveBeenCalledWith(
-        diff.layersChanged[0].layer,
-      );
-      expect(map.addLayer).toHaveBeenCalled();
-      expect(removeLayersFromSourceSpy).toHaveBeenCalled();
-      expect(removeLayersFromSourceSpy).toHaveBeenCalledTimes(2);
-    } finally {
-      generateLayerIdSpy.mockRestore();
-      removeLayersFromSourceSpy.mockRestore();
-    }
+      expect(map.addLayer).toHaveBeenCalledTimes(4); // 3 for vector layer, 1 for raster layer
+      expect(map.removeLayer).toHaveBeenCalledTimes(4); // same as above
+
+      expect(map.getStyle().layers.length).toBe(4);
+      expect(map.getStyle().layers).toEqual([
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+          },
+        }),
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+          },
+        }),
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+          },
+        }),
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(layer1Changed),
+          },
+        }),
+      ]);
+    });
+    it("simply updates the layer if updatable properties are changed", async () => {
+      diff = {
+        layersAdded: [],
+        layersChanged: [
+          {
+            layer: {
+              ...SAMPLE_LAYER3,
+              visibility: false,
+            } as MapContextLayer,
+            previousLayer: SAMPLE_LAYER3,
+            position: 0,
+          },
+          {
+            layer: {
+              ...SAMPLE_LAYER1,
+              opacity: 0.9,
+              extras: { changed: true },
+            },
+            previousLayer: SAMPLE_LAYER1,
+            position: 1,
+          },
+        ],
+        layersRemoved: [],
+        layersReordered: [],
+      };
+      await applyContextDiffToMap(map, diff);
+
+      expect(map.setLayoutProperty).toHaveBeenCalledTimes(3); // 3 for vector layer
+      expect(map.setPaintProperty).toHaveBeenCalledTimes(1);
+      expect(map.addLayer).not.toHaveBeenCalled();
+      expect(map.removeLayer).not.toHaveBeenCalled();
+
+      expect(map.getStyle().layers.length).toBe(4);
+      expect(map.getStyle().layers).toEqual([
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+          },
+        }),
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+          },
+        }),
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+          },
+        }),
+        expect.objectContaining({
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER1),
+          },
+        }),
+      ]);
+    });
   });
 
   it("calls fitBounds for viewChanges with extent", async () => {
@@ -244,19 +318,29 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         expect(map.getStyle().layers.length).toBe(5);
         expect(map.getStyle().layers).toEqual([
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER2) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER2),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER3) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER3) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER3) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER1) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER1),
+            },
           }),
         ]);
       });
@@ -309,28 +393,42 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         expect(map.getStyle().layers.length).toBe(8);
         expect(map.getStyle().layers).toEqual([
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER4) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER4),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER4) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER4),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER4) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER4),
+            },
           }),
           expect.objectContaining({
             metadata: { layerId: layer1WithId.id },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER2) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER2),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER3) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER3) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+            },
           }),
           expect.objectContaining({
-            metadata: { layerHash: getLayerHash(SAMPLE_LAYER3) },
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER3),
+            },
           }),
         ]);
       });
@@ -392,19 +490,29 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       expect(map.getStyle().layers.length).toBe(5);
       expect(map.getStyle().layers).toEqual([
         expect.objectContaining({
-          metadata: { layerHash: getLayerHash(SAMPLE_LAYER2) },
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER2),
+          },
         }),
         expect.objectContaining({
-          metadata: { layerHash: getLayerHash(changedLayer) },
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(changedLayer),
+          },
         }),
         expect.objectContaining({
-          metadata: { layerHash: getLayerHash(changedLayer) },
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(changedLayer),
+          },
         }),
         expect.objectContaining({
-          metadata: { layerHash: getLayerHash(changedLayer) },
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(changedLayer),
+          },
         }),
         expect.objectContaining({
-          metadata: { layerHash: getLayerHash(SAMPLE_LAYER5) },
+          metadata: {
+            layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER5),
+          },
         }),
       ]);
     });

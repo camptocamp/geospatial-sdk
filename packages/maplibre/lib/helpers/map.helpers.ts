@@ -1,4 +1,4 @@
-import { Map, StyleSpecification } from "maplibre-gl";
+import type { LayerSpecification, Map, StyleSpecification } from "maplibre-gl";
 import {
   Dataset,
   LayerContextWithStyle,
@@ -8,25 +8,15 @@ import {
 import { FeatureCollection, Geometry } from "geojson";
 import { contextStyleToMaplibreLayers } from "./style.helpers.js";
 import { getHash } from "@geospatial-sdk/core/dist/utils/hash.js";
-import { MapContextLayer } from "@geospatial-sdk/core";
-import { getLayerHash } from "@geospatial-sdk/core/dist/utils/map-context-layer.js";
+import { MapContextBaseLayer, MapContextLayer } from "@geospatial-sdk/core";
 
-/**
- * Remove all layers from a given source in the map.
- * @param map
- * @param sourceId
- */
-export function removeLayersFromSource(map: Map, sourceId: string) {
-  const layers = map.getStyle().layers;
-  const layersWithSource = layers.filter(
-    (layer) => layer.type !== "background",
-  ) as LayerSpecificationWithSource[];
-  const layerIds = layersWithSource
-    .filter(
-      (layer) => layer.hasOwnProperty("source") && layer.source === sourceId,
-    )
-    .map((layer) => layer.id);
-  layerIds.forEach((layer) => map.removeLayer(layer));
+function getOpacityPaintPropNames(layerType: string): string[] {
+  switch (layerType) {
+    case "circle":
+      return ["circle-opacity", "circle-stroke-opacity"];
+    default:
+      return [`${layerType}-opacity`];
+  }
 }
 
 /**
@@ -40,12 +30,22 @@ export function createDatasetFromGeoJsonLayer(
   geojson: FeatureCollection<Geometry | null> | string,
   metadata: LayerMetadataSpecification,
 ): Dataset {
-  const sourceId = generateLayerId(layerModel);
+  const sourceId = generateLayerId();
   const partialLayers = contextStyleToMaplibreLayers(layerModel.style);
   const layers = partialLayers.map((layer) => ({
     ...layer,
     id: `${sourceId}-${layer.type}`,
     source: sourceId,
+    paint: {
+      ...layer.paint,
+      ...getOpacityPaintPropNames(layer.type!).reduce(
+        (acc, prop) => ({
+          ...acc,
+          [prop]: layerModel.opacity ?? 1,
+        }),
+        {},
+      ),
+    },
     layout: {
       visibility: layerModel.visibility === false ? "none" : "visible",
     },
@@ -67,7 +67,7 @@ export function getLayersFromContextLayer(
   layerModel: MapContextLayer,
 ): LayerSpecificationWithSource[] {
   const layerId = layerModel.id;
-  const layerHash = getLayerHash(layerModel);
+  const layerHash = generateLayerHashWithoutUpdatableProps(layerModel);
 
   const layers = map.getStyle().layers;
   const result: LayerSpecificationWithSource[] = [];
@@ -86,12 +86,45 @@ export function getLayersFromContextLayer(
 }
 
 /**
- * This returns the id before which a MapLibre layer should be added/moved, in order for the
- * layer to end up at the specified position.
+ * This returns all MapLibre layers that correspond to a position in a MapContext
  * @param map
  * @param position
  */
-export function getBeforeId(map: Map, position: number): string | undefined {
+export function getLayersAtPosition(
+  map: Map,
+  position: number,
+): LayerSpecificationWithSource[] {
+  let layerId = undefined;
+  let layerHash = undefined;
+  const result: LayerSpecificationWithSource[] = [];
+
+  const layers = map.getStyle().layers;
+  let currentPosition = -1;
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i] as LayerSpecificationWithSource;
+    const metadata = layer.metadata as LayerMetadataSpecification;
+    if (metadata.layerId !== layerId || metadata.layerHash !== layerHash) {
+      currentPosition++;
+      layerId = metadata.layerId;
+      layerHash = metadata.layerHash;
+    }
+    if (currentPosition === position) {
+      result.push(layer);
+    }
+  }
+  return result;
+}
+
+/**
+ * This returns the id of the first MapLibre layer that corresponds to the given MapContext position;
+ * used as a beforeId for adding/moving layers
+ * @param map
+ * @param position
+ */
+export function getFirstLayerIdAtPosition(
+  map: Map,
+  position: number,
+): string | undefined {
   let layerId = undefined;
   let layerHash = undefined;
 
@@ -102,7 +135,7 @@ export function getBeforeId(map: Map, position: number): string | undefined {
     const metadata = layer.metadata as LayerMetadataSpecification;
     if (metadata.layerId !== layerId || metadata.layerHash !== layerHash) {
       currentPosition++;
-      if (currentPosition === position + 1) {
+      if (currentPosition === position) {
         return layer.id;
       }
 
@@ -113,13 +146,93 @@ export function getBeforeId(map: Map, position: number): string | undefined {
   return undefined;
 }
 
-export function generateLayerId(layerModel: MapContextLayer) {
-  return getHash(layerModel, [
-    "name",
-    "style",
-    "visibility",
-    "opacity",
-    "version",
-    "extras",
-  ]);
+const UPDATABLE_PROPERTIES: (keyof MapContextBaseLayer)[] = [
+  "opacity",
+  "visibility",
+  "label",
+  "extras",
+  "version",
+  // "attributions", // currently, updating the attribution means recreating the source & layer
+  // TODO (when available) "zIndex"
+];
+
+/**
+ * Incremental update is possible only if certain properties are changed: opacity,
+ * visibility, zIndex, etc.
+ *
+ * Note: we assume that both layers are different versions of the same layer (this
+ * will not be checked again)
+ * @param oldLayer
+ * @param newLayer
+ * @return Returns `true` if the only properties changed are the updatable ones
+ */
+export function canDoIncrementalUpdate(
+  oldLayer: MapContextLayer,
+  newLayer: MapContextLayer,
+): boolean {
+  const oldHash = getHash(oldLayer, UPDATABLE_PROPERTIES);
+  const newHash = getHash(newLayer, UPDATABLE_PROPERTIES);
+  return oldHash === newHash;
+}
+
+/**
+ * This simply generates a unique id
+ */
+export function generateLayerId() {
+  return Math.floor(Math.random() * 1000000).toString(10);
+}
+
+/**
+ * This generates a layer hash that stays consistent even if updatable properties change.
+ * @param layerModel
+ */
+export function generateLayerHashWithoutUpdatableProps(
+  layerModel: MapContextLayer,
+) {
+  return getHash(layerModel, UPDATABLE_PROPERTIES);
+}
+
+/**
+ * Will apply generic properties to the layer; if a previous layer model is provided,
+ * only changed properties will be updated (to avoid costly change events in OpenLayers)
+ * @param map
+ * @param layer
+ * @param layerModel
+ * @param previousLayerModel
+ */
+export function updateLayerProperties(
+  map: Map,
+  layer: LayerSpecification,
+  layerModel: MapContextLayer,
+  previousLayerModel?: MapContextLayer,
+) {
+  function shouldApplyProperty(prop: keyof MapContextBaseLayer): boolean {
+    // if the new layer model does not define that property, skip it
+    // (setting or resetting it to a default value would be counter-intuitive)
+    if (!(prop in layerModel) || typeof layerModel[prop] === "undefined")
+      return false;
+
+    // if a previous model is provided and the value did not change in the new layer model, skip it
+    if (previousLayerModel && layerModel[prop] === previousLayerModel[prop]) {
+      return false;
+    }
+
+    // any other case: apply the property
+    return true;
+  }
+  const layerId = layer.id;
+  const layerType = layer.type;
+  if (shouldApplyProperty("visibility")) {
+    map.setLayoutProperty(
+      layerId,
+      "visibility",
+      layerModel.visibility === false ? "none" : "visible",
+    );
+  }
+  if (shouldApplyProperty("opacity")) {
+    getOpacityPaintPropNames(layerType).forEach((paintProp) => {
+      map.setPaintProperty(layerId, paintProp, layerModel.opacity ?? 1);
+    });
+  }
+  // TODO: z-index
 }
