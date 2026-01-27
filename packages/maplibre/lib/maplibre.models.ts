@@ -15,7 +15,8 @@ export type LayerSpecificationWithSource = Exclude<
 >;
 
 export interface LayerMetadataSpecification {
-  sourcePosition: number;
+  layerId?: number | string;
+  layerHash?: string;
 }
 
 export type LayerContextWithStyle =

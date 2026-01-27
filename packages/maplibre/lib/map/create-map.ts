@@ -5,12 +5,7 @@ import {
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 
-import {
-  LayerSpecification,
-  Map,
-  MapOptions,
-  StyleSpecification,
-} from "maplibre-gl";
+import { LayerSpecification, Map, MapOptions } from "maplibre-gl";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -19,24 +14,35 @@ import {
 } from "@camptocamp/ogc-client";
 import {
   createDatasetFromGeoJsonLayer,
+  generateLayerHashWithoutUpdatableProps,
   generateLayerId,
 } from "../helpers/map.helpers.js";
-import { Dataset, PartialStyleSpecification } from "../maplibre.models.js";
+import {
+  LayerMetadataSpecification,
+  PartialStyleSpecification,
+} from "../maplibre.models.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
   features: [],
 };
 
+/**
+ * Create a Maplibre layer from a MapContextLayer. Returns null if the layer could not be created.
+ * @param layerModel
+ */
 export async function createLayer(
   layerModel: MapContextLayer,
-  sourcePosition: number,
-): Promise<PartialStyleSpecification> {
+): Promise<PartialStyleSpecification | null> {
   const { type } = layerModel;
+  const metadata: LayerMetadataSpecification =
+    "id" in layerModel
+      ? { layerId: layerModel.id }
+      : { layerHash: generateLayerHashWithoutUpdatableProps(layerModel) };
+  const layerId = generateLayerId();
 
   switch (type) {
     case "wms": {
-      const layerId = generateLayerId(layerModel);
       const sourceId = layerId;
 
       const endpoint = await new WmsEndpoint(layerModel.url).isReady();
@@ -50,7 +56,7 @@ export async function createLayer(
       url = removeSearchParams(url, ["bbox"]);
       url = `${url.toString()}&BBOX={bbox-epsg-3857}`;
 
-      const dataset: Dataset = {
+      return {
         sources: {
           [sourceId]: {
             type: "raster",
@@ -63,14 +69,16 @@ export async function createLayer(
             id: layerId,
             type: "raster",
             source: sourceId,
-            paint: {},
-            metadata: {
-              sourcePosition,
+            paint: {
+              "raster-opacity": layerModel.opacity ?? 1,
             },
+            layout: {
+              visibility: layerModel.visibility === false ? "none" : "visible",
+            },
+            metadata,
           },
         ],
       };
-      return dataset;
     }
     case "wfs": {
       const entryPoint = await new WfsEndpoint(layerModel.url).isReady();
@@ -78,7 +86,7 @@ export async function createLayer(
         asJson: true,
         outputCrs: "EPSG:4326",
       });
-      return createDatasetFromGeoJsonLayer(layerModel, url, sourcePosition);
+      return createDatasetFromGeoJsonLayer(layerModel, url, metadata);
     }
     case "geojson": {
       let geojson;
@@ -97,42 +105,69 @@ export async function createLayer(
           geojson = data;
         }
       }
-      return createDatasetFromGeoJsonLayer(layerModel, geojson, sourcePosition);
+      return createDatasetFromGeoJsonLayer(layerModel, geojson, metadata);
     }
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
-      let layerUrl: string;
       if (layerModel.useTiles) {
         console.warn("[Warning] OGC API - Tiles not yet implemented.");
-      } else {
-        layerUrl = await ogcEndpoint.getCollectionItemsUrl(
-          layerModel.collection,
-          { ...layerModel.options, asJson: true },
-        );
-        return createDatasetFromGeoJsonLayer(
-          layerModel,
-          layerUrl,
-          sourcePosition,
-        );
+        return null;
       }
-      break;
+      const layerUrl = await ogcEndpoint.getCollectionItemsUrl(
+        layerModel.collection,
+        { ...layerModel.options, asJson: true },
+      );
+      return createDatasetFromGeoJsonLayer(layerModel, layerUrl, metadata);
     }
     case "maplibre-style": {
       console.warn("[Warning] Maplibre style - Not yet fully implemented.");
       const style = await fetch(layerModel.styleUrl).then((res) => res.json());
       style.layers?.forEach(
-        (layer: LayerSpecification) => (layer.metadata = { sourcePosition }),
+        (layer: LayerSpecification) => (layer.metadata = metadata),
       );
       return style;
     }
+    case "xyz": {
+      const sourceId = layerId;
+      return {
+        sources: {
+          [sourceId]: {
+            type: "raster",
+            tiles: [layerModel.url],
+            tileSize: 256,
+          },
+        },
+        layers: [
+          {
+            id: layerId,
+            type: "raster",
+            source: sourceId,
+            paint: {
+              "raster-opacity": layerModel.opacity ?? 1,
+            },
+            layout: {
+              visibility: layerModel.visibility === false ? "none" : "visible",
+            },
+            metadata,
+          },
+        ],
+      };
+    }
+    case "wmts": {
+      console.warn(`WMTS layers are not yet supported in Maplibre`, layerModel);
+      return null;
+    }
+    default: {
+      console.error(`Layer could not be created`, layerModel);
+      return null;
+    }
   }
-  return {} as StyleSpecification;
 }
 
 /**
- * Create an Maplibre map from a context; optionally specify a target (root element) for the map
+ * Create a Maplibre map from a context; map options need to be provided
  * @param context
- * @param target
+ * @param mapOptions
  */
 export async function createMapFromContext(
   context: MapContext,
@@ -156,7 +191,8 @@ export async function resetMapFromContext(
 
   for (let i = 0; i < context.layers.length; i++) {
     const layerModel = context.layers[i];
-    const partialMLStyle = await createLayer(layerModel, i);
+    const partialMLStyle = await createLayer(layerModel);
+    if (!partialMLStyle) continue;
 
     if (partialMLStyle.glyphs) {
       map.setGlyphs(partialMLStyle.glyphs);
