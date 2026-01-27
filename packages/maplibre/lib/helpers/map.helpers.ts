@@ -73,12 +73,12 @@ export function getLayersFromContextLayer(
   const result: LayerSpecificationWithSource[] = [];
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
-    const metadata = layer.metadata as LayerMetadataSpecification;
+    const metadata = layer.metadata as LayerMetadataSpecification | undefined;
     if (layerId !== undefined) {
-      if (metadata.layerId === layerId) {
+      if (metadata?.layerId === layerId) {
         result.push(layer as LayerSpecificationWithSource);
       }
-    } else if (metadata.layerHash === layerHash) {
+    } else if (metadata?.layerHash === layerHash) {
       result.push(layer as LayerSpecificationWithSource);
     }
   }
@@ -102,11 +102,11 @@ export function getLayersAtPosition(
   let currentPosition = -1;
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i] as LayerSpecificationWithSource;
-    const metadata = layer.metadata as LayerMetadataSpecification;
-    if (metadata.layerId !== layerId || metadata.layerHash !== layerHash) {
+    const metadata = layer.metadata as LayerMetadataSpecification | undefined;
+    if (metadata?.layerId !== layerId || metadata?.layerHash !== layerHash) {
       currentPosition++;
-      layerId = metadata.layerId;
-      layerHash = metadata.layerHash;
+      layerId = metadata?.layerId;
+      layerHash = metadata?.layerHash;
     }
     if (currentPosition === position) {
       result.push(layer);
@@ -132,15 +132,15 @@ export function getFirstLayerIdAtPosition(
   let currentPosition = -1;
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
-    const metadata = layer.metadata as LayerMetadataSpecification;
-    if (metadata.layerId !== layerId || metadata.layerHash !== layerHash) {
+    const metadata = layer.metadata as LayerMetadataSpecification | undefined;
+    if (metadata?.layerId !== layerId || metadata?.layerHash !== layerHash) {
       currentPosition++;
       if (currentPosition === position) {
         return layer.id;
       }
 
-      layerId = metadata.layerId;
-      layerHash = metadata.layerHash;
+      layerId = metadata?.layerId;
+      layerHash = metadata?.layerHash;
     }
   }
   return undefined;
