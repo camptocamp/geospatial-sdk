@@ -34,12 +34,22 @@ export async function updateLayerInMap(
   }
 
   const mlLayersToRemove = getLayersAtPosition(map, layerPosition);
+  const sourcesToRemove: string[] = [];
   for (const layer of mlLayersToRemove) {
+    if (layer.source && !sourcesToRemove.includes(layer.source)) {
+      sourcesToRemove.push(layer.source);
+    }
     map.removeLayer(layer.id);
+  }
+  for (const sourceId of sourcesToRemove) {
+    map.removeSource(sourceId);
   }
   const styleDiff = await createLayer(layerModel);
   if (!styleDiff) return;
   const beforeId = getFirstLayerIdAtPosition(map, layerPosition);
+  Object.keys(styleDiff.sources).forEach((sourceId) =>
+    map.addSource(sourceId, styleDiff.sources[sourceId]),
+  );
   styleDiff.layers.map((layer) => {
     map.addLayer(layer, beforeId);
   });

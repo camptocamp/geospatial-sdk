@@ -1,5 +1,9 @@
 import type { Map as MapLibreMap, RasterLayerSpecification } from "maplibre-gl";
-import { MapContextDiff, MapContextLayer } from "@geospatial-sdk/core";
+import {
+  MapContextDiff,
+  MapContextLayer,
+  MapContextLayerGeojson,
+} from "@geospatial-sdk/core";
 import {
   SAMPLE_CONTEXT,
   SAMPLE_LAYER1,
@@ -11,6 +15,7 @@ import {
 import { applyContextDiffToMap } from "./apply-context-diff.js";
 import { generateLayerHashWithoutUpdatableProps } from "../helpers/map.helpers.js";
 import { resetMapFromContext } from "./create-map.js";
+import { MockInstance } from "vitest";
 
 // Helper to create a fresh mock Map instance for each test
 function createMockMap(): MapLibreMap {
@@ -143,6 +148,7 @@ describe("applyContextDiffToMap (mocked Map)", () => {
   });
 
   describe("layer changes", () => {
+    let randomMock: MockInstance;
     beforeEach(async () => {
       const context = {
         ...SAMPLE_CONTEXT,
@@ -150,13 +156,24 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       };
       await resetMapFromContext(map, context);
       vi.clearAllMocks();
+
+      // this is to get reliable source ids
+      let callCount = 0;
+      randomMock = vi.spyOn(Math, "random").mockImplementation(() => {
+        callCount++;
+        return 0.999 + 0.000001 * callCount;
+      });
+    });
+
+    afterEach(() => {
+      randomMock.mockRestore();
     });
 
     it("replace layers when non-updatable properties are changed", async () => {
       const layer3Changed = {
         ...SAMPLE_LAYER3,
         data: '{ "type": "Feature", "properties": { "changed": true}}',
-      } as MapContextLayer;
+      } as MapContextLayerGeojson;
       const layer1Changed = {
         ...SAMPLE_LAYER1,
         url: "http://changed/",
@@ -184,30 +201,51 @@ describe("applyContextDiffToMap (mocked Map)", () => {
 
       expect(map.addLayer).toHaveBeenCalledTimes(4); // 3 for vector layer, 1 for raster layer
       expect(map.removeLayer).toHaveBeenCalledTimes(4); // same as above
+      expect(map.addSource).toHaveBeenCalledTimes(2);
+      expect(map.removeSource).toHaveBeenCalledTimes(2);
 
       expect(map.getStyle().layers.length).toBe(4);
-      expect(map.getStyle().layers).toEqual([
-        expect.objectContaining({
-          metadata: {
-            layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+      expect(map.getStyle()).toEqual({
+        layers: [
+          expect.objectContaining({
+            source: "999002",
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+            },
+          }),
+          expect.objectContaining({
+            source: "999002",
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+            },
+          }),
+          expect.objectContaining({
+            source: "999002",
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
+            },
+          }),
+          expect.objectContaining({
+            source: "999003",
+            metadata: {
+              layerHash: generateLayerHashWithoutUpdatableProps(layer1Changed),
+            },
+          }),
+        ],
+        source: {
+          "999002": {
+            data: JSON.parse(layer3Changed.data as string),
+            type: "geojson",
           },
-        }),
-        expect.objectContaining({
-          metadata: {
-            layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
-          },
-        }),
-        expect.objectContaining({
-          metadata: {
-            layerHash: generateLayerHashWithoutUpdatableProps(layer3Changed),
-          },
-        }),
-        expect.objectContaining({
-          metadata: {
-            layerHash: generateLayerHashWithoutUpdatableProps(layer1Changed),
-          },
-        }),
-      ]);
+          "999003": expect.objectContaining({
+            tileSize: 256,
+            tiles: [
+              "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&BBOX={bbox-epsg-3857}",
+            ],
+            type: "raster",
+          }),
+        },
+      });
     });
     it("simply updates the layer if updatable properties are changed", async () => {
       diff = {
@@ -240,6 +278,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       expect(map.setPaintProperty).toHaveBeenCalledTimes(1);
       expect(map.addLayer).not.toHaveBeenCalled();
       expect(map.removeLayer).not.toHaveBeenCalled();
+      expect(map.addSource).not.toHaveBeenCalled();
+      expect(map.removeSource).not.toHaveBeenCalled();
 
       expect(map.getStyle().layers.length).toBe(4);
       expect(map.getStyle().layers).toEqual([
