@@ -157,6 +157,16 @@ const UPDATABLE_PROPERTIES: (keyof MapContextBaseLayer)[] = [
 ];
 
 /**
+ * This generates a layer hash that stays consistent even if updatable properties change.
+ * @param layerModel
+ */
+export function generateLayerHashWithoutUpdatableProps(
+  layerModel: MapContextLayer,
+) {
+  return getHash(layerModel, UPDATABLE_PROPERTIES);
+}
+
+/**
  * Incremental update is possible only if certain properties are changed: opacity,
  * visibility, zIndex, etc.
  *
@@ -170,8 +180,9 @@ export function canDoIncrementalUpdate(
   oldLayer: MapContextLayer,
   newLayer: MapContextLayer,
 ): boolean {
-  const oldHash = getHash(oldLayer, UPDATABLE_PROPERTIES);
-  const newHash = getHash(newLayer, UPDATABLE_PROPERTIES);
+  const oldHash = generateLayerHashWithoutUpdatableProps(oldLayer);
+  const newHash = generateLayerHashWithoutUpdatableProps(newLayer);
+  // true if only updatable props have changed between the two versions of the layer
   return oldHash === newHash;
 }
 
@@ -183,18 +194,8 @@ export function generateLayerId() {
 }
 
 /**
- * This generates a layer hash that stays consistent even if updatable properties change.
- * @param layerModel
- */
-export function generateLayerHashWithoutUpdatableProps(
-  layerModel: MapContextLayer,
-) {
-  return getHash(layerModel, UPDATABLE_PROPERTIES);
-}
-
-/**
- * Will apply generic properties to the layer; if a previous layer model is provided,
- * only changed properties will be updated (to avoid costly change events in OpenLayers)
+ * Will apply generic properties to the layer; only changes the necessary
+ * properties to avoid updating the map too often
  * @param map
  * @param layer
  * @param layerModel
@@ -204,7 +205,7 @@ export function updateLayerProperties(
   map: Map,
   layer: LayerSpecification,
   layerModel: MapContextLayer,
-  previousLayerModel?: MapContextLayer,
+  previousLayerModel: MapContextLayer,
 ) {
   function shouldApplyProperty(prop: keyof MapContextBaseLayer): boolean {
     // if the new layer model does not define that property, skip it
@@ -212,8 +213,8 @@ export function updateLayerProperties(
     if (!(prop in layerModel) || typeof layerModel[prop] === "undefined")
       return false;
 
-    // if a previous model is provided and the value did not change in the new layer model, skip it
-    if (previousLayerModel && layerModel[prop] === previousLayerModel[prop]) {
+    // if the value did not change in the new layer model, skip it
+    if (layerModel[prop] === previousLayerModel[prop]) {
       return false;
     }
 

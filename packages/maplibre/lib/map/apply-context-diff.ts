@@ -112,9 +112,8 @@ export async function applyContextDiffToMap(
       getLayersFromContextLayer(map, layerReordered.layer),
     );
 
-    // move layers & reassign sourcePosition metadata
+    // move layers
     for (let i = 0; i < reordered.length; i++) {
-      // for (const layerReordered of reordered) {
       const layerReordered = reordered[i];
       const mlLayers = mlLayersToMove[i];
       const beforeId = getFirstLayerIdAtPosition(
