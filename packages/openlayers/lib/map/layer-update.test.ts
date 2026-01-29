@@ -5,8 +5,12 @@ import {
 import { MapContextLayer } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
 import { Source } from "ol/source.js";
-import { SAMPLE_LAYER1 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
+import {
+  SAMPLE_LAYER1,
+  SAMPLE_LAYER3,
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import VectorSource from "ol/source/Vector.js";
+import VectorLayer from "ol/layer/Vector.js";
 
 describe("Layer update utils", () => {
   describe("canDoIncrementalUpdate", () => {
@@ -110,6 +114,28 @@ describe("Layer update utils", () => {
       expect(olLayer.setOpacity).toHaveBeenCalledWith(0.9);
       expect(olSource.setAttributions).toHaveBeenCalledWith("hello world");
       expect(olLayer.set).toHaveBeenCalledWith("label", "Test Layer");
+    });
+
+    it("applies properties specific to vector layers without recreating them", async () => {
+      // mocking a vector layer
+      (olLayer as VectorLayer).setStyle = vi.fn();
+
+      const layerModel = {
+        ...SAMPLE_LAYER3,
+        style: {
+          "circle-fill-color": "blue",
+        },
+        disableHover: true,
+      };
+      const prevLayerModel = SAMPLE_LAYER3;
+      updateLayerProperties(layerModel, olLayer, prevLayerModel);
+      expect((olLayer as VectorLayer).setStyle).toHaveBeenCalledWith(
+        layerModel.style,
+      );
+      expect(olLayer.set).toHaveBeenCalledWith(
+        "--geospatial-sdk-disable-hover",
+        true,
+      );
     });
   });
 });
