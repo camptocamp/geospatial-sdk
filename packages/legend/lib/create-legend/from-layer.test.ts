@@ -4,7 +4,9 @@ import { WmtsEndpoint } from "@camptocamp/ogc-client";
 
 // Mock dependencies
 vi.mock("@camptocamp/ogc-client", () => ({
-  WmtsEndpoint: vi.fn(),
+  WmtsEndpoint: class WmtsMock {
+    isReady() {}
+  },
 }));
 
 describe("createLegendFromLayer", () => {
@@ -60,12 +62,12 @@ describe("createLegendFromLayer", () => {
       getLayerByName: () => ({
         styles: [{ legendUrl: mockLegendUrl }],
       }),
-    };
+    } as unknown as WmtsEndpoint;
 
     // Mock WmtsEndpoint
-    (WmtsEndpoint as any).mockImplementation(() => ({
-      isReady: () => Promise.resolve(mockIsReady),
-    }));
+    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockImplementation(function () {
+      return Promise.resolve(mockIsReady);
+    });
 
     const result = await createLegendFromLayer(baseWmtsLayer);
 
@@ -79,12 +81,12 @@ describe("createLegendFromLayer", () => {
       getLayerByName: () => ({
         styles: [],
       }),
-    };
+    } as unknown as WmtsEndpoint;
 
     // Mock WmtsEndpoint
-    (WmtsEndpoint as any).mockImplementation(() => ({
-      isReady: () => Promise.resolve(mockIsReady),
-    }));
+    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockImplementation(function () {
+      return Promise.resolve(mockIsReady);
+    });
 
     const result = await createLegendFromLayer(baseWmtsLayer);
 
