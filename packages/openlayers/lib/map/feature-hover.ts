@@ -65,7 +65,7 @@ export function initHoverLayer(map: Map) {
       const hovered = map.getFeaturesAtPixel(event.pixel, {
         layerFilter,
       }) as Feature[];
-      hoveredSource.addFeatures(hovered);
+      hoveredSource.addFeature(hovered[0]);
 
       // dispatch event if subscribed to
       if (map.get(FeaturesHoverEventType)) {
