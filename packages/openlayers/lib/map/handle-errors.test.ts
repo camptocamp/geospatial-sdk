@@ -5,7 +5,6 @@ import {
   handleTileError,
   tileLoadErrorCatchFunction,
 } from "./handle-errors.js";
-import { describe } from "node:test";
 import TileLayer from "ol/layer/Tile.js";
 import VectorLayer from "ol/layer/Vector.js";
 import { EndpointError } from "@camptocamp/ogc-client";

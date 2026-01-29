@@ -481,9 +481,10 @@ describe("MapContextService", () => {
     });
   });
   describe("#resetMapFromContext", () => {
-    const map = new Map({});
-    const mapContext = MAP_CTX_FIXTURE;
+    let map: Map;
     beforeEach(() => {
+      map = new Map({});
+      const mapContext = MAP_CTX_FIXTURE;
       resetMapFromContext(map, mapContext);
     });
     it("create a map", () => {
@@ -501,17 +502,18 @@ describe("MapContextService", () => {
     });
     describe("uses default fallback view", () => {
       let view: View;
-      const map = new Map({});
-      const mapContext: MapContext = {
-        view: null,
-        layers: [
-          MAP_CTX_LAYER_XYZ_FIXTURE,
-          MAP_CTX_LAYER_WMS_FIXTURE,
-          MAP_CTX_LAYER_GEOJSON_FIXTURE,
-        ],
-      };
-      beforeEach(() => {
-        resetMapFromContext(map, mapContext);
+      let map: Map;
+      beforeEach(async () => {
+        map = new Map({});
+        const mapContext: MapContext = {
+          view: null,
+          layers: [
+            MAP_CTX_LAYER_XYZ_FIXTURE,
+            MAP_CTX_LAYER_WMS_FIXTURE,
+            MAP_CTX_LAYER_GEOJSON_FIXTURE,
+          ],
+        };
+        await resetMapFromContext(map, mapContext);
       });
       it("create a map", () => {
         expect(map).toBeTruthy();
