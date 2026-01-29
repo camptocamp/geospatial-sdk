@@ -56,7 +56,7 @@ export function contextStyleToMaplibreLayers(
     layers.push({
       type: "circle",
       paint: {
-        "circle-radius": style["circle-radius"],
+        "circle-radius": style["circle-radius"] as number,
         "circle-stroke-color": style["circle-stroke-color"] as string,
         "circle-color": style["circle-fill-color"] as string,
         "circle-stroke-width": style["circle-stroke-width"] as number,
