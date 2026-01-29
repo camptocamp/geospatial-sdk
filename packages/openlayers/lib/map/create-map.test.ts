@@ -44,6 +44,7 @@ import ImageTile from "ol/ImageTile.js";
 import TileState from "ol/TileState.js";
 import VectorTileLayer from "ol/layer/VectorTile.js";
 import { FeatureUrlFunction } from "ol/featureloader.js";
+import { beforeEach } from "vitest";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual =

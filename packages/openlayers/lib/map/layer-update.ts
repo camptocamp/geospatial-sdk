@@ -85,7 +85,10 @@ export function updateLayerProperties(
       (layerModel as MapContextLayerVector).disableHover,
     );
   }
-  if (shouldApplyProperty("style" as keyof MapContextLayer)) {
+  if (
+    shouldApplyProperty("style" as keyof MapContextLayer) &&
+    "setStyle" in olLayer
+  ) {
     (olLayer as VectorLayer).setStyle(
       (layerModel as MapContextLayerVector).style,
     );

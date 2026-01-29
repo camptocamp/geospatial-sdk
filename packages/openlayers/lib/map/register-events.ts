@@ -3,102 +3,16 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   MapClickEventType,
-  MapExtentChangeEventType,
   MapEventsByType,
+  MapExtentChangeEventType,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
 import { toLonLat, transformExtent } from "ol/proj.js";
-import GeoJSON from "ol/format/GeoJSON.js";
-import OlFeature from "ol/Feature.js";
 import BaseEvent from "ol/events/Event.js";
-import { MapBrowserEvent } from "ol";
-import { Coordinate } from "ol/coordinate.js";
-import TileWMS from "ol/source/TileWMS.js";
-import ImageWMS from "ol/source/ImageWMS.js";
 import Layer from "ol/layer/Layer.js";
-import { Pixel } from "ol/pixel.js";
-import type { Feature, FeatureCollection } from "geojson";
-import throttle from "lodash.throttle";
 import { BaseLayerObjectEventTypes } from "ol/layer/Base.js";
 import { equals } from "ol/extent.js";
-
-const GEOJSON = new GeoJSON();
-
-export function getFeaturesFromVectorSources(
-  olMap: Map,
-  pixel: Pixel,
-): Feature[] {
-  const olFeatures = olMap.getFeaturesAtPixel(pixel);
-  const { features } = GEOJSON.writeFeaturesObject(olFeatures as OlFeature[]);
-  if (!features) {
-    return [];
-  }
-  return features;
-}
-
-export function getGFIUrl(
-  source: TileWMS | ImageWMS,
-  map: Map,
-  coordinate: Coordinate,
-): string | null {
-  const view = map.getView();
-  const projection = view.getProjection();
-  const resolution = view.getResolution() as number;
-  const params = {
-    ...source.getParams(),
-    INFO_FORMAT: "application/json",
-  };
-  return (
-    source.getFeatureInfoUrl(coordinate, resolution, projection, params) ?? null
-  );
-}
-
-export function getFeaturesFromWmsSources(
-  olMap: Map,
-  coordinate: Coordinate,
-): Promise<Feature[]> {
-  const wmsSources: (ImageWMS | TileWMS)[] = olMap
-    .getLayers()
-    .getArray()
-    .filter(
-      (layer): layer is Layer<ImageWMS | TileWMS> =>
-        layer instanceof Layer &&
-        (layer.getSource() instanceof TileWMS ||
-          layer.getSource() instanceof ImageWMS),
-    )
-    .map((layer) => layer.getSource()!);
-
-  if (!wmsSources.length) {
-    return Promise.resolve([]);
-  }
-
-  const gfiUrls = wmsSources.reduce((urls, source) => {
-    const gfiUrl = getGFIUrl(source, olMap, coordinate);
-    return gfiUrl ? [...urls, gfiUrl] : urls;
-  }, [] as string[]);
-  return Promise.all(
-    gfiUrls.map((url) =>
-      fetch(url)
-        .then((response) => response.json())
-        .then((collection: FeatureCollection) => collection.features),
-    ),
-  ).then((features) => features.flat());
-}
-
-const getFeaturesFromWmsSourcesThrottled = throttle(
-  getFeaturesFromWmsSources,
-  250,
-);
-
-async function readFeaturesAtPixel(
-  map: Map,
-  event: MapBrowserEvent<PointerEvent>,
-) {
-  return [
-    ...getFeaturesFromVectorSources(map, event.pixel),
-    ...(await getFeaturesFromWmsSourcesThrottled(map, event.coordinate)),
-  ];
-}
+import { readFeaturesAtPixel } from "./get-features.js";
 
 function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
@@ -116,15 +30,6 @@ function registerFeatureClickEvent(map: Map) {
 
 function registerFeatureHoverEvent(map: Map) {
   if (map.get(FeaturesHoverEventType)) return;
-
-  map.on("pointermove", async (event: any) => {
-    const features = await readFeaturesAtPixel(map, event);
-    map.dispatchEvent({
-      type: FeaturesHoverEventType,
-      features,
-    } as unknown as BaseEvent);
-  });
-
   map.set(FeaturesHoverEventType, true);
 }
 
