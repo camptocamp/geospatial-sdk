@@ -125,7 +125,7 @@ describe("Layer update utils", () => {
         style: {
           "circle-fill-color": "blue",
         },
-        disableHover: true,
+        enableHover: true,
       };
       const prevLayerModel = SAMPLE_LAYER3;
       updateLayerProperties(layerModel, olLayer, prevLayerModel);
@@ -133,7 +133,7 @@ describe("Layer update utils", () => {
         layerModel.style,
       );
       expect(olLayer.set).toHaveBeenCalledWith(
-        "--geospatial-sdk-disable-hover",
+        "--geospatial-sdk-enable-hover",
         true,
       );
     });

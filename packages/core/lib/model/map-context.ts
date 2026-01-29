@@ -48,7 +48,7 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
 export interface MapContextLayerVector {
   style?: VectorStyle;
   hoverStyle?: VectorStyle;
-  disableHover?: boolean;
+  enableHover?: boolean;
 }
 
 export type MapContextLayerWfs = MapContextBaseLayer &

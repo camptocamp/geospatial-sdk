@@ -37,7 +37,7 @@ export function initHoverLayer(map: Map) {
   const originalCursorStyle = map.getTargetElement()?.style.cursor ?? "";
 
   const layerFilter = (layer: BaseLayer) =>
-    layer !== hoverLayer && !layer.get(`${GEOSPATIAL_SDK_PREFIX}disable-hover`);
+    layer !== hoverLayer && layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
 
   const unKey = map.on(
     "pointermove",

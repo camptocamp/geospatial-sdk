@@ -17,7 +17,7 @@ const UPDATABLE_PROPERTIES: (
   "attributions",
   "extras",
   "version",
-  "disableHover",
+  "enableHover",
   "style",
   // TODO (when available) "zIndex"
 ];
@@ -79,10 +79,10 @@ export function updateLayerProperties(
   if (shouldApplyProperty("label")) {
     olLayer.set("label", layerModel.label);
   }
-  if (shouldApplyProperty("disableHover" as keyof MapContextLayer)) {
+  if (shouldApplyProperty("enableHover" as keyof MapContextLayer)) {
     olLayer.set(
-      `${GEOSPATIAL_SDK_PREFIX}disable-hover`,
-      (layerModel as MapContextLayerVector).disableHover,
+      `${GEOSPATIAL_SDK_PREFIX}enable-hover`,
+      (layerModel as MapContextLayerVector).enableHover,
     );
   }
   if (
