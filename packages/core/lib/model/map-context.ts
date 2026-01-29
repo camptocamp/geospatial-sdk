@@ -45,22 +45,28 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
   style?: string;
 }
 
-export interface MapContextLayerWfs extends MapContextBaseLayer {
-  type: "wfs";
-  url: string;
-  featureType: string;
+interface MapContextLayerVector {
   style?: VectorStyle;
+  hoverStyle?: VectorStyle;
+  disableHover?: boolean;
 }
 
-export interface MapContextLayerOgcApi extends MapContextBaseLayer {
-  type: "ogcapi";
-  url: string;
-  collection: string;
-  useTiles?: "vector" | "map";
-  tileMatrixSet?: string;
-  options?: Record<string, string>;
-  style?: VectorStyle;
-}
+export type MapContextLayerWfs = MapContextBaseLayer &
+  MapContextLayerVector & {
+    type: "wfs";
+    url: string;
+    featureType: string;
+  };
+
+export type MapContextLayerOgcApi = MapContextBaseLayer &
+  MapContextLayerVector & {
+    type: "ogcapi";
+    url: string;
+    collection: string;
+    useTiles?: "vector" | "map";
+    tileMatrixSet?: string;
+    options?: Record<string, string>;
+  };
 
 // Layer pointing to a MapLibre Style spec, see https://maplibre.org/maplibre-style-spec/
 export interface MapContextLayerMapLibreStyle extends MapContextBaseLayer {
@@ -75,10 +81,10 @@ export interface MapContextLayerXyz extends MapContextBaseLayer {
   tileFormat?: "application/vnd.mapbox-vector-tile"; // If not specified, the system will automatically assume tiles are images.
 }
 
-interface LayerGeojson extends MapContextBaseLayer {
-  type: "geojson";
-  style?: VectorStyle;
-}
+export type LayerGeojson = MapContextBaseLayer &
+  MapContextLayerVector & {
+    type: "geojson";
+  };
 export interface LayerGeojsonWithUrl extends LayerGeojson {
   url: string;
   data?: never;
