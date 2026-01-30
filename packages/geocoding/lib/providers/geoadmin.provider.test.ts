@@ -57,7 +57,7 @@ const RESULTS_FIXTURE: GeoadminResponse = {
   ],
 };
 
-global.fetch = vi.fn(() =>
+globalThis.fetch = vi.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve(RESULTS_FIXTURE),
   } as Response),
@@ -114,7 +114,7 @@ describe("queryGeoadmin", () => {
       results = await queryGeoadmin("hello world");
     });
     it("uses default options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://api3.geo.admin.ch/rest/services/api/SearchServer?geometryFormat=geojson&type=locations&searchText=hello+world&lang=en&sr=4326&origins=zipcode%2Cgg25",
       );
     });
@@ -130,7 +130,7 @@ describe("queryGeoadmin", () => {
       });
     });
     it("uses given options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://api3.geo.admin.ch/rest/services/api/SearchServer?geometryFormat=geojson&type=locations&searchText=hello+world&lang=de&sr=21781&limit=32&origins=district%2Caddress",
       );
     });
@@ -146,7 +146,7 @@ describe("queryGeoadmin", () => {
       });
     });
     it("uses given options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://api3.geo.admin.ch/rest/services/api/SearchServer?geometryFormat=geojson&type=featuresearch&searchText=hello+world&lang=de&sr=21781&limit=32&features=abc%2Cdef",
       );
     });
@@ -161,7 +161,7 @@ describe("queryGeoadmin", () => {
       });
     });
     it("uses given options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://api3.geo.admin.ch/rest/services/api/SearchServer?geometryFormat=geojson&type=layers&searchText=hello+world&lang=de&sr=21781&limit=32",
       );
     });

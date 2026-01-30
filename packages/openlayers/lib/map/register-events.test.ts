@@ -77,7 +77,7 @@ function createMapEvent(map: Map, type: string) {
     new MouseEvent(type, {
       clientX: 10,
       clientY: 10,
-    }),
+    }) as PointerEvent,
     false,
   );
 }

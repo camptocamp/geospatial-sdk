@@ -90,7 +90,7 @@ describe("queryGeonames", () => {
       results = await queryGeonames("Zurich");
     });
     it("uses default options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining(
           "https://secure.geonames.org/searchJSON?q=Zurich&username=gn_ui&maxRows=10",
         ),
@@ -108,7 +108,7 @@ describe("queryGeonames", () => {
       });
     });
     it("uses given options for custom search", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining(
           "https://secure.geonames.org/searchJSON?q=Zurich&username=customUser&maxRows=5&country=CH&lang=de&style=FULL&type=json",
         ),
@@ -127,7 +127,7 @@ describe("queryGeonames", () => {
       });
     });
     it("uses given options for bounding box search", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining(
           "https://secure.geonames.org/searchJSON?q=Zurich&username=customUser&maxRows=10&lang=en&style=FULL&type=json&east=10&west=5&north=50&south=45",
         ),
