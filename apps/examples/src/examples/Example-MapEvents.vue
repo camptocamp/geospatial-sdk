@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import Map from 'ol/Map'
+import OlMap from 'ol/Map'
 import { createMapFromContext, listen } from '@geospatial-sdk/openlayers'
-import type { MapContext } from '@geospatial-sdk/core'
+import type { FeaturesByLayerIndex, MapContext } from '@geospatial-sdk/core'
 import { DEFAULT_CONTEXT } from '@/constants'
 import Panel from '@/components/Panel.vue'
-import type { Feature } from 'geojson'
 import type { Extent } from 'ol/extent'
 
 const Layers = {
@@ -22,18 +21,18 @@ const Layers = {
 }
 
 const mapRoot = ref<HTMLElement>()
-let map: Map
+let map: OlMap
 let context = {
   ...DEFAULT_CONTEXT,
   layers: [...DEFAULT_CONTEXT.layers, Layers.wms, Layers.geojson]
 } as MapContext
-let features = ref<Feature[]>([])
+let features = ref<FeaturesByLayerIndex>()
 let clickCoordinates = ref<[number, number] | null>(null)
 let extent = ref<Extent | null>(null)
 
 onMounted(async () => {
   map = await createMapFromContext(context, mapRoot.value)
-  listen(map, 'features-hover', (event) => (features.value = event.features))
+  listen(map, 'features-hover', (event) => (features.value = event.featuresByLayer))
   listen(map, 'map-click', (event) => (clickCoordinates.value = event.coordinate))
   listen(map, 'map-extent-change', (event) => {
     extent.value = event.extent;
@@ -57,15 +56,17 @@ onMounted(async () => {
           <li><strong>Max Y</strong>: {{ extent[3] }}</li>
         </ul>
       </Panel>
-      <Panel v-for="(feature, index) in features" v-bind:key="index">
-        <h4 class="font-bold mb-1">Feature</h4>
-        <ul>
-          <li v-for="(value, key) in feature.properties" v-bind:key="key">
-            <strong>{{ key }}</strong
-            >:&nbsp;{{ value }}
-          </li>
-        </ul>
-      </Panel>
+      <template v-for="layerAndFeatures in features" v-bind:key="layerAndFeatures[0]">
+        <Panel v-for="(feature, index) in layerAndFeatures[1]" v-bind:key="index">
+          <h4 class="font-bold mb-1">Feature from layer #{{layerAndFeatures[0]}}</h4>
+          <ul>
+            <li v-for="(value, key) in feature.properties" v-bind:key="key">
+              <strong>{{ key }}</strong
+              >:&nbsp;{{ value }}
+            </li>
+          </ul>
+        </Panel>
+      </template>
     </div>
   </div>
 </template>
