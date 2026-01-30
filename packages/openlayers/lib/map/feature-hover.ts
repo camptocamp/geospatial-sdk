@@ -83,7 +83,11 @@ export function initHoverLayer(map: OlMap) {
 
       // dispatch event if subscribed to
       if (map.get(FeaturesHoverEventType)) {
-        const featuresByLayer = await readFeaturesAtPixel(map, event);
+        const featuresByLayer = await readFeaturesAtPixel(
+          map,
+          event,
+          layerFilter,
+        );
         const features = Array.from(featuresByLayer.values()).flat();
         map.dispatchEvent({
           type: FeaturesHoverEventType,

@@ -11,7 +11,8 @@ const Layers = {
   wms: {
     type: 'wms',
     url: 'https://ows.emodnet-bathymetry.eu/wms',
-    name: 'emodnet:mean_rainbowcolour'
+    name: 'emodnet:mean_rainbowcolour',
+    enableHover: true
   },
   geojson: {
     type: 'geojson',

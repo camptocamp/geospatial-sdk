@@ -77,7 +77,7 @@ describe("get features utils", () => {
   });
 
   describe("getFeaturesFromVectorSources", () => {
-    it("returns an array of features", () => {
+    it("returns a map of features by layer index", () => {
       const featuresByLayerIndex = getFeaturesFromVectorSources(map, [0, 0]);
       expect(featuresByLayerIndex).toEqual(
         new Map([
