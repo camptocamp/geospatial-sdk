@@ -9,7 +9,7 @@ import TileLayer from "ol/layer/Tile.js";
 import VectorLayer from "ol/layer/Vector.js";
 import { EndpointError } from "@camptocamp/ogc-client";
 
-global.URL.createObjectURL = vi.fn(() => "blob:http://example.com/blob");
+globalThis.URL.createObjectURL = vi.fn(() => "blob:http://example.com/blob");
 
 const mockBlob = new Blob();
 const RESPONSE_OK = {
@@ -19,10 +19,10 @@ const RESPONSE_OK = {
 const RESPONSE_ERROR = {
   status: 404,
 };
-global.fetch = vi.fn().mockImplementation((url: string) => {
+globalThis.fetch = vi.fn().mockImplementation((url: string) => {
   return url.includes("error")
-    ? Promise.reject(RESPONSE_ERROR as Response)
-    : Promise.resolve(RESPONSE_OK as Response);
+    ? Promise.reject(RESPONSE_ERROR)
+    : Promise.resolve(RESPONSE_OK);
 });
 
 describe("handle-errors", () => {

@@ -3,7 +3,7 @@ import {
   getFeaturesFromWmsSources,
   getGFIUrl,
 } from "./get-features.js";
-import Map from "ol/Map.js";
+import OlMap from "ol/Map.js";
 import TileWMS from "ol/source/TileWMS.js";
 import TileLayer from "ol/layer/Tile.js";
 import OlFeature from "ol/Feature.js";
@@ -30,7 +30,7 @@ function createWmsSource() {
     },
   });
 }
-function createMap(): Map {
+function createMap(): OlMap {
   const wmsLayer = new TileLayer({
     source: createWmsSource(),
   });
@@ -47,23 +47,27 @@ function createMap(): Map {
     resolution: 1,
     center: [0, 0],
   });
-  const map = new BaseObject() as Map;
+  const map = new BaseObject() as OlMap;
   Object.defineProperties(map, {
     getView: { value: vi.fn(() => view) },
     getLayers: { value: vi.fn(() => new Collection([wmsLayer, vectorLayer])) },
     getEventPixel: { value: vi.fn(() => [10, 10]) },
     getCoordinateFromPixel: { value: vi.fn(() => [123, 123]) },
-    getFeaturesAtPixel: { value: vi.fn(() => [feature]) },
+    forEachFeatureAtPixel: {
+      value: vi.fn((pixel, callback) => {
+        callback(feature, vectorLayer);
+      }),
+    },
     getSize: { value: vi.fn(() => [800, 600]) },
   });
   return map;
 }
 
 describe("get features utils", () => {
-  let map: Map;
+  let map: OlMap;
   beforeEach(() => {
     map = createMap();
-    vi.spyOn(global, "fetch").mockImplementation(() =>
+    vi.spyOn(globalThis, "fetch").mockImplementation(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ features: [gfiResult] }),
@@ -73,18 +77,25 @@ describe("get features utils", () => {
   });
 
   describe("getFeaturesFromVectorSources", () => {
-    it("returns an array of features", () => {
-      const features = getFeaturesFromVectorSources(map, [0, 0]);
-      expect(features).toEqual([
-        {
-          geometry: {
-            coordinates: [100, 200],
-            type: "Point",
-          },
-          properties: null,
-          type: "Feature",
-        },
-      ]);
+    it("returns a map of features by layer index", () => {
+      const featuresByLayerIndex = getFeaturesFromVectorSources(map, [0, 0]);
+      expect(featuresByLayerIndex).toEqual(
+        new Map([
+          [
+            1,
+            [
+              {
+                geometry: {
+                  coordinates: [100, 200],
+                  type: "Point",
+                },
+                properties: null,
+                type: "Feature",
+              },
+            ],
+          ],
+        ]),
+      );
     });
   });
   describe("getGFIUrl", () => {
@@ -102,8 +113,8 @@ describe("get features utils", () => {
   });
   describe("getFeaturesFromWmsSources", () => {
     it("queries the WMS sources", async () => {
-      const features = await getFeaturesFromWmsSources(map, [0, 0]);
-      expect(features).toEqual([gfiResult]);
+      const featuresByLayerIndex = await getFeaturesFromWmsSources(map, [0, 0]);
+      expect(featuresByLayerIndex).toEqual(new Map([[0, [gfiResult]]]));
     });
   });
 });

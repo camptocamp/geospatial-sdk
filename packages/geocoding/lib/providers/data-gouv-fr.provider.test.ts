@@ -38,7 +38,7 @@ const RESULTS_FIXTURE: DataGouvFrResponse = {
   limit: 1,
 };
 
-global.fetch = vi.fn(() =>
+globalThis.fetch = vi.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve(RESULTS_FIXTURE),
   } as Response),
@@ -72,7 +72,7 @@ describe("queryDataGouvFr", () => {
       results = await queryDataGouvFr("hello world");
     });
     it("uses default options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://api-adresse.data.gouv.fr/search/?q=hello+world",
       );
     });
@@ -87,7 +87,7 @@ describe("queryDataGouvFr", () => {
       });
     });
     it("uses given options", () => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://api-adresse.data.gouv.fr/search/?q=hello+world&limit=32&type=street&postcode=00000&citycode=12345",
       );
     });

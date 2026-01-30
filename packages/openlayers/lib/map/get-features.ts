@@ -1,5 +1,5 @@
 import GeoJSON from "ol/format/GeoJSON.js";
-import Map from "ol/Map.js";
+import OlMap from "ol/Map.js";
 import { Pixel } from "ol/pixel.js";
 import type { Feature, FeatureCollection } from "geojson";
 import OlFeature from "ol/Feature.js";
@@ -8,25 +8,41 @@ import ImageWMS from "ol/source/ImageWMS.js";
 import { Coordinate } from "ol/coordinate.js";
 import Layer from "ol/layer/Layer.js";
 import throttle from "lodash.throttle";
-import { MapBrowserEvent } from "ol";
+import type MapBrowserEvent from "ol/MapBrowserEvent.js";
+import type { FeaturesByLayerIndex } from "@geospatial-sdk/core";
 
 const GEOJSON = new GeoJSON();
 
 export function getFeaturesFromVectorSources(
-  olMap: Map,
+  olMap: OlMap,
   pixel: Pixel,
-): Feature[] {
-  const olFeatures = olMap.getFeaturesAtPixel(pixel);
-  const { features } = GEOJSON.writeFeaturesObject(olFeatures as OlFeature[]);
-  if (!features) {
-    return [];
-  }
-  return features;
+  layerFilter?: (layer: Layer) => boolean,
+): FeaturesByLayerIndex {
+  const result = new Map<number, Feature[]>();
+  const layerArray = olMap.getLayers().getArray();
+  olMap.forEachFeatureAtPixel(
+    pixel,
+    (feature, layer) => {
+      // can happen for unmanaged layer (i.e. hover layer)
+      if (layer === null) {
+        return null;
+      }
+      const layerIndex = layerArray.indexOf(layer);
+      if (!result.has(layerIndex)) {
+        result.set(layerIndex, []);
+      }
+      result
+        .get(layerIndex)!
+        .push(GEOJSON.writeFeatureObject(feature as OlFeature));
+    },
+    { layerFilter },
+  );
+  return result;
 }
 
 export function getGFIUrl(
   source: TileWMS | ImageWMS,
-  map: Map,
+  map: OlMap,
   coordinate: Coordinate,
 ): string | null {
   const view = map.getView();
@@ -41,36 +57,48 @@ export function getGFIUrl(
   );
 }
 
-export function getFeaturesFromWmsSources(
-  olMap: Map,
+export async function getFeaturesFromWmsSources(
+  olMap: OlMap,
   coordinate: Coordinate,
-): Promise<Feature[]> {
-  const wmsSources: (ImageWMS | TileWMS)[] = olMap
-    .getLayers()
-    .getArray()
-    .filter(
-      (layer): layer is Layer<ImageWMS | TileWMS> =>
-        layer instanceof Layer &&
-        (layer.getSource() instanceof TileWMS ||
-          layer.getSource() instanceof ImageWMS),
-    )
-    .map((layer) => layer.getSource()!);
+  layerFilter?: (layer: Layer) => boolean,
+): Promise<FeaturesByLayerIndex> {
+  const result = new Map<number, Feature[]>();
+  const layerArray = olMap.getLayers().getArray();
 
-  if (!wmsSources.length) {
-    return Promise.resolve([]);
+  const hasWms = layerArray.some((layer) => {
+    const source = layer instanceof Layer ? layer.getSource() : null;
+    return source instanceof TileWMS || source instanceof ImageWMS;
+  });
+  if (!hasWms) {
+    return result;
   }
 
-  const gfiUrls = wmsSources.reduce((urls, source) => {
+  const gfiPromises: (Promise<Feature[]> | null)[] = layerArray.map((layer) => {
+    if (!(layer instanceof Layer)) {
+      return null;
+    }
+    if (layerFilter && !layerFilter(layer)) {
+      return null;
+    }
+    const source = layer.getSource();
+    if (!(source instanceof TileWMS) && !(source instanceof ImageWMS)) {
+      return null;
+    }
     const gfiUrl = getGFIUrl(source, olMap, coordinate);
-    return gfiUrl ? [...urls, gfiUrl] : urls;
-  }, [] as string[]);
-  return Promise.all(
-    gfiUrls.map((url) =>
-      fetch(url)
-        .then((response) => response.json())
-        .then((collection: FeatureCollection) => collection.features),
-    ),
-  ).then((features) => features.flat());
+    return gfiUrl
+      ? fetch(gfiUrl)
+          .then((response) => response.json())
+          .then((collection: FeatureCollection) => collection.features)
+      : null;
+  });
+
+  const responses = await Promise.all(gfiPromises);
+  responses.forEach((features, index) => {
+    if (features !== null && features.length > 0) {
+      result.set(index, features);
+    }
+  });
+  return result;
 }
 
 const getFeaturesFromWmsSourcesThrottled = throttle(
@@ -79,11 +107,16 @@ const getFeaturesFromWmsSourcesThrottled = throttle(
 );
 
 export async function readFeaturesAtPixel(
-  map: Map,
+  map: OlMap,
   event: MapBrowserEvent<PointerEvent>,
-) {
-  return [
-    ...getFeaturesFromVectorSources(map, event.pixel),
-    ...(await getFeaturesFromWmsSourcesThrottled(map, event.coordinate)),
-  ];
+  layerFilter?: (layer: Layer) => boolean,
+): Promise<FeaturesByLayerIndex> {
+  return new Map([
+    ...getFeaturesFromVectorSources(map, event.pixel, layerFilter),
+    ...(await getFeaturesFromWmsSourcesThrottled(
+      map,
+      event.coordinate,
+      layerFilter,
+    )),
+  ]);
 }

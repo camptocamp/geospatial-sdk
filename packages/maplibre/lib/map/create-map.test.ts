@@ -207,7 +207,7 @@ describe("MapContextService", () => {
         describe("with remote file url", () => {
           beforeEach(async () => {
             layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
-            global.fetch = vi.fn(() =>
+            globalThis.fetch = vi.fn(() =>
               Promise.resolve({
                 ok: true,
                 json: () =>

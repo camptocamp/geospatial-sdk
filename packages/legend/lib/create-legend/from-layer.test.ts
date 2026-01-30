@@ -140,7 +140,7 @@ describe("createLegendFromLayer", () => {
   it("adds accessibility attributes", async () => {
     const result = await createLegendFromLayer(baseWmsLayer);
 
-    expect(result.getAttribute("role")).toBe("region");
-    expect(result.getAttribute("aria-label")).toBe("Map Layer Legend");
+    expect(result?.getAttribute("role")).toBe("region");
+    expect(result?.getAttribute("aria-label")).toBe("Map Layer Legend");
   });
 });
