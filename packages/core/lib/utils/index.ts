@@ -17,3 +17,4 @@ export {
 } from "./map-context.js";
 export { updateLayer } from "./map-context-layer.js";
 export { createViewFromLayer } from "./view.js";
+export * from "./style.js";

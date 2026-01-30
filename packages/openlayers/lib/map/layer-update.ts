@@ -1,14 +1,24 @@
 import { getHash, MapContextLayer } from "@geospatial-sdk/core";
-import { MapContextBaseLayer } from "@geospatial-sdk/core/lib/model/map-context.js";
+import {
+  MapContextBaseLayer,
+  MapContextLayerVector,
+} from "@geospatial-sdk/core/lib/model/map-context.js";
 import Layer from "ol/layer/Layer.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import VectorLayer from "ol/layer/Vector.js";
 
-const UPDATABLE_PROPERTIES: (keyof MapContextBaseLayer)[] = [
+const UPDATABLE_PROPERTIES: (
+  | keyof MapContextBaseLayer
+  | keyof MapContextLayerVector
+)[] = [
   "opacity",
   "visibility",
   "label",
   "attributions",
   "extras",
   "version",
+  "enableHover",
+  "style",
   // TODO (when available) "zIndex"
 ];
 
@@ -43,7 +53,7 @@ export function updateLayerProperties(
   olLayer: Layer,
   previousLayerModel?: MapContextLayer,
 ) {
-  function shouldApplyProperty(prop: keyof MapContextBaseLayer): boolean {
+  function shouldApplyProperty(prop: keyof MapContextLayer): boolean {
     // if the new layer model does not define that property, skip it
     // (setting or resetting it to a default value would be counter-intuitive)
     if (!(prop in layerModel) || typeof layerModel[prop] === "undefined")
@@ -68,6 +78,20 @@ export function updateLayerProperties(
   }
   if (shouldApplyProperty("label")) {
     olLayer.set("label", layerModel.label);
+  }
+  if (shouldApplyProperty("enableHover" as keyof MapContextLayer)) {
+    olLayer.set(
+      `${GEOSPATIAL_SDK_PREFIX}enable-hover`,
+      (layerModel as MapContextLayerVector).enableHover,
+    );
+  }
+  if (
+    shouldApplyProperty("style" as keyof MapContextLayer) &&
+    "setStyle" in olLayer
+  ) {
+    (olLayer as VectorLayer).setStyle(
+      (layerModel as MapContextLayerVector).style,
+    );
   }
   // TODO: z-index
 }

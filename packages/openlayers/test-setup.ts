@@ -1,3 +1,5 @@
+import "vitest-canvas-mock";
+
 class ResizeObserverMock {
   observe = vi.fn();
   unobserve = vi.fn();

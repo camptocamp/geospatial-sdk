@@ -1,4 +1,5 @@
 import {
+  defaultStyle,
   MapContext,
   MapContextLayer,
   MapContextView,
@@ -18,7 +19,6 @@ import Geometry from "ol/geom/Geometry.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import { bbox as bboxStrategy } from "ol/loadingstrategy.js";
-import { defaultStyle } from "./styles.js";
 import VectorTileLayer from "ol/layer/VectorTile.js";
 import OGCMapTile from "ol/source/OGCMapTile.js";
 import OGCVectorTile from "ol/source/OGCVectorTile.js";
@@ -40,6 +40,7 @@ import {
   canDoIncrementalUpdate,
   updateLayerProperties,
 } from "./layer-update.js";
+import { initHoverLayer } from "./feature-hover.js";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -351,5 +352,6 @@ export async function resetMapFromContext(
     const layer = await createLayer(layerModel);
     map.addLayer(layer);
   }
+  initHoverLayer(map);
   return map;
 }
