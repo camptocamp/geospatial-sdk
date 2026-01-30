@@ -1,4 +1,4 @@
-import { FlatStyleLike } from "ol/style/flat.js";
+import type { FlatStyleLike } from "ol/style/flat.js";
 import chroma from "chroma-js";
 
 const color = "rgb(0, 0, 255)";

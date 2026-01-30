@@ -11,6 +11,7 @@ import { MapBrowserEvent } from "ol";
 import GeoJSON from "ol/format/GeoJSON.js";
 import Feature from "ol/Feature.js";
 import BaseLayer from "ol/layer/Base.js";
+import { unByKey } from "ol/Observable.js";
 
 const GEOJSON = new GeoJSON();
 
@@ -51,9 +52,11 @@ export function initHoverLayer(map: Map) {
       const hasFeature = map.hasFeatureAtPixel(event.pixel, {
         layerFilter,
       });
-      map.getTargetElement().style.cursor = hasFeature
-        ? "pointer"
-        : originalCursorStyle;
+      if (map.getTargetElement()) {
+        map.getTargetElement().style.cursor = hasFeature
+          ? "pointer"
+          : originalCursorStyle;
+      }
 
       const hoveredSource = hoverLayer.getSource() as VectorSource;
       hoveredSource.clear(true);
@@ -89,6 +92,5 @@ export function clearHoverLayer(map: Map) {
   hoverLayer.setMap(null);
   hoverLayer.dispose();
   map.set(hoverLayerKey, null);
-  console.log(map.get);
-  map.get(unsubscribeKey)?.();
+  unByKey(map.get(unsubscribeKey));
 }

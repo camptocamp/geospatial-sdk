@@ -4,7 +4,7 @@ import { LONLAT_CRS_CODES } from "../constant/projections.js";
 import { fromEPSGCode, register } from "ol/proj/proj4.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import { extend } from "ol/extent.js";
-import Feature from "ol/Feature.js";
+import type Feature from "ol/Feature.js";
 import proj4 from "proj4";
 import {
   Extent,

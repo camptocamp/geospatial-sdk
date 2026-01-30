@@ -28,5 +28,8 @@
   },
   "devDependencies": {
     "ol": "^10.7.0"
+  },
+  "peerDependencies": {
+    "ol": ">9.x"
   }
 }
