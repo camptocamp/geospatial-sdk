@@ -1,24 +1,22 @@
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import type Map from "ol/Map.js";
+import type OlMap from "ol/Map.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import {
   defaultHighlightStyle,
   FeaturesHoverEventType,
 } from "@geospatial-sdk/core";
-import BaseEvent from "ol/events/Event.js";
+import type BaseEvent from "ol/events/Event.js";
 import { MapBrowserEvent } from "ol";
-import GeoJSON from "ol/format/GeoJSON.js";
-import Feature from "ol/Feature.js";
-import BaseLayer from "ol/layer/Base.js";
+import OlFeature from "ol/Feature.js";
+import type BaseLayer from "ol/layer/Base.js";
 import { unByKey } from "ol/Observable.js";
-
-const GEOJSON = new GeoJSON();
+import { readFeaturesAtPixel } from "./get-features.js";
 
 const hoverLayerKey = `${GEOSPATIAL_SDK_PREFIX}hover-layer`;
 const unsubscribeKey = `${GEOSPATIAL_SDK_PREFIX}hover-unsub`;
 
-export function initHoverLayer(map: Map) {
+export function initHoverLayer(map: OlMap) {
   if (map.get(hoverLayerKey)) {
     clearHoverLayer(map);
   }
@@ -65,17 +63,32 @@ export function initHoverLayer(map: Map) {
       }
 
       // add hovered feature to the layer
-      const hovered = map.getFeaturesAtPixel(event.pixel, {
-        layerFilter,
-      }) as Feature[];
-      hoveredSource.addFeature(hovered[0]);
+      let firstFeature: OlFeature | null = null;
+      map.forEachFeatureAtPixel(
+        event.pixel,
+        (feature) => {
+          if (feature instanceof OlFeature) {
+            firstFeature = feature;
+            return true;
+          }
+        },
+        {
+          layerFilter,
+        },
+      );
+      if (!firstFeature) {
+        return;
+      }
+      hoveredSource.addFeature(firstFeature);
 
       // dispatch event if subscribed to
       if (map.get(FeaturesHoverEventType)) {
-        const { features } = GEOJSON.writeFeaturesObject(hovered);
+        const featuresByLayer = await readFeaturesAtPixel(map, event);
+        const features = Array.from(featuresByLayer.values()).flat();
         map.dispatchEvent({
           type: FeaturesHoverEventType,
-          features: features ?? [],
+          features,
+          featuresByLayer,
         } as unknown as BaseEvent);
       }
     },
@@ -83,11 +96,11 @@ export function initHoverLayer(map: Map) {
   map.set(unsubscribeKey, unKey);
 }
 
-export function getHoverLayer(map: Map): VectorLayer<VectorSource> {
+export function getHoverLayer(map: OlMap): VectorLayer<VectorSource> {
   return map.get(hoverLayerKey) as VectorLayer<VectorSource>;
 }
 
-export function clearHoverLayer(map: Map) {
+export function clearHoverLayer(map: OlMap) {
   const hoverLayer = getHoverLayer(map);
   hoverLayer.setMap(null);
   hoverLayer.dispose();

@@ -3,16 +3,20 @@ import { Feature } from "geojson";
 import BaseEvent from "ol/events/Event.js";
 import type { Extent } from "ol/extent.js";
 
+export type FeaturesByLayerIndex = Map<number, Feature[]>;
+
 export const FeaturesClickEventType = "features-click";
 export interface FeaturesClickEvent {
   type: typeof FeaturesClickEventType;
   features: Feature[];
+  featuresByLayer: FeaturesByLayerIndex;
 }
 
 export const FeaturesHoverEventType = "features-hover";
 export interface FeaturesHoverEvent {
   type: typeof FeaturesHoverEventType;
   features: Feature[];
+  featuresByLayer: FeaturesByLayerIndex;
 }
 
 export const MapClickEventType = "map-click";

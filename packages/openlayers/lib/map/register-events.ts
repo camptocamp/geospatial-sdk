@@ -18,10 +18,12 @@ function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
 
   map.on("click", async (event: any) => {
-    const features = await readFeaturesAtPixel(map, event);
+    const featuresByLayer = await readFeaturesAtPixel(map, event);
+    const features = Array.from(featuresByLayer.values()).flat();
     map.dispatchEvent({
       type: FeaturesClickEventType,
       features,
+      featuresByLayer,
     } as unknown as BaseEvent);
   });
 
