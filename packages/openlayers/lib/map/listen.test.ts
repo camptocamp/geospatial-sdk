@@ -1,11 +1,12 @@
 import OlMap from "ol/Map.js";
 import { Mock } from "vitest";
-import { listen } from "./register-events.js";
+import { listen } from "./listen.js";
 import { MapBrowserEvent, Object as BaseObject } from "ol";
 import View from "ol/View.js";
 import { toLonLat } from "ol/proj.js";
 import { FeaturesHoverEventType } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 vi.mock("./get-features.js", () => ({
   readFeaturesAtPixel() {
@@ -78,7 +79,7 @@ function createMap(): OlMap {
   // simulate hover feature initialization
   map.on("pointermove", () => {
     map.dispatchEvent({
-      type: FeaturesHoverEventType,
+      type: `${GEOSPATIAL_SDK_PREFIX}${FeaturesHoverEventType}`,
       features: [featureB],
       featuresByLayer: new Map([[0, [featureB]]]),
     } as unknown as BaseEvent);
@@ -97,11 +98,12 @@ function createMapEvent(map: OlMap, type: string) {
   );
 }
 
-describe("event registration", () => {
+describe("event listener registration", () => {
   let map: OlMap;
   beforeEach(() => {
     map = createMap();
     vi.useFakeTimers();
+    vi.clearAllMocks();
   });
   describe("features hover event", () => {
     let callback: Mock;
@@ -116,7 +118,6 @@ describe("event registration", () => {
         type: "features-hover",
         features: [featureB],
         featuresByLayer: new Map([[0, [featureB]]]),
-        target: expect.anything(),
       });
     });
   });
@@ -136,7 +137,6 @@ describe("event registration", () => {
           [0, [featureA]],
           [1, [featureB]],
         ]),
-        target: expect.anything(),
       });
     });
   });
@@ -154,7 +154,43 @@ describe("event registration", () => {
       });
     });
   });
-  describe("map extent change event", () => {
+  describe("map view state change event", () => {
+    let callback: Mock;
+
+    beforeEach(() => {
+      callback = vi.fn();
+      listen(map, "map-view-state-change", callback);
+    });
+
+    it("tracks change in center, resolution & rotation", () => {
+      map.getView().setCenter([1000, 1000]);
+      map.getView().setResolution(100);
+      map.getView().setRotation(Math.PI / 2);
+      callback.mockReset();
+
+      map.getView().setCenter([0, 0]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+      map.getView().dispatchEvent(createMapEvent(map, "change:resolution"));
+      map.getView().dispatchEvent(createMapEvent(map, "change:rotation"));
+      map.dispatchEvent(createMapEvent(map, "change:size"));
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-view-state-change",
+        viewState: {
+          center: [0, 0],
+          bearing: 180,
+          extent: [
+            -0.044915764205976066, -0.04491575960553007, 0.044915764205976066,
+            0.04491575960551586,
+          ],
+          resolution: 100,
+          scaleDenominator: (100 * 1000) / 0.28, // metersPerUnit * resolution * (1000 / mmPerPixel)
+        },
+      });
+    });
+  });
+  describe("map extent change event (deprecated)", () => {
     let callback: Mock;
 
     beforeEach(() => {
@@ -169,7 +205,6 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: EXPECTED_MAP_EXTENT_EPSG4326,
-        target: expect.anything(),
       });
     });
 
@@ -180,7 +215,6 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: EXPECTED_MAP_EXTENT_EPSG4326,
-        target: expect.anything(),
       });
     });
 
@@ -191,7 +225,6 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: EXPECTED_MAP_EXTENT_EPSG4326,
-        target: expect.anything(),
       });
     });
 
@@ -202,7 +235,6 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: EXPECTED_MAP_EXTENT_EPSG4326,
-        target: expect.anything(),
       });
     });
 
@@ -216,7 +248,6 @@ describe("event registration", () => {
       expect(callback).toHaveBeenCalledWith({
         type: "map-extent-change",
         extent: EXPECTED_MAP_EXTENT_EPSG4326,
-        target: expect.anything(),
       });
     });
 

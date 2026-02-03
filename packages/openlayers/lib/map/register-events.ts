@@ -1,33 +1,29 @@
+import Map from "ol/Map.js";
 import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
-  MapClickEventType,
-  MapEventsByType,
-  MapExtentChangeEventType,
-  SourceLoadErrorType,
+  MapViewStateChangeEventType,
 } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
-import { equals } from "ol/extent.js";
 import type BaseLayer from "ol/layer/Base.js";
-import { BaseLayerObjectEventTypes } from "ol/layer/Base.js";
-import Layer from "ol/layer/Layer.js";
-import Map, { MapObjectEventTypes } from "ol/Map.js";
-import { toLonLat, transformExtent } from "ol/proj.js";
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { readFeaturesAtPixel } from "./get-features.js";
+import MapBrowserEvent from "ol/MapBrowserEvent.js";
+import { equals } from "ol/extent.js";
+import { readMapViewState } from "./resolved-map-state.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
-function registerFeatureClickEvent(map: Map) {
+export function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
 
   // Filter to only query clickable layers
   const layerFilter = (layer: BaseLayer) =>
     layer.get(`${GEOSPATIAL_SDK_PREFIX}clickable`) !== false;
 
-  map.on("click", async (event: any) => {
+  map.on("click", async (event: MapBrowserEvent<PointerEvent>) => {
     const featuresByLayer = await readFeaturesAtPixel(map, event, layerFilter);
     const features = Array.from(featuresByLayer.values()).flat();
     map.dispatchEvent({
-      type: FeaturesClickEventType,
+      type: `${GEOSPATIAL_SDK_PREFIX}${FeaturesClickEventType}`,
       features,
       featuresByLayer,
     } as unknown as BaseEvent);
@@ -36,119 +32,33 @@ function registerFeatureClickEvent(map: Map) {
   map.set(FeaturesClickEventType, true);
 }
 
-function registerFeatureHoverEvent(map: Map) {
+export function registerFeatureHoverEvent(map: Map) {
   if (map.get(FeaturesHoverEventType)) return;
   map.set(FeaturesHoverEventType, true);
 }
 
-function registerMapExtentChangeEvent(map: Map) {
-  if (map.get(MapExtentChangeEventType)) return;
+export function registerMapViewStateChangeEvent(map: Map) {
+  if (map.get(MapViewStateChangeEventType)) return;
 
   let lastExtent: number[] | null = null;
 
-  const handleExtentChange = () => {
-    const extent = map.getView().calculateExtent(map.getSize());
-    const reprojectedExtent = transformExtent(
-      extent,
-      map.getView().getProjection(),
-      "EPSG:4326",
-    );
-
-    if (lastExtent && equals(lastExtent, reprojectedExtent)) {
+  const handleViewChange = () => {
+    const viewState = readMapViewState(map);
+    if (lastExtent && equals(lastExtent, viewState.extent)) {
       return;
     }
-
-    lastExtent = reprojectedExtent;
+    lastExtent = viewState.extent;
 
     map.dispatchEvent({
-      type: MapExtentChangeEventType,
-      extent: reprojectedExtent,
+      type: `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
+      viewState,
     } as unknown as BaseEvent);
   };
 
-  map.getView().on("change:center", handleExtentChange);
-  map.getView().on("change:resolution", handleExtentChange);
-  map.getView().on("change:rotation", handleExtentChange);
-  map.on("change:size", handleExtentChange);
+  map.getView().on("change:center", handleViewChange);
+  map.getView().on("change:resolution", handleViewChange);
+  map.getView().on("change:rotation", handleViewChange);
+  map.on("change:size", handleViewChange);
 
-  map.set(MapExtentChangeEventType, true);
-}
-
-export function listen<T extends keyof MapEventsByType>(
-  map: Map,
-  eventType: T,
-  callback: (event: MapEventsByType[T]) => void,
-) {
-  switch (eventType) {
-    case FeaturesClickEventType:
-      registerFeatureClickEvent(map);
-      // we're using a custom event type here so we need to cast to unknown first
-      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
-        (callback as (event: unknown) => void)(event);
-      });
-      break;
-    case FeaturesHoverEventType:
-      registerFeatureHoverEvent(map);
-      // see comment above
-      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
-        (callback as (event: unknown) => void)(event);
-      });
-      break;
-    case MapClickEventType:
-      map.on("click", (event: any) => {
-        const coordinate = toLonLat(
-          event.coordinate,
-          map.getView().getProjection(),
-        ) as [number, number];
-        (callback as (event: unknown) => void)({
-          type: "map-click",
-          coordinate,
-        });
-      });
-      break;
-    case MapExtentChangeEventType:
-      registerMapExtentChangeEvent(map);
-      // see comment above
-      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
-        (callback as (event: unknown) => void)(event);
-      });
-      break;
-    case SourceLoadErrorType: {
-      const errorCallback = (event: BaseEvent) => {
-        (callback as (event: unknown) => void)(event);
-      };
-      //attach event listener to all existing layers
-      map.getLayers().forEach((layer) => {
-        if (layer) {
-          layer.on(
-            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            errorCallback,
-          );
-        }
-      });
-      //attach event listener when layer is added
-      map.getLayers().on("add", (event: any) => {
-        const layer = event.element as Layer;
-        if (layer) {
-          layer.on(
-            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            errorCallback,
-          );
-        }
-      });
-      //remove event listener when layer is removed
-      map.getLayers().on("remove", (event: any) => {
-        const layer = event.element as Layer;
-        if (layer) {
-          layer.un(
-            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            errorCallback,
-          );
-        }
-      });
-      break;
-    }
-    default:
-      throw new Error(`Unrecognized event type: ${eventType}`);
-  }
+  map.set(MapViewStateChangeEventType, true);
 }

@@ -108,7 +108,7 @@ export function initHoverLayer(map: OlMap) {
         );
         const features = Array.from(featuresByLayer.values()).flat();
         map.dispatchEvent({
-          type: FeaturesHoverEventType,
+          type: `${GEOSPATIAL_SDK_PREFIX}${FeaturesHoverEventType}`,
           features,
           featuresByLayer,
         } as unknown as BaseEvent);
