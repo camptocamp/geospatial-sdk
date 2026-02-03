@@ -2,6 +2,11 @@ import { EndpointError } from "@camptocamp/ogc-client";
 import { Feature } from "geojson";
 import BaseEvent from "ol/events/Event.js";
 import type { Extent } from "ol/extent.js";
+import {
+  ResolvedMapLayerState,
+  ResolvedMapState,
+  ResolvedMapViewState,
+} from "./resolved-map-state.js";
 
 export type FeaturesByLayerIndex = Map<number, Feature[]>;
 
@@ -25,12 +30,39 @@ export interface MapClickEvent {
   coordinate: [number, number]; // expressed in lon/lat
 }
 
+export const MapViewStateChangeEventType = "map-view-state-change";
+export interface MapViewStateChangeEvent {
+  type: typeof MapViewStateChangeEventType;
+  viewState: ResolvedMapViewState;
+}
+
+export const MapLayerStateChangeEventType = "map-layer-state-change";
+export interface MapLayerStateChangeEvent {
+  type: typeof MapLayerStateChangeEventType;
+  layerState: ResolvedMapLayerState;
+  layerIndex: number;
+}
+
+export const MapStateChangeEventType = "map-state-change";
+export interface MapStateChangeEvent {
+  type: typeof MapStateChangeEventType;
+  mapState: ResolvedMapState;
+}
+
+/**
+ * DEPRECATED
+ * Use the MapViewStateEvent instead
+ */
 export const MapExtentChangeEventType = "map-extent-change";
 export interface MapExtentChangeEvent {
   type: typeof MapExtentChangeEventType;
   extent: Extent;
 }
 
+/**
+ * DEPRECATED
+ * Use the MapStateEvent instead
+ */
 export const SourceLoadErrorType = "source-load-error";
 export class SourceLoadErrorEvent extends BaseEvent {
   message: string;
@@ -58,6 +90,12 @@ export interface MapEventsByType {
   [FeaturesClickEventType]: FeaturesClickEvent;
   [FeaturesHoverEventType]: FeaturesHoverEvent;
   [MapClickEventType]: MapClickEvent;
+  [MapViewStateChangeEventType]: MapViewStateChangeEvent;
+  [MapLayerStateChangeEventType]: MapLayerStateChangeEvent;
+  [MapStateChangeEventType]: MapStateChangeEvent;
+  /**
+   * DEPRECATED
+   */
   [MapExtentChangeEventType]: MapExtentChangeEvent;
   [SourceLoadErrorType]: SourceLoadErrorEvent;
 }

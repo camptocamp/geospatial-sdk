@@ -1,0 +1,60 @@
+import { Coordinate, Extent } from "./map-context.js";
+
+export type MapLayerCreationStatus =
+  | {
+      ready: true;
+    }
+  | {
+      creationError: true;
+      creationErrorMessage: string;
+    };
+
+export type MapLayerLoadingStatus =
+  | {
+      loaded: true;
+    }
+  | {
+      loadingError: true;
+      loadingErrorMessage: string;
+      loadingErrorHttpStatus?: number;
+    }
+  | {
+      loading: true;
+    };
+
+export interface MapLayerDataInfo {
+  featuresCount?: number;
+  geometryTypes?: Array<"Point" | "LineString" | "Polygon">;
+}
+
+export type ResolvedMapLayerState = MapLayerCreationStatus &
+  MapLayerLoadingStatus &
+  MapLayerDataInfo;
+
+/**
+ * Describes the actual view state of a map
+ */
+export interface ResolvedMapViewState {
+  /** View center in longitude/latitude */
+  center: Coordinate;
+
+  /** Actual view extent in longitude/latitude */
+  extent: Extent;
+
+  /** Map units per pixel */
+  resolution: number;
+
+  /** Scale denominator (takes into account an estimated DPI) */
+  scaleDenominator: number;
+
+  /** Bearing in degrees; 90 is North (up) */
+  bearing: number;
+}
+
+/**
+ * Describes the actual state of a map after a context or context diff was applied to it.
+ */
+export interface ResolvedMapState {
+  layers: ResolvedMapLayerState[];
+  view: ResolvedMapViewState;
+}

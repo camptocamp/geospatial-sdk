@@ -1,11 +1,20 @@
 import { FeatureCollection, Geometry } from "geojson";
 import { VectorStyle } from "./style.js";
 
+export type LayerDimensionValueSingle = string | number | Date;
+export type LayerDimensionValueRange = {
+  start: LayerDimensionValueSingle | null;
+  end: LayerDimensionValueSingle | null;
+};
+
 /**
  * @private
  * @inline
  */
-export type LayerDimensions = Record<string, string>;
+export type LayerDimensionValues = Record<
+  string,
+  LayerDimensionValueSingle | LayerDimensionValueRange
+>;
 
 /**
  * @private
@@ -35,7 +44,8 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
   url: string;
   name: string;
-  dimensions?: LayerDimensions;
+  // TODO: add support for these
+  dimensionValues?: LayerDimensionValues;
   style?: string;
 }
 
@@ -43,7 +53,8 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
   type: "wmts";
   url: string;
   name: string;
-  dimensions?: LayerDimensions;
+  // TODO: add support for these
+  dimensionValues?: LayerDimensionValues;
   style?: string;
 }
 
