@@ -6,6 +6,7 @@ import {
 import Layer from "ol/layer/Layer.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import VectorLayer from "ol/layer/Vector.js";
+import type VectorSource from "ol/source/Vector.js";
 
 const UPDATABLE_PROPERTIES: (
   | keyof MapContextBaseLayer
@@ -18,7 +19,10 @@ const UPDATABLE_PROPERTIES: (
   "extras",
   "version",
   "enableHover",
+  "enableSelection",
   "style",
+  "hoverStyle",
+  "selectedStyle",
   // TODO (when available) "zIndex"
 ];
 
@@ -85,11 +89,29 @@ export function updateLayerProperties(
       (layerModel as MapContextLayerVector).enableHover,
     );
   }
+  if (shouldApplyProperty("hoverStyle" as keyof MapContextLayer)) {
+    olLayer.set(
+      `${GEOSPATIAL_SDK_PREFIX}hover-style`,
+      (layerModel as MapContextLayerVector).hoverStyle,
+    );
+  }
+  if (shouldApplyProperty("enableSelection" as keyof MapContextLayer)) {
+    olLayer.set(
+      `${GEOSPATIAL_SDK_PREFIX}enable-selection`,
+      (layerModel as MapContextLayerVector).enableSelection,
+    );
+  }
+  if (shouldApplyProperty("selectedStyle" as keyof MapContextLayer)) {
+    olLayer.set(
+      `${GEOSPATIAL_SDK_PREFIX}selected-style`,
+      (layerModel as MapContextLayerVector).selectedStyle,
+    );
+  }
   if (
     shouldApplyProperty("style" as keyof MapContextLayer) &&
     "setStyle" in olLayer
   ) {
-    (olLayer as VectorLayer).setStyle(
+    (olLayer as VectorLayer<VectorSource>).setStyle(
       (layerModel as MapContextLayerVector).style,
     );
   }
