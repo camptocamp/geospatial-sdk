@@ -41,6 +41,7 @@ import {
   updateLayerProperties,
 } from "./layer-update.js";
 import { initHoverLayer } from "./feature-hover.js";
+import { initSelectionLayer } from "./feature-selection.js";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -353,5 +354,6 @@ export async function resetMapFromContext(
     map.addLayer(layer);
   }
   initHoverLayer(map);
+  initSelectionLayer(map);
   return map;
 }
