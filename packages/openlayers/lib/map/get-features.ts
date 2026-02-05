@@ -1,15 +1,15 @@
-import GeoJSON from "ol/format/GeoJSON.js";
-import OlMap from "ol/Map.js";
-import { Pixel } from "ol/pixel.js";
-import type { Feature, FeatureCollection } from "geojson";
-import OlFeature from "ol/Feature.js";
-import TileWMS from "ol/source/TileWMS.js";
-import ImageWMS from "ol/source/ImageWMS.js";
-import { Coordinate } from "ol/coordinate.js";
-import Layer from "ol/layer/Layer.js";
-import throttle from "lodash.throttle";
-import type MapBrowserEvent from "ol/MapBrowserEvent.js";
 import type { FeaturesByLayerIndex } from "@geospatial-sdk/core";
+import type { Feature, FeatureCollection } from "geojson";
+import throttle from "lodash.throttle";
+import { Coordinate } from "ol/coordinate.js";
+import OlFeature from "ol/Feature.js";
+import GeoJSON from "ol/format/GeoJSON.js";
+import Layer from "ol/layer/Layer.js";
+import OlMap from "ol/Map.js";
+import type MapBrowserEvent from "ol/MapBrowserEvent.js";
+import { Pixel } from "ol/pixel.js";
+import ImageWMS from "ol/source/ImageWMS.js";
+import TileWMS from "ol/source/TileWMS.js";
 
 const GEOJSON = new GeoJSON();
 
@@ -31,9 +31,13 @@ export function getFeaturesFromVectorSources(
       if (!result.has(layerIndex)) {
         result.set(layerIndex, []);
       }
-      result
-        .get(layerIndex)!
-        .push(GEOJSON.writeFeatureObject(feature as OlFeature));
+      result.get(layerIndex)!.push(
+        GEOJSON.writeFeatureObject(feature as OlFeature, {
+          featureProjection: olMap.getView().getProjection(),
+          dataProjection: "EPSG:4326",
+        }),
+      );
+      return null;
     },
     { layerFilter },
   );

@@ -28,6 +28,10 @@ export function initHoverLayer(map: OlMap) {
       useSpatialIndex: false,
     }),
     style: defaultHighlightStyle,
+    properties: {
+      [`${GEOSPATIAL_SDK_PREFIX}enable-hover`]: false,
+      [`${GEOSPATIAL_SDK_PREFIX}disable-click`]: true,
+    },
   });
   map.set(hoverLayerKey, hoverLayer);
   hoverLayer.setMap(map);
@@ -36,7 +40,7 @@ export function initHoverLayer(map: OlMap) {
   const originalCursorStyle = map.getTargetElement()?.style.cursor ?? "";
 
   const layerFilter = (layer: BaseLayer) =>
-    layer !== hoverLayer && layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
+    layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
 
   const unKey = map.on(
     "pointermove",
@@ -63,12 +67,15 @@ export function initHoverLayer(map: OlMap) {
       }
 
       // add hovered feature to the layer
-      let firstFeature: OlFeature | null = null;
+      const hoveredFeatureResult: {
+        feature: OlFeature;
+        layer: BaseLayer;
+      }[] = [];
       map.forEachFeatureAtPixel(
         event.pixel,
-        (feature) => {
+        (feature, layer) => {
           if (feature instanceof OlFeature) {
-            firstFeature = feature;
+            hoveredFeatureResult.push({ feature, layer });
             return true;
           }
         },
@@ -76,9 +83,20 @@ export function initHoverLayer(map: OlMap) {
           layerFilter,
         },
       );
-      if (!firstFeature) {
+      if (hoveredFeatureResult.length === 0) {
         return;
       }
+
+      const { feature: firstFeature, layer: sourceLayer } =
+        hoveredFeatureResult[0];
+
+      // Get the hoverStyle from the source layer, fallback to defaultHighlightStyle
+      const hoverStyle =
+        sourceLayer.get(`${GEOSPATIAL_SDK_PREFIX}hover-style`) ??
+        defaultHighlightStyle;
+
+      // Apply the hover style to the layer (FlatStyleLike works on layers, not features)
+      hoverLayer.setStyle(hoverStyle);
       hoveredSource.addFeature(firstFeature);
 
       // dispatch event if subscribed to

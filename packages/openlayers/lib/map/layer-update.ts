@@ -6,6 +6,7 @@ import {
 import Layer from "ol/layer/Layer.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import VectorLayer from "ol/layer/Vector.js";
+import type VectorSource from "ol/source/Vector.js";
 
 const UPDATABLE_PROPERTIES: (
   | keyof MapContextBaseLayer
@@ -18,7 +19,9 @@ const UPDATABLE_PROPERTIES: (
   "extras",
   "version",
   "enableHover",
+  "disableClick",
   "style",
+  "hoverStyle",
   // TODO (when available) "zIndex"
 ];
 
@@ -85,11 +88,23 @@ export function updateLayerProperties(
       (layerModel as MapContextLayerVector).enableHover,
     );
   }
+  if (shouldApplyProperty("hoverStyle" as keyof MapContextLayer)) {
+    olLayer.set(
+      `${GEOSPATIAL_SDK_PREFIX}hover-style`,
+      (layerModel as MapContextLayerVector).hoverStyle,
+    );
+  }
+  if (shouldApplyProperty("disableClick" as keyof MapContextLayer)) {
+    olLayer.set(
+      `${GEOSPATIAL_SDK_PREFIX}disable-click`,
+      layerModel.disableClick,
+    );
+  }
   if (
     shouldApplyProperty("style" as keyof MapContextLayer) &&
     "setStyle" in olLayer
   ) {
-    (olLayer as VectorLayer).setStyle(
+    (olLayer as VectorLayer<VectorSource>).setStyle(
       (layerModel as MapContextLayerVector).style,
     );
   }

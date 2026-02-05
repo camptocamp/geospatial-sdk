@@ -27,6 +27,7 @@ export interface MapContextBaseLayer {
   opacity?: number;
   label?: string;
   attributions?: string;
+  disableClick?: boolean;
 }
 
 export interface MapContextLayerWms extends MapContextBaseLayer {

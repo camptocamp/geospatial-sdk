@@ -12,12 +12,12 @@ const Layers = {
     type: 'wms',
     url: 'https://ows.emodnet-bathymetry.eu/wms',
     name: 'emodnet:mean_rainbowcolour',
-    enableHover: true
   },
   geojson: {
     type: 'geojson',
     url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/refs/heads/master/regions.geojson',
-    enableHover: true
+    enableHover: true,
+    disableClick: true
   }
 }
 
@@ -28,12 +28,14 @@ let context = {
   layers: [...DEFAULT_CONTEXT.layers, Layers.wms, Layers.geojson]
 } as MapContext
 let features = ref<FeaturesByLayerIndex>()
+let clickedFeatures = ref<FeaturesByLayerIndex>()
 let clickCoordinates = ref<[number, number] | null>(null)
 let extent = ref<Extent | null>(null)
 
 onMounted(async () => {
   map = await createMapFromContext(context, mapRoot.value)
   listen(map, 'features-hover', (event) => (features.value = event.featuresByLayer))
+  listen(map, 'features-click', (event) => (clickedFeatures.value = event.featuresByLayer))
   listen(map, 'map-click', (event) => (clickCoordinates.value = event.coordinate))
   listen(map, 'map-extent-change', (event) => {
     extent.value = event.extent;
@@ -59,7 +61,18 @@ onMounted(async () => {
       </Panel>
       <template v-for="layerAndFeatures in features" v-bind:key="layerAndFeatures[0]">
         <Panel v-for="(feature, index) in layerAndFeatures[1]" v-bind:key="index">
-          <h4 class="font-bold mb-1">Feature from layer #{{layerAndFeatures[0]}}</h4>
+          <h4 class="font-bold mb-1">Hovered feature from layer #{{layerAndFeatures[0]}}</h4>
+          <ul>
+            <li v-for="(value, key) in feature.properties" v-bind:key="key">
+              <strong>{{ key }}</strong
+              >:&nbsp;{{ value }}
+            </li>
+          </ul>
+        </Panel>
+      </template>
+      <template v-for="layerAndFeatures in clickedFeatures" v-bind:key="layerAndFeatures[0]">
+        <Panel v-for="(feature, index) in layerAndFeatures[1]" v-bind:key="index">
+          <h4 class="font-bold mb-1">Clicked feature from layer #{{layerAndFeatures[0]}}</h4>
           <ul>
             <li v-for="(value, key) in feature.properties" v-bind:key="key">
               <strong>{{ key }}</strong

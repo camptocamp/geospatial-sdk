@@ -1,4 +1,3 @@
-import Map, { MapObjectEventTypes } from "ol/Map.js";
 import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
@@ -7,18 +6,25 @@ import {
   MapExtentChangeEventType,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
-import { toLonLat, transformExtent } from "ol/proj.js";
 import BaseEvent from "ol/events/Event.js";
-import Layer from "ol/layer/Layer.js";
-import { BaseLayerObjectEventTypes } from "ol/layer/Base.js";
 import { equals } from "ol/extent.js";
+import type BaseLayer from "ol/layer/Base.js";
+import { BaseLayerObjectEventTypes } from "ol/layer/Base.js";
+import Layer from "ol/layer/Layer.js";
+import Map, { MapObjectEventTypes } from "ol/Map.js";
+import { toLonLat, transformExtent } from "ol/proj.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { readFeaturesAtPixel } from "./get-features.js";
 
 function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
 
+  // Filter to only query layers with enableSelection
+  const layerFilter = (layer: BaseLayer) =>
+    !layer.get(`${GEOSPATIAL_SDK_PREFIX}disable-click`);
+
   map.on("click", async (event: any) => {
-    const featuresByLayer = await readFeaturesAtPixel(map, event);
+    const featuresByLayer = await readFeaturesAtPixel(map, event, layerFilter);
     const features = Array.from(featuresByLayer.values()).flat();
     map.dispatchEvent({
       type: FeaturesClickEventType,
