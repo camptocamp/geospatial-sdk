@@ -29,8 +29,8 @@ export function initHoverLayer(map: OlMap) {
     }),
     style: defaultHighlightStyle,
     properties: {
-      [`${GEOSPATIAL_SDK_PREFIX}enable-hover`]: false,
-      [`${GEOSPATIAL_SDK_PREFIX}disable-click`]: true,
+      [`${GEOSPATIAL_SDK_PREFIX}hoverable`]: false,
+      [`${GEOSPATIAL_SDK_PREFIX}clickable`]: false,
     },
   });
   map.set(hoverLayerKey, hoverLayer);
@@ -40,7 +40,7 @@ export function initHoverLayer(map: OlMap) {
   const originalCursorStyle = map.getTargetElement()?.style.cursor ?? "";
 
   const layerFilter = (layer: BaseLayer) =>
-    layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
+    layer.get(`${GEOSPATIAL_SDK_PREFIX}hoverable`);
 
   const unKey = map.on(
     "pointermove",
@@ -84,6 +84,16 @@ export function initHoverLayer(map: OlMap) {
         },
       );
       if (hoveredFeatureResult.length === 0) {
+        return;
+      }
+
+      // Skip hover if an overlay layer (non-clickable) has a feature at the same pixel
+      const hasOverlayFeature = map.hasFeatureAtPixel(event.pixel, {
+        layerFilter: (l: BaseLayer) =>
+          l !== hoverLayer &&
+          l.get(`${GEOSPATIAL_SDK_PREFIX}clickable`) === false,
+      });
+      if (hasOverlayFeature) {
         return;
       }
 

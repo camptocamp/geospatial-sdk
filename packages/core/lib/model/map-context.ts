@@ -27,7 +27,8 @@ export interface MapContextBaseLayer {
   opacity?: number;
   label?: string;
   attributions?: string;
-  disableClick?: boolean;
+  clickable?: boolean;
+  hoverable?: boolean;
 }
 
 export interface MapContextLayerWms extends MapContextBaseLayer {
@@ -49,7 +50,6 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
 export interface MapContextLayerVector {
   style?: VectorStyle;
   hoverStyle?: VectorStyle;
-  enableHover?: boolean;
 }
 
 export type MapContextLayerWfs = MapContextBaseLayer &
