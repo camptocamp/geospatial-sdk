@@ -28,6 +28,10 @@ export function initHoverLayer(map: OlMap) {
       useSpatialIndex: false,
     }),
     style: defaultHighlightStyle,
+    properties: {
+      [`${GEOSPATIAL_SDK_PREFIX}enable-hover`]: false,
+      [`${GEOSPATIAL_SDK_PREFIX}disable-click`]: true,
+    },
   });
   map.set(hoverLayerKey, hoverLayer);
   hoverLayer.setMap(map);
@@ -36,7 +40,7 @@ export function initHoverLayer(map: OlMap) {
   const originalCursorStyle = map.getTargetElement()?.style.cursor ?? "";
 
   const layerFilter = (layer: BaseLayer) =>
-    layer !== hoverLayer && layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
+    layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
 
   const unKey = map.on(
     "pointermove",

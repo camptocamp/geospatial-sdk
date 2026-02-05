@@ -116,7 +116,7 @@ describe("Layer update utils", () => {
       expect(olLayer.set).toHaveBeenCalledWith("label", "Test Layer");
     });
 
-    it("applies properties specific to vector layers without recreating them", async () => {
+    it("enable interaction-related props without recreating them", async () => {
       // mocking a vector layer
       (olLayer as VectorLayer).setStyle = vi.fn();
 
@@ -126,6 +126,7 @@ describe("Layer update utils", () => {
           "circle-fill-color": "blue",
         },
         enableHover: true,
+        disableClick: true,
       };
       const prevLayerModel = SAMPLE_LAYER3;
       updateLayerProperties(layerModel, olLayer, prevLayerModel);
@@ -134,6 +135,10 @@ describe("Layer update utils", () => {
       );
       expect(olLayer.set).toHaveBeenCalledWith(
         "--geospatial-sdk-enable-hover",
+        true,
+      );
+      expect(olLayer.set).toHaveBeenCalledWith(
+        "--geospatial-sdk-disable-click",
         true,
       );
     });

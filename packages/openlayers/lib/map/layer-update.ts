@@ -19,10 +19,9 @@ const UPDATABLE_PROPERTIES: (
   "extras",
   "version",
   "enableHover",
-  "enableSelection",
+  "disableClick",
   "style",
   "hoverStyle",
-  "selectedStyle",
   // TODO (when available) "zIndex"
 ];
 
@@ -95,16 +94,10 @@ export function updateLayerProperties(
       (layerModel as MapContextLayerVector).hoverStyle,
     );
   }
-  if (shouldApplyProperty("enableSelection" as keyof MapContextLayer)) {
+  if (shouldApplyProperty("disableClick" as keyof MapContextLayer)) {
     olLayer.set(
-      `${GEOSPATIAL_SDK_PREFIX}enable-selection`,
-      (layerModel as MapContextLayerVector).enableSelection,
-    );
-  }
-  if (shouldApplyProperty("selectedStyle" as keyof MapContextLayer)) {
-    olLayer.set(
-      `${GEOSPATIAL_SDK_PREFIX}selected-style`,
-      (layerModel as MapContextLayerVector).selectedStyle,
+      `${GEOSPATIAL_SDK_PREFIX}disable-click`,
+      layerModel.disableClick,
     );
   }
   if (
