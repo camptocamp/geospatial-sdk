@@ -1,16 +1,16 @@
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import type OlMap from "ol/Map.js";
-import VectorLayer from "ol/layer/Vector.js";
-import VectorSource from "ol/source/Vector.js";
 import {
   defaultHighlightStyle,
   FeaturesHoverEventType,
 } from "@geospatial-sdk/core";
-import type BaseEvent from "ol/events/Event.js";
 import { MapBrowserEvent } from "ol";
+import type BaseEvent from "ol/events/Event.js";
 import OlFeature from "ol/Feature.js";
 import type BaseLayer from "ol/layer/Base.js";
+import VectorLayer from "ol/layer/Vector.js";
+import type OlMap from "ol/Map.js";
 import { unByKey } from "ol/Observable.js";
+import VectorSource from "ol/source/Vector.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { readFeaturesAtPixel } from "./get-features.js";
 
 const hoverLayerKey = `${GEOSPATIAL_SDK_PREFIX}hover-layer`;
@@ -84,16 +84,6 @@ export function initHoverLayer(map: OlMap) {
         },
       );
       if (hoveredFeatureResult.length === 0) {
-        return;
-      }
-
-      // Skip hover if an overlay layer (non-clickable) has a feature at the same pixel
-      const hasOverlayFeature = map.hasFeatureAtPixel(event.pixel, {
-        layerFilter: (l: BaseLayer) =>
-          l !== hoverLayer &&
-          l.get(`${GEOSPATIAL_SDK_PREFIX}clickable`) === false,
-      });
-      if (hasOverlayFeature) {
         return;
       }
 
