@@ -1,16 +1,16 @@
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import type OlMap from "ol/Map.js";
-import VectorLayer from "ol/layer/Vector.js";
-import VectorSource from "ol/source/Vector.js";
 import {
   defaultHighlightStyle,
   FeaturesHoverEventType,
 } from "@geospatial-sdk/core";
-import type BaseEvent from "ol/events/Event.js";
 import { MapBrowserEvent } from "ol";
+import type BaseEvent from "ol/events/Event.js";
 import OlFeature from "ol/Feature.js";
 import type BaseLayer from "ol/layer/Base.js";
+import VectorLayer from "ol/layer/Vector.js";
+import type OlMap from "ol/Map.js";
 import { unByKey } from "ol/Observable.js";
+import VectorSource from "ol/source/Vector.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { readFeaturesAtPixel } from "./get-features.js";
 
 const hoverLayerKey = `${GEOSPATIAL_SDK_PREFIX}hover-layer`;
@@ -29,8 +29,8 @@ export function initHoverLayer(map: OlMap) {
     }),
     style: defaultHighlightStyle,
     properties: {
-      [`${GEOSPATIAL_SDK_PREFIX}enable-hover`]: false,
-      [`${GEOSPATIAL_SDK_PREFIX}disable-click`]: true,
+      [`${GEOSPATIAL_SDK_PREFIX}hoverable`]: false,
+      [`${GEOSPATIAL_SDK_PREFIX}clickable`]: false,
     },
   });
   map.set(hoverLayerKey, hoverLayer);
@@ -40,7 +40,7 @@ export function initHoverLayer(map: OlMap) {
   const originalCursorStyle = map.getTargetElement()?.style.cursor ?? "";
 
   const layerFilter = (layer: BaseLayer) =>
-    layer.get(`${GEOSPATIAL_SDK_PREFIX}enable-hover`);
+    layer.get(`${GEOSPATIAL_SDK_PREFIX}hoverable`);
 
   const unKey = map.on(
     "pointermove",

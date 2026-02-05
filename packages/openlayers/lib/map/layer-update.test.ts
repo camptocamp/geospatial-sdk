@@ -125,8 +125,8 @@ describe("Layer update utils", () => {
         style: {
           "circle-fill-color": "blue",
         },
-        enableHover: true,
-        disableClick: true,
+        hoverable: true,
+        clickable: false,
       };
       const prevLayerModel = SAMPLE_LAYER3;
       updateLayerProperties(layerModel, olLayer, prevLayerModel);
@@ -134,12 +134,12 @@ describe("Layer update utils", () => {
         layerModel.style,
       );
       expect(olLayer.set).toHaveBeenCalledWith(
-        "--geospatial-sdk-enable-hover",
+        "--geospatial-sdk-hoverable",
         true,
       );
       expect(olLayer.set).toHaveBeenCalledWith(
-        "--geospatial-sdk-disable-click",
-        true,
+        "--geospatial-sdk-clickable",
+        false,
       );
     });
   });

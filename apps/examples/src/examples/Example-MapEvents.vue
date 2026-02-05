@@ -16,8 +16,8 @@ const Layers = {
   geojson: {
     type: 'geojson',
     url: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/refs/heads/master/regions.geojson',
-    enableHover: true,
-    disableClick: true
+    hoverable: true,
+    clickable: false
   }
 }
 

@@ -4,9 +4,9 @@ import {
   MapContextLayerVector,
 } from "@geospatial-sdk/core/lib/model/map-context.js";
 import Layer from "ol/layer/Layer.js";
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import VectorLayer from "ol/layer/Vector.js";
 import type VectorSource from "ol/source/Vector.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 const UPDATABLE_PROPERTIES: (
   | keyof MapContextBaseLayer
@@ -18,8 +18,8 @@ const UPDATABLE_PROPERTIES: (
   "attributions",
   "extras",
   "version",
-  "enableHover",
-  "disableClick",
+  "hoverable",
+  "clickable",
   "style",
   "hoverStyle",
   // TODO (when available) "zIndex"
@@ -82,11 +82,8 @@ export function updateLayerProperties(
   if (shouldApplyProperty("label")) {
     olLayer.set("label", layerModel.label);
   }
-  if (shouldApplyProperty("enableHover" as keyof MapContextLayer)) {
-    olLayer.set(
-      `${GEOSPATIAL_SDK_PREFIX}enable-hover`,
-      (layerModel as MapContextLayerVector).enableHover,
-    );
+  if (shouldApplyProperty("hoverable")) {
+    olLayer.set(`${GEOSPATIAL_SDK_PREFIX}hoverable`, layerModel.hoverable);
   }
   if (shouldApplyProperty("hoverStyle" as keyof MapContextLayer)) {
     olLayer.set(
@@ -94,11 +91,8 @@ export function updateLayerProperties(
       (layerModel as MapContextLayerVector).hoverStyle,
     );
   }
-  if (shouldApplyProperty("disableClick" as keyof MapContextLayer)) {
-    olLayer.set(
-      `${GEOSPATIAL_SDK_PREFIX}disable-click`,
-      layerModel.disableClick,
-    );
+  if (shouldApplyProperty("clickable" as keyof MapContextLayer)) {
+    olLayer.set(`${GEOSPATIAL_SDK_PREFIX}clickable`, layerModel.clickable);
   }
   if (
     shouldApplyProperty("style" as keyof MapContextLayer) &&

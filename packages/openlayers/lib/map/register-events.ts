@@ -19,9 +19,9 @@ import { readFeaturesAtPixel } from "./get-features.js";
 function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
 
-  // Filter to only query layers with enableSelection
+  // Filter to only query clickable layers
   const layerFilter = (layer: BaseLayer) =>
-    !layer.get(`${GEOSPATIAL_SDK_PREFIX}disable-click`);
+    layer.get(`${GEOSPATIAL_SDK_PREFIX}clickable`) !== false;
 
   map.on("click", async (event: any) => {
     const featuresByLayer = await readFeaturesAtPixel(map, event, layerFilter);
