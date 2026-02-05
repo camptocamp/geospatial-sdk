@@ -12,6 +12,7 @@ import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import View from "ol/View.js";
 import { Collection, Object as BaseObject } from "ol";
+import { toLonLat } from "ol/proj.js";
 
 const gfiResult = {
   type: "Feature",
@@ -86,7 +87,7 @@ describe("get features utils", () => {
             [
               {
                 geometry: {
-                  coordinates: [100, 200],
+                  coordinates: toLonLat([100, 200]),
                   type: "Point",
                 },
                 properties: null,

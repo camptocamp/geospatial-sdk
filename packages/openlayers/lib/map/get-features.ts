@@ -31,9 +31,13 @@ export function getFeaturesFromVectorSources(
       if (!result.has(layerIndex)) {
         result.set(layerIndex, []);
       }
-      result
-        .get(layerIndex)!
-        .push(GEOJSON.writeFeatureObject(feature as OlFeature));
+      result.get(layerIndex)!.push(
+        GEOJSON.writeFeatureObject(feature as OlFeature, {
+          featureProjection: olMap.getView().getProjection(),
+          dataProjection: "EPSG:4326",
+        }),
+      );
+      return null;
     },
     { layerFilter },
   );
