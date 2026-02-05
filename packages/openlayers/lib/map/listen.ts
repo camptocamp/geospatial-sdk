@@ -20,6 +20,7 @@ import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import {
   registerFeatureClickEvent,
   registerFeatureHoverEvent,
+  registerMapLayerStateChangeEvent,
   registerMapViewStateChangeEvent,
 } from "./register-events.js";
 import { CollectionEvent } from "ol/Collection.js";
@@ -75,7 +76,7 @@ export function listen<T extends keyof MapEventsByType>(
       addEventListener(map, eventType, callback);
       break;
     case MapLayerStateChangeEventType:
-      // TODO: registerMapLayerStateChangeEvent(map);
+      registerMapLayerStateChangeEvent(map);
       addEventListener(map, eventType, callback);
       break;
     case MapStateChangeEventType:

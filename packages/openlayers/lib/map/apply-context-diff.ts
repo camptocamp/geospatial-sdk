@@ -4,6 +4,9 @@ import { createLayer, createView, updateLayerInMap } from "./create-map.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import BaseEvent from "ol/events/Event.js";
+import { propagateLayerStateChangeEventToMap } from "./register-events.js";
 
 const GEOJSON = new GeoJSON();
 
@@ -31,16 +34,27 @@ export async function applyContextDiffToMap(
 
   // insert added layers
   const newLayers = await Promise.all(
-    contextDiff.layersAdded.map((layerAdded) => createLayer(layerAdded.layer)),
+    contextDiff.layersAdded.map((layerAdded) =>
+      createLayer(layerAdded.layer).catch((error) => {
+        map.dispatchEvent({
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+          error,
+        } as unknown as BaseEvent);
+      }),
+    ),
   );
 
   newLayers.forEach((layer, index) => {
+    if (!layer) {
+      return;
+    }
     const position = contextDiff.layersAdded[index].position;
     if (position >= layers.getLength()) {
       layers.push(layer);
     } else {
       layers.insertAt(position, layer);
     }
+    propagateLayerStateChangeEventToMap(map, layer);
   });
 
   // move reordered layers (sorted by ascending new position)
@@ -59,12 +73,15 @@ export async function applyContextDiffToMap(
   }
 
   // update or recreate changed layers
+  const updatePromises = [];
   for (const layerChanged of contextDiff.layersChanged) {
-    updateLayerInMap(
-      map,
-      layerChanged.layer,
-      layerChanged.position,
-      layerChanged.previousLayer,
+    updatePromises.push(
+      updateLayerInMap(
+        map,
+        layerChanged.layer,
+        layerChanged.position,
+        layerChanged.previousLayer,
+      ),
     );
   }
 
@@ -106,6 +123,9 @@ export async function applyContextDiffToMap(
       // }
     }
   }
+
+  // wait for all layers to have been updated
+  await Promise.all(updatePromises);
 
   return map;
 }

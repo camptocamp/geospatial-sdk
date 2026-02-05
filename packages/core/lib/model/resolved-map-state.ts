@@ -2,7 +2,7 @@ import { Coordinate, Extent } from "./map-context.js";
 
 export type MapLayerCreationStatus =
   | {
-      ready: true;
+      created: true;
     }
   | {
       creationError: true;

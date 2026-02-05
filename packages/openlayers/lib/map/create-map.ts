@@ -45,6 +45,9 @@ import {
   updateLayerProperties,
 } from "./layer-update.js";
 import { initHoverLayer } from "./feature-hover.js";
+import { propagateLayerStateChangeEventToMap } from "./register-events.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import BaseEvent from "ol/events/Event.js";
 
 // Register proj4 with OpenLayers so that arbitrary EPSG codes
 // (e.g., UTM zones from GeoTIFF metadata) can be reprojected to the map projection
@@ -84,6 +87,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         }
       }
       break;
+
     case "wms":
       {
         layer = new TileLayer({});
@@ -105,8 +109,8 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         });
         layer.setSource(source);
       }
-
       break;
+
     case "wmts": {
       const olLayer = new TileLayer({});
       const endpoint = new WmtsEndpoint(layerModel.url);
@@ -143,6 +147,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         });
       return olLayer;
     }
+
     case "wfs": {
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
@@ -175,6 +180,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       layer = olLayer;
       break;
     }
+
     case "maplibre-style": {
       layer = new MapboxVectorLayer({
         styleUrl: layerModel.styleUrl,
@@ -182,6 +188,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       }) as unknown as Layer;
       break;
     }
+
     case "geojson": {
       if (layerModel.url !== undefined) {
         layer = new VectorLayer({
@@ -216,6 +223,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       }
       break;
     }
+
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
@@ -273,6 +281,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     default:
       throw new Error(`Unrecognized layer type: ${JSON.stringify(layerModel)}`);
   }
+
   if (!layer) {
     throw new Error(`Layer could not be created for type: ${layerModel.type}`);
   }
@@ -282,12 +291,12 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   return layer;
 }
 
-export function updateLayerInMap(
+export async function updateLayerInMap(
   map: Map,
   layerModel: MapContextLayer,
   layerPosition: number,
   previousLayerModel: MapContextLayer,
-) {
+): Promise<void> {
   const layers = map.getLayers();
   const updatedLayer = layers.item(layerPosition) as Layer;
 
@@ -299,9 +308,17 @@ export function updateLayerInMap(
 
   // dispose and recreate layer
   updatedLayer.dispose();
-  createLayer(layerModel).then((layer) => {
-    layers.setAt(layerPosition, layer);
-  });
+  await createLayer(layerModel)
+    .then((layer) => {
+      layers.setAt(layerPosition, layer);
+      propagateLayerStateChangeEventToMap(map, layer);
+    })
+    .catch((error) => {
+      map.dispatchEvent({
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+        error,
+      } as unknown as BaseEvent);
+    });
 }
 
 export function createView(viewModel: MapContextView | null, map: Map): View {
@@ -367,8 +384,16 @@ export async function resetMapFromContext(
   map.setView(createView(context.view, map));
   map.getLayers().clear();
   for (const layerModel of context.layers) {
-    const layer = await createLayer(layerModel);
-    map.addLayer(layer);
+    try {
+      const layer = await createLayer(layerModel);
+      map.addLayer(layer);
+      propagateLayerStateChangeEventToMap(map, layer);
+    } catch (error) {
+      map.dispatchEvent({
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+        error,
+      } as unknown as BaseEvent);
+    }
   }
   initHoverLayer(map);
   return map;
