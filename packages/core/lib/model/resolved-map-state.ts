@@ -57,6 +57,6 @@ export interface ResolvedMapViewState {
  * A `layer` item of null means the layer state hasn't been changed yet.
  */
 export interface ResolvedMapState {
-  layers: Array<ResolvedMapLayerState|null>;
+  layers: Array<ResolvedMapLayerState | null>;
   view: ResolvedMapViewState | null;
 }
