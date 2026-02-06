@@ -155,7 +155,8 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           handleEndpointError(olLayer, e);
         });
       defer().then(() => emitLayerLoadingStatusSuccess(olLayer));
-      return olLayer;
+      layer = olLayer;
+      break;
     }
 
     case "wfs": {
