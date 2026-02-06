@@ -66,6 +66,21 @@ describe("getHash", () => {
     });
     expect(hashB).toEqual(hashA);
   });
+  it("stable with identical GeoJSON collection", () => {
+    const hashA = getHash({
+      geometry: {
+        type: "FeatureCollection",
+        features: [{ type: "Feature", properties: {}, geometry: null }],
+      },
+    });
+    const hashB = getHash({
+      geometry: {
+        type: "FeatureCollection",
+        features: [{ type: "Feature", properties: {}, geometry: null }],
+      },
+    });
+    expect(hashB).toEqual(hashA);
+  });
   it("different if GeoJSON geometry properties are not in the same order", () => {
     const hashA = getHash({
       geometry: {

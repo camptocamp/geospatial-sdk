@@ -1,5 +1,5 @@
 function isGeoJsonGeometry(object: object) {
-  return "type" in object && "coordinates" in object;
+  return "type" in object && ("coordinates" in object || "features" in object);
 }
 
 export function getHash(input: unknown, ignoreKeys: string[] = []): string {
