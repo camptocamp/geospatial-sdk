@@ -5,8 +5,11 @@ import {
   MapLayerLoadingStatus,
   MapLayerStateChangeEvent,
   MapLayerStateChangeEventType,
+  MapStateChangeEventType,
+  MapViewStateChangeEvent,
   MapViewStateChangeEventType,
   ResolvedMapLayerState,
+  ResolvedMapState,
 } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
 import type BaseLayer from "ol/layer/Base.js";
@@ -171,4 +174,51 @@ export function propagateLayerStateChangeEventToMap(
 
   // emit initial state
   updateStateAndEmit({});
+}
+
+export function registerMapStateChangeEvent(map: Map) {
+  if (map.get(MapStateChangeEventType)) return;
+
+  // the global map state requires both view and layers state
+  registerMapLayerStateChangeEvent(map);
+  registerMapViewStateChangeEvent(map);
+
+  let currentState: ResolvedMapState = {
+    layers: [],
+    view: null,
+  };
+
+  function emitState() {
+    // we're making sure to have the right amount of layers in the state and to fill empty slots with null
+    currentState.layers.length = map.getLayers().getLength();
+    for (let i = 0; i < currentState.layers.length; i++) {
+      if (!currentState.layers[i]) {
+        currentState.layers[i] = null;
+      }
+    }
+    map.dispatchEvent({
+      type: `${GEOSPATIAL_SDK_PREFIX}${MapStateChangeEventType}`,
+      mapState: currentState as ResolvedMapState,
+    } as unknown as BaseEvent);
+  }
+
+  // collect view and layer states to re-emit them as a global state
+  map.on(
+    `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
+    (event: BaseEvent & MapLayerStateChangeEvent) => {
+      const layers = [...currentState.layers];
+      layers[event.layerIndex] = event.layerState;
+      currentState = { ...currentState, layers };
+      emitState();
+    },
+  );
+  map.on(
+    `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
+    (event: BaseEvent & MapViewStateChangeEvent) => {
+      currentState = { ...currentState, view: event.viewState };
+      emitState();
+    },
+  );
+
+  map.set(MapStateChangeEventType, true);
 }

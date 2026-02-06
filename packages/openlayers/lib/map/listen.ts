@@ -21,6 +21,7 @@ import {
   registerFeatureClickEvent,
   registerFeatureHoverEvent,
   registerMapLayerStateChangeEvent,
+  registerMapStateChangeEvent,
   registerMapViewStateChangeEvent,
 } from "./register-events.js";
 import { CollectionEvent } from "ol/Collection.js";
@@ -80,7 +81,7 @@ export function listen<T extends keyof MapEventsByType>(
       addEventListener(map, eventType, callback);
       break;
     case MapStateChangeEventType:
-      // TODO: registerMapStateChangeEvent(map);
+      registerMapStateChangeEvent(map);
       addEventListener(map, eventType, callback);
       break;
 

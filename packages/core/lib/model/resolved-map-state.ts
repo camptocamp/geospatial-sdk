@@ -53,8 +53,10 @@ export interface ResolvedMapViewState {
 
 /**
  * Describes the actual state of a map after a context or context diff was applied to it.
+ * A `view` of null means the view state hasn't been changed yet.
+ * A `layer` item of null means the layer state hasn't been changed yet.
  */
 export interface ResolvedMapState {
-  layers: ResolvedMapLayerState[];
-  view: ResolvedMapViewState;
+  layers: Array<ResolvedMapLayerState|null>;
+  view: ResolvedMapViewState | null;
 }

@@ -1,7 +1,7 @@
 import OlMap from "ol/Map.js";
 import { Mock } from "vitest";
 import { listen } from "./listen.js";
-import { MapBrowserEvent, Object as BaseObject } from "ol";
+import { Collection, MapBrowserEvent, Object as BaseObject } from "ol";
 import View from "ol/View.js";
 import { toLonLat } from "ol/proj.js";
 import { FeaturesHoverEventType } from "@geospatial-sdk/core";
@@ -16,6 +16,7 @@ import {
   MAP_CTX_LAYER_XYZ_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import { applyContextDiffToMap } from "./apply-context-diff.js";
+import { propagateLayerStateChangeEventToMap } from "./register-events.js";
 
 vi.mock("./get-features.js", () => ({
   readFeaturesAtPixel() {
@@ -81,8 +82,8 @@ async function createMap() {
   const layer1 = await createLayer(MAP_CTX_LAYER_WMS_FIXTURE);
   const layer2 = await createLayer(MAP_CTX_LAYER_WMS_FIXTURE);
   const layer3 = await createLayer(MAP_CTX_LAYER_GEOJSON_FIXTURE);
+  const layers = new Collection([layer1, layer2, layer3]);
   const map = new BaseObject() as OlMap;
-  const layers = [layer1, layer2, layer3];
   Object.defineProperties(map, {
     getView: { value: vi.fn(() => view) },
     setView: { value: vi.fn() },
@@ -91,18 +92,15 @@ async function createMap() {
     getSize: { value: vi.fn(() => [800, 600]) },
     addLayer: { value: vi.fn((layer) => layers.push(layer)) },
     getLayers: {
-      value: () => ({
-        getArray: vi.fn(() => layers),
-        getLength: vi.fn(() => layers.length),
-        push: vi.fn((layer) => layers.push(layer)),
-        item: vi.fn((index) => layers[index]),
-        setAt: vi.fn((index, layer) => (layers[index] = layer)),
-        clear: vi.fn(() => (layers.length = 0)),
-      }),
+      value: () => layers,
     },
     render: { value: vi.fn() },
     getTargetElement: { value: vi.fn() },
   });
+  propagateLayerStateChangeEventToMap(map, layer1);
+  propagateLayerStateChangeEventToMap(map, layer2);
+  propagateLayerStateChangeEventToMap(map, layer3);
+
   // simulate hover feature initialization
   map.on("pointermove", () => {
     map.dispatchEvent({
@@ -128,8 +126,8 @@ function createMapEvent(map: OlMap, type: string) {
 describe("event listener registration", () => {
   let map: OlMap;
   beforeEach(async () => {
-    map = await createMap();
     vi.useFakeTimers();
+    map = await createMap();
     vi.clearAllMocks();
   });
   describe("features hover event", () => {
@@ -400,6 +398,105 @@ describe("event listener registration", () => {
           layerIndex: 1,
           type: "map-layer-state-change",
         });
+      });
+    });
+  });
+
+  describe("global map state change", () => {
+    let callback: Mock;
+
+    beforeEach(async () => {
+      // we're skipping all the initial events in order to track only the ones we control
+      await vi.runAllTimersAsync();
+      callback = vi.fn();
+      listen(map, "map-state-change", callback);
+    });
+
+    it("emits an updated state after changes to layers and view", async () => {
+      map
+        .getLayers()
+        .item(0)
+        .dispatchEvent({
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+          layerState: {
+            loading: true,
+          },
+        } as unknown as BaseEvent);
+      map
+        .getLayers()
+        .item(1)
+        .dispatchEvent({
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
+          layerState: {
+            featuresCount: 123,
+          },
+        } as unknown as BaseEvent);
+      map.getView().setCenter([0, 0]);
+      map.getView().dispatchEvent(createMapEvent(map, "change:center"));
+
+      expect(callback).toHaveBeenCalledTimes(3); // 1 per each layer + 1 for the view
+      expect(callback).toHaveBeenLastCalledWith({
+        type: "map-state-change",
+        mapState: {
+          layers: [
+            {
+              created: true,
+              loading: true,
+            },
+            {
+              created: true,
+              featuresCount: 123,
+              loaded: true,
+            },
+            null,
+          ],
+          view: {
+            bearing: 90,
+            center: [0, 0],
+            extent: [
+              -0.0035932611364780857, -0.0026949458513598756,
+              0.0035932611364780857, 0.0026949458513740865,
+            ],
+            resolution: 1,
+            scaleDenominator: 3571.428571428571,
+          },
+        },
+      });
+    });
+
+    it("emits a new state when layers are deleted/changed", async () => {
+      await applyContextDiffToMap(map, {
+        layersAdded: [],
+        layersRemoved: [
+          {
+            layer: MAP_CTX_LAYER_WMTS_FIXTURE,
+            position: 2,
+          },
+        ],
+        layersReordered: [],
+        layersChanged: [
+          {
+            layer: MAP_CTX_LAYER_WFS_FIXTURE,
+            previousLayer: MAP_CTX_LAYER_GEOJSON_FIXTURE,
+            position: 1,
+          },
+        ],
+      });
+      await vi.runAllTimersAsync();
+
+      expect(callback).toHaveBeenLastCalledWith({
+        type: "map-state-change",
+        mapState: {
+          layers: [
+            null,
+            {
+              // this is the new WFS layer
+              created: true,
+              loaded: true,
+            },
+          ],
+          view: null,
+        },
       });
     });
   });
