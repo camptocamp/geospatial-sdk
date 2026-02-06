@@ -45,9 +45,11 @@ import {
   updateLayerProperties,
 } from "./layer-update.js";
 import { initHoverLayer } from "./feature-hover.js";
-import { propagateLayerStateChangeEventToMap } from "./register-events.js";
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import BaseEvent from "ol/events/Event.js";
+import {
+  emitLayerCreationError,
+  emitLayerLoadingStatusSuccess,
+  propagateLayerStateChangeEventToMap,
+} from "./register-events.js";
 
 // Register proj4 with OpenLayers so that arbitrary EPSG codes
 // (e.g., UTM zones from GeoTIFF metadata) can be reprojected to the map projection
@@ -55,6 +57,11 @@ register(proj4);
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
+
+// We need to defer some events being dispatched to make sure they are caught by the map
+// where the layers sit
+// FIXME: this should be better handled in a separate module!
+const defer = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
@@ -85,6 +92,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           });
           layer.setSource(source);
         }
+        defer().then(() => emitLayerLoadingStatusSuccess(layer!));
       }
       break;
 
@@ -108,6 +116,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           );
         });
         layer.setSource(source);
+        defer().then(() => emitLayerLoadingStatusSuccess(layer!));
       }
       break;
 
@@ -145,6 +154,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         .catch((e) => {
           handleEndpointError(olLayer, e);
         });
+      defer().then(() => emitLayerLoadingStatusSuccess(olLayer));
       return olLayer;
     }
 
@@ -177,6 +187,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         .catch((e) => {
           handleEndpointError(olLayer, e);
         });
+      defer().then(() => emitLayerLoadingStatusSuccess(olLayer));
       layer = olLayer;
       break;
     }
@@ -186,18 +197,20 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         styleUrl: layerModel.styleUrl,
         accessToken: layerModel.accessToken,
       }) as unknown as Layer;
+      defer().then(() => emitLayerLoadingStatusSuccess(layer!));
       break;
     }
 
     case "geojson": {
+      layer = new VectorLayer({
+        style: layerModel.style ?? defaultStyle,
+      });
+      let source: VectorSource;
       if (layerModel.url !== undefined) {
-        layer = new VectorLayer({
-          source: new VectorSource({
-            format: new GeoJSON(),
-            url: layerModel.url,
-            attributions: layerModel.attributions,
-          }),
-          style: layerModel.style ?? defaultStyle,
+        source = new VectorSource({
+          format: new GeoJSON(),
+          url: layerModel.url,
+          attributions: layerModel.attributions,
         });
       } else {
         let geojson = layerModel.data;
@@ -213,14 +226,14 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           featureProjection: "EPSG:3857",
           dataProjection: "EPSG:4326",
         }) as Feature<Geometry>[];
-        layer = new VectorLayer({
-          source: new VectorSource({
-            features,
-            attributions: layerModel.attributions,
-          }),
-          style: layerModel.style ?? defaultStyle,
+        source = new VectorSource({
+          features,
+          attributions: layerModel.attributions,
         });
       }
+      layer.setSource(source);
+      // FIXME: actually track layer loading and data info
+      defer().then(() => emitLayerLoadingStatusSuccess(layer!));
       break;
     }
 
@@ -257,15 +270,17 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           layerModel.collection,
           layerModel.options,
         );
+        const source = new VectorSource({
+          format: new GeoJSON(),
+          url: layerUrl,
+          attributions: layerModel.attributions,
+        });
         layer = new VectorLayer({
-          source: new VectorSource({
-            format: new GeoJSON(),
-            url: layerUrl,
-            attributions: layerModel.attributions,
-          }),
+          source,
           style: layerModel.style ?? defaultStyle,
         });
       }
+      defer().then(() => emitLayerLoadingStatusSuccess(layer!));
       break;
     }
     case "geotiff": {
@@ -313,12 +328,7 @@ export async function updateLayerInMap(
       layers.setAt(layerPosition, layer);
       propagateLayerStateChangeEventToMap(map, layer);
     })
-    .catch((error) => {
-      map.dispatchEvent({
-        type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
-        error,
-      } as unknown as BaseEvent);
-    });
+    .catch((error) => emitLayerCreationError(map, error));
 }
 
 export function createView(viewModel: MapContextView | null, map: Map): View {
@@ -388,11 +398,8 @@ export async function resetMapFromContext(
       const layer = await createLayer(layerModel);
       map.addLayer(layer);
       propagateLayerStateChangeEventToMap(map, layer);
-    } catch (error) {
-      map.dispatchEvent({
-        type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
-        error,
-      } as unknown as BaseEvent);
+    } catch (error: unknown) {
+      emitLayerCreationError(map, error);
     }
   }
   initHoverLayer(map);

@@ -89,6 +89,40 @@ export function registerMapLayerStateChangeEvent(map: Map) {
   map.set(MapLayerStateChangeEventType, true);
 }
 
+export function emitLayerCreationError(map: Map, error: unknown) {
+  map.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+    error,
+  } as unknown as BaseEvent);
+}
+export function emitLayerLoadingStatusLoading(layer: BaseLayer) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+    layerState: { loading: true },
+  } as unknown as BaseEvent);
+}
+export function emitLayerLoadingStatusSuccess(layer: BaseLayer) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+    layerState: { loaded: true },
+  } as unknown as BaseEvent);
+}
+export function emitLayerLoadingStatusError(layer: BaseLayer, error: Error) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+    layerState: { loadingError: true, loadingErrorMessage: error.toString() },
+  } as unknown as BaseEvent);
+}
+export function emitLayerDataInfo(
+  layer: BaseLayer,
+  dataInfo: MapLayerDataInfo,
+) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
+    layerState: dataInfo,
+  } as unknown as BaseEvent);
+}
+
 export function propagateLayerStateChangeEventToMap(
   map: Map,
   layer: BaseLayer,
