@@ -50,6 +50,7 @@ import {
   emitLayerLoadingStatusSuccess,
   propagateLayerStateChangeEventToMap,
 } from "./register-events.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 // Register proj4 with OpenLayers so that arbitrary EPSG codes
 // (e.g., UTM zones from GeoTIFF metadata) can be reprojected to the map projection
@@ -65,7 +66,8 @@ const defer = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
-  let layer: Layer | undefined;
+  let layer: Layer;
+
   switch (type) {
     case "xyz":
       {
@@ -92,7 +94,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           });
           layer.setSource(source);
         }
-        defer().then(() => emitLayerLoadingStatusSuccess(layer!));
+        defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
       break;
 
@@ -116,7 +118,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           );
         });
         layer.setSource(source);
-        defer().then(() => emitLayerLoadingStatusSuccess(layer!));
+        defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
       break;
 
@@ -198,7 +200,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         styleUrl: layerModel.styleUrl,
         accessToken: layerModel.accessToken,
       }) as unknown as Layer;
-      defer().then(() => emitLayerLoadingStatusSuccess(layer!));
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
 
@@ -234,7 +236,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       }
       layer.setSource(source);
       // FIXME: actually track layer loading and data info
-      defer().then(() => emitLayerLoadingStatusSuccess(layer!));
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
 
@@ -281,7 +283,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           style: layerModel.style ?? defaultStyle,
         });
       }
-      defer().then(() => emitLayerLoadingStatusSuccess(layer!));
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
     case "geotiff": {
@@ -294,17 +296,25 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       });
       break;
     }
-    default:
-      throw new Error(`Unrecognized layer type: ${JSON.stringify(layerModel)}`);
+    default: {
+      // we create an empty placeholder layer so that we still have a corresponding layer in OL
+      layer = new VectorLayer({
+        properties: {
+          [`${GEOSPATIAL_SDK_PREFIX}layer-with-error`]: true,
+        },
+      });
+      defer().then(() =>
+        emitLayerCreationError(
+          layer,
+          new Error(`Unrecognized layer type: ${JSON.stringify(layerModel)}`),
+        ),
+      );
+    }
   }
 
-  if (!layer) {
-    throw new Error(`Layer could not be created for type: ${layerModel.type}`);
-  }
+  updateLayerProperties(layerModel, layer!);
 
-  updateLayerProperties(layerModel, layer);
-
-  return layer;
+  return layer!;
 }
 
 export async function updateLayerInMap(
@@ -324,12 +334,10 @@ export async function updateLayerInMap(
 
   // dispose and recreate layer
   updatedLayer.dispose();
-  await createLayer(layerModel)
-    .then((layer) => {
-      layers.setAt(layerPosition, layer);
-      propagateLayerStateChangeEventToMap(map, layer);
-    })
-    .catch((error) => emitLayerCreationError(map, error));
+  await createLayer(layerModel).then((layer) => {
+    layers.setAt(layerPosition, layer);
+    propagateLayerStateChangeEventToMap(map, layer);
+  });
 }
 
 export function createView(viewModel: MapContextView | null, map: Map): View {
@@ -395,13 +403,9 @@ export async function resetMapFromContext(
   map.setView(createView(context.view, map));
   map.getLayers().clear();
   for (const layerModel of context.layers) {
-    try {
-      const layer = await createLayer(layerModel);
-      map.addLayer(layer);
-      propagateLayerStateChangeEventToMap(map, layer);
-    } catch (error: unknown) {
-      emitLayerCreationError(map, error);
-    }
+    const layer = await createLayer(layerModel);
+    map.addLayer(layer);
+    propagateLayerStateChangeEventToMap(map, layer);
   }
   initHoverLayer(map);
   return map;

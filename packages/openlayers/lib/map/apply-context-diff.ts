@@ -4,10 +4,7 @@ import { createLayer, createView, updateLayerInMap } from "./create-map.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";
-import {
-  emitLayerCreationError,
-  propagateLayerStateChangeEventToMap,
-} from "./register-events.js";
+import { propagateLayerStateChangeEventToMap } from "./register-events.js";
 
 const GEOJSON = new GeoJSON();
 
@@ -35,11 +32,7 @@ export async function applyContextDiffToMap(
 
   // insert added layers
   const newLayers = await Promise.all(
-    contextDiff.layersAdded.map((layerAdded) =>
-      createLayer(layerAdded.layer).catch((error) =>
-        emitLayerCreationError(map, error),
-      ),
-    ),
+    contextDiff.layersAdded.map((layerAdded) => createLayer(layerAdded.layer)),
   );
 
   newLayers.forEach((layer, index) => {

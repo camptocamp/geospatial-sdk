@@ -49,6 +49,12 @@ export interface MapStateChangeEvent {
   mapState: ResolvedMapState;
 }
 
+export const LayerCreationErrorEventType = "layer-creation-error";
+export interface LayerCreationErrorEvent {
+  type: typeof LayerCreationErrorEventType;
+  error: Error;
+}
+
 /**
  * DEPRECATED
  * Use the MapViewStateEvent instead
@@ -93,6 +99,7 @@ export interface MapEventsByType {
   [MapViewStateChangeEventType]: MapViewStateChangeEvent;
   [MapLayerStateChangeEventType]: MapLayerStateChangeEvent;
   [MapStateChangeEventType]: MapStateChangeEvent;
+  [LayerCreationErrorEventType]: LayerCreationErrorEvent;
   /**
    * DEPRECATED
    */

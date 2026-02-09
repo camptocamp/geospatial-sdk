@@ -109,6 +109,9 @@ async function createMap() {
       featuresByLayer: new Map([[0, [featureB]]]),
     } as unknown as BaseEvent);
   });
+
+  // wait out all pending timers
+  await vi.runAllTimersAsync();
   return map;
 }
 function createMapEvent(map: OlMap, type: string) {
@@ -229,13 +232,15 @@ describe("event listener registration", () => {
           layers: [{ type: "doesnt-exist" } as any],
           view: null,
         });
+        await vi.runAllTimersAsync();
+
         expect(callback).toHaveBeenCalledOnce();
         expect(callback).toHaveBeenCalledWith({
-          layerIndex: -1,
+          layerIndex: 0,
           layerState: {
             creationError: true,
             creationErrorMessage:
-              'Error: Unrecognized layer type: {"type":"doesnt-exist"}',
+              'Unrecognized layer type: {"type":"doesnt-exist"}',
           },
           type: "map-layer-state-change",
         });
@@ -259,22 +264,24 @@ describe("event listener registration", () => {
             },
           ],
         });
+        await vi.runAllTimersAsync();
+
         expect(callback).toHaveBeenCalledTimes(2);
         expect(callback).toHaveBeenCalledWith({
-          layerIndex: -1,
+          layerIndex: 3,
           layerState: {
             creationError: true,
             creationErrorMessage:
-              'Error: Unrecognized layer type: {"type":"doesnt-exist"}',
+              'Unrecognized layer type: {"type":"doesnt-exist"}',
           },
           type: "map-layer-state-change",
         });
         expect(callback).toHaveBeenCalledWith({
-          layerIndex: -1,
+          layerIndex: 2,
           layerState: {
             creationError: true,
             creationErrorMessage:
-              'Error: Unrecognized layer type: {"type":"also-doesnt-exist"}',
+              'Unrecognized layer type: {"type":"also-doesnt-exist"}',
           },
           type: "map-layer-state-change",
         });
@@ -284,11 +291,14 @@ describe("event listener registration", () => {
           layers: [MAP_CTX_LAYER_XYZ_FIXTURE],
           view: null,
         });
+        await vi.runAllTimersAsync();
+
         expect(callback).toHaveBeenCalledOnce();
         expect(callback).toHaveBeenCalledWith({
           layerIndex: 0,
           layerState: {
             created: true,
+            loaded: true,
           },
           type: "map-layer-state-change",
         });
@@ -312,11 +322,14 @@ describe("event listener registration", () => {
             },
           ],
         });
+        await vi.runAllTimersAsync();
+
         expect(callback).toHaveBeenCalledTimes(2);
         expect(callback).toHaveBeenCalledWith({
           layerIndex: 3,
           layerState: {
             created: true,
+            loaded: true,
           },
           type: "map-layer-state-change",
         });
@@ -324,6 +337,7 @@ describe("event listener registration", () => {
           layerIndex: 2,
           layerState: {
             created: true,
+            loaded: true,
           },
           type: "map-layer-state-change",
         });
@@ -336,6 +350,7 @@ describe("event listener registration", () => {
           layers: [MAP_CTX_LAYER_XYZ_FIXTURE, MAP_CTX_LAYER_WMS_FIXTURE],
           view: null,
         });
+        await vi.runAllTimersAsync();
         callback.mockClear();
 
         const layer2 = map.getLayers().item(1);
@@ -398,6 +413,62 @@ describe("event listener registration", () => {
           layerIndex: 1,
           type: "map-layer-state-change",
         });
+      });
+    });
+  });
+
+  describe("layer creation error", () => {
+    let callback: Mock;
+
+    beforeEach(() => {
+      callback = vi.fn();
+      listen(map, "layer-creation-error", callback);
+    });
+
+    it("emits an error without layer index if something goes wrong when applying a context", async () => {
+      await resetMapFromContext(map, {
+        layers: [{ type: "doesnt-exist" } as any],
+        view: null,
+      });
+      await vi.runAllTimersAsync();
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith({
+        error: new Error('Unrecognized layer type: {"type":"doesnt-exist"}'),
+        type: "layer-creation-error",
+      });
+    });
+    it("emits an error without layer index if something goes wrong when applying a context diff", async () => {
+      await applyContextDiffToMap(map, {
+        layersAdded: [
+          {
+            layer: { type: "doesnt-exist" } as any,
+            position: 3,
+          },
+        ],
+        layersRemoved: [],
+        layersReordered: [],
+        layersChanged: [
+          {
+            // the change here needs a recreation of the layer
+            layer: { type: "also-doesnt-exist" } as any,
+            previousLayer: MAP_CTX_LAYER_GEOJSON_FIXTURE,
+            position: 2,
+          },
+        ],
+      });
+      await vi.runAllTimersAsync();
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenCalledWith({
+        error: new Error('Unrecognized layer type: {"type":"doesnt-exist"}'),
+        type: "layer-creation-error",
+      });
+      expect(callback).toHaveBeenCalledWith({
+        error: new Error(
+          'Unrecognized layer type: {"type":"also-doesnt-exist"}',
+        ),
+        type: "layer-creation-error",
       });
     });
   });

@@ -4,6 +4,7 @@ import { toLonLat } from "ol/proj.js";
 import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
+  LayerCreationErrorEventType,
   MapClickEvent,
   MapClickEventType,
   MapEventsByType,
@@ -20,6 +21,7 @@ import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import {
   registerFeatureClickEvent,
   registerFeatureHoverEvent,
+  registerLayerCreationErrorEvent,
   registerMapLayerStateChangeEvent,
   registerMapStateChangeEvent,
   registerMapViewStateChangeEvent,
@@ -82,6 +84,10 @@ export function listen<T extends keyof MapEventsByType>(
       break;
     case MapStateChangeEventType:
       registerMapStateChangeEvent(map);
+      addEventListener(map, eventType, callback);
+      break;
+    case LayerCreationErrorEventType:
+      registerLayerCreationErrorEvent(map);
       addEventListener(map, eventType, callback);
       break;
 

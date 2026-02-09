@@ -2,6 +2,7 @@ import Map from "ol/Map.js";
 import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
+  LayerCreationErrorEventType,
   MapLayerLoadingStatus,
   MapLayerStateChangeEvent,
   MapLayerStateChangeEventType,
@@ -73,27 +74,11 @@ export function registerMapViewStateChangeEvent(map: Map) {
 
 export function registerMapLayerStateChangeEvent(map: Map) {
   if (map.get(MapLayerStateChangeEventType)) return;
-
-  // re-dispatch layer creation error
-  map.on(
-    `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
-    (event: BaseEvent & { error: Error }) => {
-      map.dispatchEvent({
-        type: `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
-        layerState: {
-          creationError: true,
-          creationErrorMessage: event.error.toString(),
-        },
-        layerIndex: -1, // layer index is unknown in case of creation error}
-      } as unknown as BaseEvent);
-    },
-  );
-
   map.set(MapLayerStateChangeEventType, true);
 }
 
-export function emitLayerCreationError(map: Map, error: unknown) {
-  map.dispatchEvent({
+export function emitLayerCreationError(layer: BaseLayer, error: Error) {
+  layer.dispatchEvent({
     type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
     error,
   } as unknown as BaseEvent);
@@ -155,6 +140,25 @@ export function propagateLayerStateChangeEventToMap(
     } as unknown as BaseEvent);
   }
 
+  // on layer creation error update layer state and redispatch on map
+  layer.on(
+    `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+    (event: BaseEvent & { error: Error }) => {
+      currentLayerState = {
+        creationError: true,
+        creationErrorMessage: event.error.message,
+      };
+      updateStateAndEmit({});
+
+      if (map.get(LayerCreationErrorEventType)) {
+        map.dispatchEvent({
+          type: `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
+          error: event.error,
+        } as unknown as BaseEvent);
+      }
+    },
+  );
+
   // When new information about a layer state is available, add it to the previous state & emit
   layer.on(
     `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
@@ -171,9 +175,6 @@ export function propagateLayerStateChangeEventToMap(
       updateStateAndEmit({});
     },
   );
-
-  // emit initial state
-  updateStateAndEmit({});
 }
 
 export function registerMapStateChangeEvent(map: Map) {
@@ -221,4 +222,9 @@ export function registerMapStateChangeEvent(map: Map) {
   );
 
   map.set(MapStateChangeEventType, true);
+}
+
+export function registerLayerCreationErrorEvent(map: Map) {
+  if (map.get(LayerCreationErrorEventType)) return;
+  map.set(LayerCreationErrorEventType, true);
 }
