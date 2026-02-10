@@ -1,15 +1,13 @@
-import { FeatureCollection } from "geojson";
-import TileLayer from "ol/layer/Tile.js";
-import VectorLayer from "ol/layer/Vector.js";
-import Map from "ol/Map.js";
-import TileWMS from "ol/source/TileWMS.js";
-import VectorSource from "ol/source/Vector.js";
-import XYZ from "ol/source/XYZ.js";
-import View from "ol/View.js";
-import GeoJSON from "ol/format/GeoJSON.js";
+import {
+  MapContext,
+  MapContextLayer,
+  MapContextLayerGeojson,
+  MapContextLayerWms,
+} from "@geospatial-sdk/core";
 import {
   MAP_CTX_EXTENT_FIXTURE,
   MAP_CTX_FIXTURE,
+  MAP_CTX_LAYER_GEOTIFF_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
   MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE,
@@ -20,31 +18,36 @@ import {
   MAP_CTX_LAYER_WMTS_FIXTURE,
   MAP_CTX_LAYER_XYZ_FIXTURE,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
-import {
-  MapContext,
-  MapContextLayer,
-  MapContextLayerGeojson,
-  MapContextLayerWms,
-} from "@geospatial-sdk/core";
+import { FeatureCollection } from "geojson";
+import { MapboxVectorLayer } from "ol-mapbox-style";
+import { FeatureUrlFunction } from "ol/featureloader.js";
+import GeoJSON from "ol/format/GeoJSON.js";
+import ImageTile from "ol/ImageTile.js";
 import Layer from "ol/layer/Layer.js";
+import TileLayer from "ol/layer/Tile.js";
+import VectorLayer from "ol/layer/Vector.js";
+import VectorTileLayer from "ol/layer/VectorTile.js";
+import WebGLTileLayer from "ol/layer/WebGLTile.js";
+import Map from "ol/Map.js";
+import { VectorTile } from "ol/source.js";
+import GeoTIFF from "ol/source/GeoTIFF.js";
+import TileWMS from "ol/source/TileWMS.js";
+import VectorSource from "ol/source/Vector.js";
+import WMTS from "ol/source/WMTS.js";
+import XYZ from "ol/source/XYZ.js";
+import TileState from "ol/TileState.js";
+import View from "ol/View.js";
+import { beforeEach } from "vitest";
 import {
   createLayer,
   createMapFromContext,
   createView,
   resetMapFromContext,
 } from "./create-map.js";
-import WMTS from "ol/source/WMTS.js";
-import { VectorTile } from "ol/source.js";
-import { MapboxVectorLayer } from "ol-mapbox-style";
 import {
   handleEndpointError,
   tileLoadErrorCatchFunction,
 } from "./handle-errors.js";
-import ImageTile from "ol/ImageTile.js";
-import TileState from "ol/TileState.js";
-import VectorTileLayer from "ol/layer/VectorTile.js";
-import { FeatureUrlFunction } from "ol/featureloader.js";
-import { beforeEach } from "vitest";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual =
@@ -430,6 +433,26 @@ describe("MapContextService", () => {
         expect(layer.getVisible()).toBe(true);
         expect(layer.getOpacity()).toBe(1);
         expect(layer.get("label")).toBeUndefined();
+      });
+    });
+
+    describe("GeoTIFF", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_GEOTIFF_FIXTURE;
+        layer = await createLayer(layerModel);
+      });
+      it("create a WebGLTile layer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(WebGLTileLayer);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(1);
+        expect(layer.get("label")).toBeUndefined();
+      });
+      it("create a GeoTIFF source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(GeoTIFF);
       });
     });
   });

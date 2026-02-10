@@ -13,6 +13,8 @@ import ExampleMapEventsRaw from '@/examples/Example-MapEvents.vue?raw'
 import ExampleCustomElementsHtml from '@/examples/Example-CustomElements.html?raw'
 import ExampleMaplibreRaw from '@/examples/Example-Maplibre.vue?raw'
 import ExampleMaplibre from '@/examples/Example-Maplibre.vue'
+import ExampleGeoTIFF from '@/examples/Example-GeoTIFF.vue'
+import ExampleGeoTIFFRaw from '@/examples/Example-GeoTIFF.vue?raw'
 import { onMounted, ref } from 'vue'
 import hljs from 'highlight.js'
 import '@geospatial-sdk/elements'
@@ -95,6 +97,13 @@ onMounted(() => {
       :source-code="ExampleMaplibreRaw"
     >
      <ExampleMaplibre></ExampleMaplibre>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 8: GeoTIFF"
+      example-id="example08"
+      :source-code="ExampleGeoTIFFRaw"
+    >
+      <ExampleGeoTIFF></ExampleGeoTIFF>
     </ExampleContainer>
   </div>
 </template>
