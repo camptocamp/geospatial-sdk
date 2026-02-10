@@ -22,11 +22,9 @@ export function tileLoadErrorCatchFunction(
             emitLayerLoadingError(layer, error);
           });
       } else {
-        emitLayerLoadingError(
-          layer,
-          new Error(response.statusText),
-          response.status,
-        );
+        response.text().then((text) => {
+          emitLayerLoadingError(layer, new Error(text), response.status);
+        });
       }
     })
     .catch((error) => {

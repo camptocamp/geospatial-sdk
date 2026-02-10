@@ -5,10 +5,7 @@ import TileQueue, { getTilePriority } from "ol/TileQueue.js";
 import View from "ol/View.js";
 import Collection from "ol/Collection.js";
 import { get as getProjection, toLonLat } from "ol/proj.js";
-import {
-  FeaturesHoverEventType,
-  SourceLoadErrorEvent,
-} from "@geospatial-sdk/core";
+import { FeaturesHoverEventType } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { createLayer, resetMapFromContext } from "./create-map.js";
@@ -616,10 +613,12 @@ describe("event listener registration", () => {
       });
       it("DEPRECATED: emits a source load error", async () => {
         expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        const mockSourceLoadError = {
+          message: "Something went wrong",
+          httpStatus: 305,
+        };
         expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
-          new SourceLoadErrorEvent(
-            new EndpointError("Something went wrong", 305),
-          ),
+          expect.objectContaining(mockSourceLoadError),
         );
       });
     });
@@ -663,10 +662,12 @@ describe("event listener registration", () => {
       });
       it("DEPRECATED: emits a source load error", async () => {
         expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        const mockSourceLoadError = {
+          message: "Something went wrong",
+          httpStatus: 305,
+        };
         expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
-          new SourceLoadErrorEvent(
-            new EndpointError("Something went wrong", 305),
-          ),
+          expect.objectContaining(mockSourceLoadError),
         );
       });
     });
@@ -690,7 +691,7 @@ describe("event listener registration", () => {
       it("emits an error", async () => {
         expect(errorEventCallback).toHaveBeenCalledOnce();
         expect(errorEventCallback).toHaveBeenCalledWith({
-          error: new Error("Some HTTP error"),
+          error: new Error("An error happened on this tile"),
           type: "layer-loading-error",
           httpStatus: 403,
         });
@@ -704,7 +705,7 @@ describe("event listener registration", () => {
                 created: true,
                 loadingError: true,
                 loadingErrorHttpStatus: 403,
-                loadingErrorMessage: "Some HTTP error",
+                loadingErrorMessage: "An error happened on this tile",
               },
               null,
               null,
@@ -715,8 +716,12 @@ describe("event listener registration", () => {
       });
       it("DEPRECATED: emits a source load error", async () => {
         expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        const mockSourceLoadError = {
+          message: "An error happened on this tile",
+          httpStatus: 403,
+        };
         expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
-          new SourceLoadErrorEvent(new EndpointError("Some HTTP error", 403)),
+          expect.objectContaining(mockSourceLoadError),
         );
       });
     });
@@ -763,8 +768,11 @@ describe("event listener registration", () => {
       });
       it("DEPRECATED: emits a source load error", async () => {
         expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        const mockSourceLoadError = {
+          message: "Network error",
+        };
         expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
-          new SourceLoadErrorEvent(new Error("Network error")),
+          expect.objectContaining(mockSourceLoadError),
         );
       });
     });

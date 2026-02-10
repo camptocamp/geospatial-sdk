@@ -5,7 +5,6 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
-  LayerLoadingErrorEvent,
   LayerLoadingErrorEventType,
   MapClickEvent,
   MapClickEventType,
@@ -113,14 +112,8 @@ export function listen<T extends keyof MapEventsByType>(
       break;
     case SourceLoadErrorType: {
       registerSourceLoadErrorEvent(map);
-      map.on(
-        `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
-        (event: LayerLoadingErrorEvent) =>
-          callback(
-            new SourceLoadErrorEvent(
-              event.error,
-            ) as unknown as MapEventsByType[T],
-          ),
+      map.on(SourceLoadErrorType, (event: SourceLoadErrorEvent) =>
+        callback(event as MapEventsByType[T]),
       );
       break;
     }

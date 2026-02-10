@@ -85,11 +85,7 @@ export class SourceLoadErrorEvent extends BaseEvent {
     if (error instanceof Response) {
       this.message = error.statusText;
       this.httpStatus = error.status;
-    } else if (
-      error instanceof Error &&
-      "isCrossOriginRelated" in error &&
-      "httpStatus" in error
-    ) {
+    } else if (error instanceof EndpointError) {
       const e = error as EndpointError;
       this.message = e.message;
       this.httpStatus = e.httpStatus;
