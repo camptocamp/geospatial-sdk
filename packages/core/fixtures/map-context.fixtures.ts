@@ -1,9 +1,9 @@
-import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures.js";
 import {
   Extent,
   LayerGeojsonWithData,
   LayerGeojsonWithUrl,
   MapContext,
+  MapContextLayerGeotiff,
   MapContextLayerGeojson,
   MapContextLayerMapLibreStyle,
   MapContextLayerOgcApi,
@@ -14,6 +14,7 @@ import {
   MapContextView,
 } from "../lib/model/index.js";
 import { deepFreeze } from "../lib/utils/index.js";
+import { FEATURE_COLLECTION_POLYGON_FIXTURE_4326 } from "./geojson.fixtures.js";
 
 export const MAP_CTX_LAYER_XYZ_FIXTURE: MapContextLayerXyz = deepFreeze({
   type: "xyz",
@@ -72,6 +73,12 @@ export const MAP_CTX_LAYER_MVT_FIXTURE: MapContextLayerXyz = deepFreeze({
   tileFormat: "application/vnd.mapbox-vector-tile",
   accessToken: "abcdefgh",
 });
+export const MAP_CTX_LAYER_GEOTIFF_FIXTURE: MapContextLayerGeotiff = deepFreeze(
+  {
+    type: "geotiff",
+    url: "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/Q/WD/2020/7/S2A_36QWD_20200701_0_L2A/TCI.tif",
+  },
+);
 
 export const MAP_CTX_VIEW_FIXTURE: MapContextView = deepFreeze({
   center: [7.75, 48.6],

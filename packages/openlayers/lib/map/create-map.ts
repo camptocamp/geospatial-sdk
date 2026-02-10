@@ -36,11 +36,19 @@ import {
   tileLoadErrorCatchFunction,
 } from "./handle-errors.js";
 import VectorTile from "ol/source/VectorTile.js";
+import GeoTIFF from "ol/source/GeoTIFF.js";
+import WebGLTileLayer from "ol/layer/WebGLTile.js";
+import proj4 from "proj4";
+import { register } from "ol/proj/proj4.js";
 import {
   canDoIncrementalUpdate,
   updateLayerProperties,
 } from "./layer-update.js";
 import { initHoverLayer } from "./feature-hover.js";
+
+// Register proj4 with OpenLayers so that arbitrary EPSG codes
+// (e.g., UTM zones from GeoTIFF metadata) can be reprojected to the map projection
+register(proj4);
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -250,6 +258,16 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           style: layerModel.style ?? defaultStyle,
         });
       }
+      break;
+    }
+    case "geotiff": {
+      const geoTiffSource = new GeoTIFF({
+        sources: [{ url: layerModel.url }],
+        convertToRGB: "auto",
+      });
+      layer = new WebGLTileLayer({
+        source: geoTiffSource,
+      });
       break;
     }
     default:

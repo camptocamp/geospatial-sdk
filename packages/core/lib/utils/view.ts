@@ -1,14 +1,15 @@
 import { transformExtent } from "ol/proj.js";
 import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 import { LONLAT_CRS_CODES } from "../constant/projections.js";
-import { fromEPSGCode, register } from "ol/proj/proj4.js";
+import { fromEPSGCode } from "ol/proj/proj4.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import { extend } from "ol/extent.js";
 import type Feature from "ol/Feature.js";
-import proj4 from "proj4";
+import GeoTIFF from "ol/source/GeoTIFF.js";
 import {
   Extent,
   MapContextLayer,
+  MapContextLayerGeotiff,
   MapContextLayerWfs,
   MapContextLayerWms,
   MapContextLayerWmts,
@@ -52,6 +53,8 @@ export async function createViewFromLayer(
     return computeExtentFromGeojson(layer.data);
   } else if (layer.type === "wfs") {
     return await getWfsLayerExtent(layer);
+  } else if (layer.type === "geotiff") {
+    return await getGeotiffLayerExtent(layer);
   } else {
     throw new Error(`Unsupported layer type: ${layer.type}`);
   }
@@ -92,7 +95,6 @@ async function getWmsLayerExtent(
     };
   } else {
     const availableEPSGCode = Object.keys(boundingBoxes)[0];
-    register(proj4);
     const proj = await fromEPSGCode(availableEPSGCode);
     return {
       extent: transformExtent(
@@ -129,4 +131,33 @@ async function getWfsLayerExtent(
   return {
     extent: boundingBox,
   };
+}
+
+async function getGeotiffLayerExtent(
+  layer: MapContextLayerGeotiff,
+): Promise<ViewByExtent | null> {
+  const source = new GeoTIFF({
+    sources: [{ url: layer.url }],
+  });
+
+  return new Promise((resolve) => {
+    source.on("change", () => {
+      if (source.getState() === "ready") {
+        const tileGrid = source.getTileGrid();
+        const projection = source.getProjection();
+        if (!tileGrid || !projection) {
+          resolve(null);
+          return;
+        }
+        const extent = transformExtent(
+          tileGrid.getExtent(),
+          projection,
+          "EPSG:4326",
+        ) as Extent;
+        resolve({ extent });
+      } else if (source.getState() === "error") {
+        resolve(null);
+      }
+    });
+  });
 }
