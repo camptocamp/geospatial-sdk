@@ -44,10 +44,7 @@ import {
   createView,
   resetMapFromContext,
 } from "./create-map.js";
-import {
-  handleEndpointError,
-  tileLoadErrorCatchFunction,
-} from "./handle-errors.js";
+import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 vi.mock("./handle-errors", async (importOriginal) => {
@@ -265,9 +262,6 @@ describe("MapContextService", () => {
           "https://www.datagrandest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
         );
       });
-      it("should NOT call handleEndpointError", () => {
-        expect(handleEndpointError).not.toHaveBeenCalled();
-      });
       it("emits a loaded event initially", async () => {
         await vi.runAllTimersAsync();
         expect(eventCallback).toHaveBeenCalledWith({
@@ -277,17 +271,6 @@ describe("MapContextService", () => {
           target: layer,
           type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
         });
-      });
-    });
-    describe("WFS error", () => {
-      beforeEach(async () => {
-        layerModel = { ...MAP_CTX_LAYER_WFS_FIXTURE, url: "https://wfs/error" };
-        layer = await createLayer(layerModel);
-        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
-        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
-      });
-      it("should call handleEndpointError", () => {
-        expect(handleEndpointError).toHaveBeenCalled();
       });
     });
 
@@ -451,9 +434,6 @@ describe("MapContextService", () => {
           "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
         ]);
       });
-      it("should NOT call handleEndpointError", () => {
-        expect(handleEndpointError).not.toHaveBeenCalled();
-      });
       it("emits a loaded event initially", async () => {
         await vi.runAllTimersAsync();
         expect(eventCallback).toHaveBeenCalledWith({
@@ -463,20 +443,6 @@ describe("MapContextService", () => {
           target: layer,
           type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
         });
-      });
-    });
-    describe("WMTS error", () => {
-      beforeEach(async () => {
-        layerModel = {
-          ...MAP_CTX_LAYER_WMTS_FIXTURE,
-          url: "https://wmts/error",
-        };
-        layer = await createLayer(layerModel);
-        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
-        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
-      });
-      it("should call handleEndpointError", () => {
-        expect(handleEndpointError).toHaveBeenCalled();
       });
     });
     describe("WMTS without default style given", () => {

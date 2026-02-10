@@ -25,16 +25,14 @@ import OGCVectorTile from "ol/source/OGCVectorTile.js";
 import WMTS from "ol/source/WMTS.js";
 import MVT from "ol/format/MVT.js";
 import {
+  EndpointError,
   OgcApiEndpoint,
   WfsEndpoint,
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
 import { Tile } from "ol";
-import {
-  handleEndpointError,
-  tileLoadErrorCatchFunction,
-} from "./handle-errors.js";
+import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import VectorTile from "ol/source/VectorTile.js";
 import GeoTIFF from "ol/source/GeoTIFF.js";
 import WebGLTileLayer from "ol/layer/WebGLTile.js";
@@ -47,6 +45,7 @@ import {
 import { initHoverLayer } from "./feature-hover.js";
 import {
   emitLayerCreationError,
+  emitLayerLoadingError,
   emitLayerLoadingStatusSuccess,
   propagateLayerStateChangeEventToMap,
 } from "./register-events.js";
@@ -153,10 +152,12 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             }),
           );
         })
+        .then(() => emitLayerLoadingStatusSuccess(olLayer))
         .catch((e) => {
-          handleEndpointError(olLayer, e);
+          const httpStatus =
+            e instanceof EndpointError ? e.httpStatus : undefined;
+          emitLayerLoadingError(layer, e, httpStatus);
         });
-      defer().then(() => emitLayerLoadingStatusSuccess(olLayer));
       layer = olLayer;
       break;
     }
@@ -187,10 +188,12 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             }),
           );
         })
+        .then(() => emitLayerLoadingStatusSuccess(olLayer))
         .catch((e) => {
-          handleEndpointError(olLayer, e);
+          const httpStatus =
+            e instanceof EndpointError ? e.httpStatus : undefined;
+          emitLayerLoadingError(olLayer, e, httpStatus);
         });
-      defer().then(() => emitLayerLoadingStatusSuccess(olLayer));
       layer = olLayer;
       break;
     }

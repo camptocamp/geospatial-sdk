@@ -1,30 +1,7 @@
-import { EndpointError } from "@camptocamp/ogc-client";
-import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
 import { ImageTile, Tile } from "ol";
 import { Layer } from "ol/layer.js";
-import TileLayer from "ol/layer/Tile.js";
-import VectorLayer from "ol/layer/Vector.js";
-import TileSource from "ol/source/Tile.js";
-import VectorSource from "ol/source/Vector.js";
 import TileState from "ol/TileState.js";
-
-export function handleEndpointError(
-  layer: TileLayer<TileSource> | VectorLayer<VectorSource>,
-  error: EndpointError,
-) {
-  console.error("Error loading Endpoint", error);
-  layer.dispatchEvent(new SourceLoadErrorEvent(error));
-}
-
-export function handleTileError(
-  response: Response | Error,
-  tile: Tile,
-  layer: Layer,
-) {
-  console.error("Error loading tile", response);
-  tile.setState(TileState.ERROR);
-  layer.dispatchEvent(new SourceLoadErrorEvent(response));
-}
+import { emitLayerLoadingError } from "./register-events.js";
 
 export function tileLoadErrorCatchFunction(
   layer: Layer,
@@ -40,14 +17,19 @@ export function tileLoadErrorCatchFunction(
             const image = (tile as ImageTile).getImage();
             (image as HTMLImageElement).src = URL.createObjectURL(blob);
           })
-          .catch(() => {
-            handleTileError(response, tile, layer);
+          .catch((error) => {
+            tile.setState(TileState.ERROR);
+            emitLayerLoadingError(layer, error);
           });
       } else {
-        handleTileError(response, tile, layer);
+        emitLayerLoadingError(
+          layer,
+          new Error(response.statusText),
+          response.status,
+        );
       }
     })
     .catch((error) => {
-      handleTileError(error, tile, layer);
+      emitLayerLoadingError(layer, error);
     });
 }

@@ -5,6 +5,8 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
+  LayerLoadingErrorEvent,
+  LayerLoadingErrorEventType,
   MapClickEvent,
   MapClickEventType,
   MapEventsByType,
@@ -22,12 +24,12 @@ import {
   registerFeatureClickEvent,
   registerFeatureHoverEvent,
   registerLayerCreationErrorEvent,
+  registerLayerLoadingErrorEvent,
   registerMapLayerStateChangeEvent,
   registerMapStateChangeEvent,
   registerMapViewStateChangeEvent,
+  registerSourceLoadErrorEvent,
 } from "./register-events.js";
-import { CollectionEvent } from "ol/Collection.js";
-import Layer from "ol/layer/Layer.js";
 
 function addEventListener<T extends keyof MapEventsByType>(
   map: Map,
@@ -90,6 +92,10 @@ export function listen<T extends keyof MapEventsByType>(
       registerLayerCreationErrorEvent(map);
       addEventListener(map, eventType, callback);
       break;
+    case LayerLoadingErrorEventType:
+      registerLayerLoadingErrorEvent(map);
+      addEventListener(map, eventType, callback);
+      break;
 
     /**
      * DEPRECATED
@@ -106,29 +112,16 @@ export function listen<T extends keyof MapEventsByType>(
       );
       break;
     case SourceLoadErrorType: {
-      const errorCallback = (event: SourceLoadErrorEvent) => {
-        callback(event as MapEventsByType[T]);
-      };
-      //attach event listener to all existing layers
-      map.getLayers().forEach((layer) => {
-        if (layer) {
-          layer.on(SourceLoadErrorType, errorCallback);
-        }
-      });
-      //attach event listener when layer is added
-      map.getLayers().on("add", (event: CollectionEvent<Layer>) => {
-        const layer = event.element;
-        if (layer) {
-          layer.on(SourceLoadErrorType, errorCallback);
-        }
-      });
-      //remove event listener when layer is removed
-      map.getLayers().on("remove", (event: CollectionEvent<Layer>) => {
-        const layer = event.element;
-        if (layer) {
-          layer.un(SourceLoadErrorType, errorCallback);
-        }
-      });
+      registerSourceLoadErrorEvent(map);
+      map.on(
+        `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
+        (event: LayerLoadingErrorEvent) =>
+          callback(
+            new SourceLoadErrorEvent(
+              event.error,
+            ) as unknown as MapEventsByType[T],
+          ),
+      );
       break;
     }
     default:

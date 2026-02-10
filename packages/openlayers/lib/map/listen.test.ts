@@ -1,10 +1,14 @@
-import OlMap from "ol/Map.js";
-import { Mock } from "vitest";
+import OlMap, { FrameState } from "ol/Map.js";
+import { afterAll, beforeEach, Mock } from "vitest";
 import { listen } from "./listen.js";
-import { Collection, MapBrowserEvent, Object as BaseObject } from "ol";
+import TileQueue, { getTilePriority } from "ol/TileQueue.js";
 import View from "ol/View.js";
-import { toLonLat } from "ol/proj.js";
-import { FeaturesHoverEventType } from "@geospatial-sdk/core";
+import Collection from "ol/Collection.js";
+import { get as getProjection, toLonLat } from "ol/proj.js";
+import {
+  FeaturesHoverEventType,
+  SourceLoadErrorEvent,
+} from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { createLayer, resetMapFromContext } from "./create-map.js";
@@ -17,6 +21,10 @@ import {
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import { applyContextDiffToMap } from "./apply-context-diff.js";
 import { propagateLayerStateChangeEventToMap } from "./register-events.js";
+import MapBrowserEvent from "ol/MapBrowserEvent.js";
+import BaseObject from "ol/Object.js";
+import Layer from "ol/layer/Layer.js";
+import { EndpointError } from "@camptocamp/ogc-client";
 
 vi.mock("./get-features.js", () => ({
   readFeaturesAtPixel() {
@@ -425,7 +433,7 @@ describe("event listener registration", () => {
       listen(map, "layer-creation-error", callback);
     });
 
-    it("emits an error without layer index if something goes wrong when applying a context", async () => {
+    it("emits an error if something goes wrong when applying a context", async () => {
       await resetMapFromContext(map, {
         layers: [{ type: "doesnt-exist" } as any],
         view: null,
@@ -438,7 +446,7 @@ describe("event listener registration", () => {
         type: "layer-creation-error",
       });
     });
-    it("emits an error without layer index if something goes wrong when applying a context diff", async () => {
+    it("emits an error if something goes wrong when applying a context diff", async () => {
       await applyContextDiffToMap(map, {
         layersAdded: [
           {
@@ -469,6 +477,295 @@ describe("event listener registration", () => {
           'Unrecognized layer type: {"type":"also-doesnt-exist"}',
         ),
         type: "layer-creation-error",
+      });
+    });
+  });
+
+  describe("layer loading error", () => {
+    let errorEventCallback: Mock;
+    let mapStateCallback: Mock;
+    let sourceLoadErrorCallback: Mock;
+    let fetchMock: Mock;
+    let layer: Layer;
+    const mockCanvas = document.createElement("canvas");
+
+    const getFrameState = (layer: Layer): FrameState => {
+      const frameState = {
+        animate: false,
+        coordinateToPixelTransform: [1, 0, 0, 1, 0, 0],
+        declutterItems: [],
+        extent: [
+          -696165.0132013096, 5090855.383524774, 3367832.7922398755,
+          7122854.286245367,
+        ],
+        index: 0,
+        layerIndex: 0,
+        pixelRatio: 1,
+        pixelToCoordinateTransform: [1, 0, 0, 1, 0, 0],
+        postRenderFunctions: [],
+        size: [800, 400],
+        time: 1604056713131,
+        usedTiles: {},
+        wantedTiles: {},
+        viewHints: [0, 0],
+        viewState: {
+          center: [0, 0],
+          resolution: 5079.997256801481,
+          projection: getProjection("EPSG:3857"),
+          rotation: 0,
+        },
+        layerStatesArray: [
+          {
+            layer,
+            managed: true,
+            maxResolution: null,
+            maxZoom: null,
+            minResolution: 0,
+            minZoom: null,
+            opacity: 1,
+            sourceState: "",
+            visible: true,
+            zIndex: 0,
+          },
+        ],
+        tileQueue: new TileQueue(
+          (tile, tileSourceKey, tileCenter, tileResolution) =>
+            getTilePriority(
+              frameState,
+              tile,
+              tileSourceKey,
+              tileCenter,
+              tileResolution,
+            ),
+          () => {},
+        ),
+      } as unknown as FrameState;
+      return frameState;
+    };
+
+    beforeAll(() => {
+      fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockImplementation((input, _options) => {
+          if (input.toString().includes("give.me/network/error")) {
+            return Promise.reject(new Error("Network error"));
+          }
+          if (input.toString().includes("give.me/http/error")) {
+            return Promise.resolve(
+              new Response("An error happened on this tile", {
+                status: 403,
+                statusText: "Some HTTP error",
+              }),
+            );
+          }
+          return Promise.resolve(
+            new Response("fake image blob", { status: 200 }),
+          );
+        });
+    });
+
+    afterAll(() => {
+      fetchMock.mockRestore();
+    });
+
+    beforeEach(() => {
+      errorEventCallback = vi.fn();
+      mapStateCallback = vi.fn();
+      sourceLoadErrorCallback = vi.fn();
+      listen(map, "layer-loading-error", errorEventCallback);
+      listen(map, "map-state-change", mapStateCallback);
+      listen(map, "source-load-error", sourceLoadErrorCallback);
+    });
+
+    describe("WMTS endpoint error", () => {
+      beforeEach(async () => {
+        layer = await createLayer({
+          type: "wmts",
+          url: "http://give.me/error",
+          name: "abcd",
+        });
+        map.getLayers().setAt(0, layer);
+        propagateLayerStateChangeEventToMap(map, layer);
+        await vi.runAllTimersAsync();
+      });
+      it("emits an error", async () => {
+        expect(errorEventCallback).toHaveBeenCalledOnce();
+        expect(errorEventCallback).toHaveBeenCalledWith({
+          error: new EndpointError("Something went wrong", 305),
+          type: "layer-loading-error",
+          httpStatus: 305,
+        });
+      });
+      it("updates the map state accordingly", async () => {
+        expect(mapStateCallback).toHaveBeenLastCalledWith({
+          type: "map-state-change",
+          mapState: {
+            layers: [
+              {
+                created: true,
+                loadingError: true,
+                loadingErrorHttpStatus: 305,
+                loadingErrorMessage: "Something went wrong",
+              },
+              null,
+              null,
+            ],
+            view: null,
+          },
+        });
+      });
+      it("DEPRECATED: emits a source load error", async () => {
+        expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
+          new SourceLoadErrorEvent(
+            new EndpointError("Something went wrong", 305),
+          ),
+        );
+      });
+    });
+
+    describe("WFS endpoint error", () => {
+      beforeEach(async () => {
+        layer = await createLayer({
+          type: "wfs",
+          url: "http://give.me/error",
+          featureType: "abcd",
+        });
+        map.getLayers().setAt(0, layer);
+        propagateLayerStateChangeEventToMap(map, layer);
+        await vi.runAllTimersAsync();
+      });
+      it("emits an error", async () => {
+        expect(errorEventCallback).toHaveBeenCalledOnce();
+        expect(errorEventCallback).toHaveBeenCalledWith({
+          error: new EndpointError("Something went wrong", 305),
+          type: "layer-loading-error",
+          httpStatus: 305,
+        });
+      });
+      it("updates the map state accordingly", async () => {
+        expect(mapStateCallback).toHaveBeenLastCalledWith({
+          type: "map-state-change",
+          mapState: {
+            layers: [
+              {
+                created: true,
+                loadingError: true,
+                loadingErrorHttpStatus: 305,
+                loadingErrorMessage: "Something went wrong",
+              },
+              null,
+              null,
+            ],
+            view: null,
+          },
+        });
+      });
+      it("DEPRECATED: emits a source load error", async () => {
+        expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
+          new SourceLoadErrorEvent(
+            new EndpointError("Something went wrong", 305),
+          ),
+        );
+      });
+    });
+
+    describe("Tile loading HTTP error", () => {
+      beforeEach(async () => {
+        layer = await createLayer({
+          type: "xyz",
+          url: "http://give.me/http/error",
+        });
+        map.getLayers().setAt(0, layer);
+        propagateLayerStateChangeEventToMap(map, layer);
+        await vi.runAllTimersAsync();
+
+        // this will trigger tile loading
+        const frameState = getFrameState(layer);
+        layer.render(frameState, mockCanvas);
+        frameState.tileQueue.loadMoreTiles(1, 1);
+        layer.render(frameState, mockCanvas);
+      });
+      it("emits an error", async () => {
+        expect(errorEventCallback).toHaveBeenCalledOnce();
+        expect(errorEventCallback).toHaveBeenCalledWith({
+          error: new Error("Some HTTP error"),
+          type: "layer-loading-error",
+          httpStatus: 403,
+        });
+      });
+      it("updates the map state accordingly", async () => {
+        expect(mapStateCallback).toHaveBeenLastCalledWith({
+          type: "map-state-change",
+          mapState: {
+            layers: [
+              {
+                created: true,
+                loadingError: true,
+                loadingErrorHttpStatus: 403,
+                loadingErrorMessage: "Some HTTP error",
+              },
+              null,
+              null,
+            ],
+            view: null,
+          },
+        });
+      });
+      it("DEPRECATED: emits a source load error", async () => {
+        expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
+          new SourceLoadErrorEvent(new EndpointError("Some HTTP error", 403)),
+        );
+      });
+    });
+
+    describe("Tile loading network error", () => {
+      beforeEach(async () => {
+        layer = await createLayer({
+          type: "xyz",
+          url: "http://give.me/network/error",
+        });
+        map.getLayers().setAt(0, layer);
+        propagateLayerStateChangeEventToMap(map, layer);
+        await vi.runAllTimersAsync();
+
+        // this will trigger tile loading
+        const frameState = getFrameState(layer);
+        layer.render(frameState, mockCanvas);
+        frameState.tileQueue.loadMoreTiles(1, 1);
+        layer.render(frameState, mockCanvas);
+      });
+      it("emits an error", async () => {
+        expect(errorEventCallback).toHaveBeenCalledOnce();
+        expect(errorEventCallback).toHaveBeenCalledWith({
+          error: new Error("Network error"),
+          type: "layer-loading-error",
+        });
+      });
+      it("updates the map state accordingly", async () => {
+        expect(mapStateCallback).toHaveBeenLastCalledWith({
+          type: "map-state-change",
+          mapState: {
+            layers: [
+              {
+                created: true,
+                loadingError: true,
+                loadingErrorMessage: "Network error",
+              },
+              null,
+              null,
+            ],
+            view: null,
+          },
+        });
+      });
+      it("DEPRECATED: emits a source load error", async () => {
+        expect(sourceLoadErrorCallback).toHaveBeenCalledOnce();
+        expect(sourceLoadErrorCallback).toHaveBeenCalledWith(
+          new SourceLoadErrorEvent(new Error("Network error")),
+        );
       });
     });
   });

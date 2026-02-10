@@ -3,6 +3,7 @@ import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
+  LayerLoadingErrorEventType,
   MapLayerLoadingStatus,
   MapLayerStateChangeEvent,
   MapLayerStateChangeEventType,
@@ -11,6 +12,8 @@ import {
   MapViewStateChangeEventType,
   ResolvedMapLayerState,
   ResolvedMapState,
+  SourceLoadErrorEvent,
+  SourceLoadErrorType,
 } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
 import type BaseLayer from "ol/layer/Base.js";
@@ -46,32 +49,6 @@ export function registerFeatureHoverEvent(map: Map) {
   map.set(FeaturesHoverEventType, true);
 }
 
-export function registerMapViewStateChangeEvent(map: Map) {
-  if (map.get(MapViewStateChangeEventType)) return;
-
-  let lastExtent: number[] | null = null;
-
-  const handleViewChange = () => {
-    const viewState = readMapViewState(map);
-    if (lastExtent && equals(lastExtent, viewState.extent)) {
-      return;
-    }
-    lastExtent = viewState.extent;
-
-    map.dispatchEvent({
-      type: `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
-      viewState,
-    } as unknown as BaseEvent);
-  };
-
-  map.getView().on("change:center", handleViewChange);
-  map.getView().on("change:resolution", handleViewChange);
-  map.getView().on("change:rotation", handleViewChange);
-  map.on("change:size", handleViewChange);
-
-  map.set(MapViewStateChangeEventType, true);
-}
-
 export function registerMapLayerStateChangeEvent(map: Map) {
   if (map.get(MapLayerStateChangeEventType)) return;
   map.set(MapLayerStateChangeEventType, true);
@@ -79,7 +56,7 @@ export function registerMapLayerStateChangeEvent(map: Map) {
 
 export function emitLayerCreationError(layer: BaseLayer, error: Error) {
   layer.dispatchEvent({
-    type: `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+    type: `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
     error,
   } as unknown as BaseEvent);
 }
@@ -95,10 +72,15 @@ export function emitLayerLoadingStatusSuccess(layer: BaseLayer) {
     layerState: { loaded: true },
   } as unknown as BaseEvent);
 }
-export function emitLayerLoadingStatusError(layer: BaseLayer, error: Error) {
+export function emitLayerLoadingError(
+  layer: BaseLayer,
+  error: Error,
+  httpStatus?: number,
+) {
   layer.dispatchEvent({
-    type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
-    layerState: { loadingError: true, loadingErrorMessage: error.toString() },
+    type: `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
+    error,
+    ...(httpStatus && { httpStatus }),
   } as unknown as BaseEvent);
 }
 export function emitLayerDataInfo(
@@ -120,20 +102,15 @@ export function propagateLayerStateChangeEventToMap(
   };
   let currentLoadingStatus: Partial<MapLayerLoadingStatus> = {};
 
-  function updateStateAndEmit(update: Partial<MapLayerDataInfo>) {
+  function updateStateAndEmit() {
     if (!map.get(MapLayerStateChangeEventType)) {
       return;
     }
-    currentLayerState = {
-      ...currentLayerState,
-      ...update,
-    };
     const layerIndex = map.getLayers().getArray().indexOf(layer);
     map.dispatchEvent({
       type: `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
       layerState: {
         ...currentLayerState,
-        ...update,
         ...currentLoadingStatus,
       },
       layerIndex,
@@ -142,19 +119,42 @@ export function propagateLayerStateChangeEventToMap(
 
   // on layer creation error update layer state and redispatch on map
   layer.on(
-    `${GEOSPATIAL_SDK_PREFIX}layer-creation-error`,
+    `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
     (event: BaseEvent & { error: Error }) => {
       currentLayerState = {
         creationError: true,
         creationErrorMessage: event.error.message,
       };
-      updateStateAndEmit({});
+      updateStateAndEmit();
 
       if (map.get(LayerCreationErrorEventType)) {
-        map.dispatchEvent({
-          type: `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
-          error: event.error,
-        } as unknown as BaseEvent);
+        map.dispatchEvent(event);
+      }
+    },
+  );
+
+  // on layer loading error update layer state and redispatch on map
+  layer.on(
+    `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
+    (event: BaseEvent & { error: Error; httpStatus?: number }) => {
+      currentLoadingStatus = {
+        loadingError: true,
+        loadingErrorMessage: event.error.message,
+        ...(event.httpStatus && { loadingErrorHttpStatus: event.httpStatus }),
+      };
+      updateStateAndEmit();
+
+      if (map.get(LayerLoadingErrorEventType)) {
+        map.dispatchEvent(event);
+      }
+
+      // deprecated event
+      if (map.get(SourceLoadErrorType)) {
+        const sourceLoadEvent = new SourceLoadErrorEvent(event.error);
+        if (event.httpStatus) {
+          sourceLoadEvent.httpStatus = event.httpStatus;
+        }
+        map.dispatchEvent(sourceLoadEvent as unknown as BaseEvent);
       }
     },
   );
@@ -163,7 +163,11 @@ export function propagateLayerStateChangeEventToMap(
   layer.on(
     `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
     (event: MapLayerStateChangeEvent) => {
-      updateStateAndEmit(event.layerState);
+      currentLayerState = {
+        ...currentLayerState,
+        ...event.layerState,
+      };
+      updateStateAndEmit();
     },
   );
 
@@ -172,7 +176,7 @@ export function propagateLayerStateChangeEventToMap(
     `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
     (event: MapLayerStateChangeEvent) => {
       currentLoadingStatus = event.layerState;
-      updateStateAndEmit({});
+      updateStateAndEmit();
     },
   );
 }
@@ -227,4 +231,42 @@ export function registerMapStateChangeEvent(map: Map) {
 export function registerLayerCreationErrorEvent(map: Map) {
   if (map.get(LayerCreationErrorEventType)) return;
   map.set(LayerCreationErrorEventType, true);
+}
+
+export function registerLayerLoadingErrorEvent(map: Map) {
+  if (map.get(LayerLoadingErrorEventType)) return;
+  map.set(LayerLoadingErrorEventType, true);
+}
+
+// DEPRECATED EVENTS
+
+export function registerMapViewStateChangeEvent(map: Map) {
+  if (map.get(MapViewStateChangeEventType)) return;
+
+  let lastExtent: number[] | null = null;
+
+  const handleViewChange = () => {
+    const viewState = readMapViewState(map);
+    if (lastExtent && equals(lastExtent, viewState.extent)) {
+      return;
+    }
+    lastExtent = viewState.extent;
+
+    map.dispatchEvent({
+      type: `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
+      viewState,
+    } as unknown as BaseEvent);
+  };
+
+  map.getView().on("change:center", handleViewChange);
+  map.getView().on("change:resolution", handleViewChange);
+  map.getView().on("change:rotation", handleViewChange);
+  map.on("change:size", handleViewChange);
+
+  map.set(MapViewStateChangeEventType, true);
+}
+
+export function registerSourceLoadErrorEvent(map: Map) {
+  if (map.get(SourceLoadErrorType)) return;
+  map.set(SourceLoadErrorType, true);
 }

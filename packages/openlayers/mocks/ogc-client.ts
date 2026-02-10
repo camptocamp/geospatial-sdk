@@ -3,11 +3,18 @@
 
 import WMTSTileGrid from "ol/tilegrid/WMTS.js";
 
+export class EndpointError {
+  constructor(
+    public message: string,
+    public httpStatus: number,
+  ) {}
+}
+
 export class WmtsEndpoint {
   constructor(private url) {}
   isReady() {
     if (this.url.indexOf("error") > -1) {
-      return Promise.reject(new Error("Something went wrong"));
+      return Promise.reject(new EndpointError("Something went wrong", 305));
     }
     return Promise.resolve({
       getLayerByName: (name) => {
@@ -78,7 +85,7 @@ export class WfsEndpoint {
 
   isReady() {
     if (this.url.indexOf("error") > -1) {
-      return Promise.reject(new Error("Something went wrong"));
+      return Promise.reject(new EndpointError("Something went wrong", 305));
     }
     return Promise.resolve({
       getLayerByName: (name) => {
@@ -92,6 +99,24 @@ export class WfsEndpoint {
       },
       getFeatureUrl: () => {
         return "https://www.datagrandest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000";
+      },
+    });
+  }
+}
+
+export class WmsEndpoint {
+  constructor(private url) {}
+
+  isReady() {
+    if (this.url.indexOf("error") > -1) {
+      return Promise.reject(new EndpointError("Something went wrong", 305));
+    }
+    return Promise.resolve({
+      getLayerByName: (name) => {
+        return {
+          name,
+          latLonBoundingBox: [1.33, 48.81, 4.3, 51.1],
+        };
       },
     });
   }

@@ -55,9 +55,16 @@ export interface LayerCreationErrorEvent {
   error: Error;
 }
 
+export const LayerLoadingErrorEventType = "layer-loading-error";
+export interface LayerLoadingErrorEvent {
+  type: typeof LayerLoadingErrorEventType;
+  error: Error;
+  httpStatus?: number;
+}
+
 /**
  * DEPRECATED
- * Use the MapViewStateEvent instead
+ * Use the MapViewStateChangeEvent instead
  */
 export const MapExtentChangeEventType = "map-extent-change";
 export interface MapExtentChangeEvent {
@@ -67,7 +74,7 @@ export interface MapExtentChangeEvent {
 
 /**
  * DEPRECATED
- * Use the MapStateEvent instead
+ * Use the MapLayerStateChangeEvent and LayerLoadingErrorEvent instead
  */
 export const SourceLoadErrorType = "source-load-error";
 export class SourceLoadErrorEvent extends BaseEvent {
@@ -100,6 +107,7 @@ export interface MapEventsByType {
   [MapLayerStateChangeEventType]: MapLayerStateChangeEvent;
   [MapStateChangeEventType]: MapStateChangeEvent;
   [LayerCreationErrorEventType]: LayerCreationErrorEvent;
+  [LayerLoadingErrorEventType]: LayerLoadingErrorEvent;
   /**
    * DEPRECATED
    */

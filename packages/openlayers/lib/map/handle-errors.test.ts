@@ -1,13 +1,6 @@
-import { ImageTile, Tile } from "ol";
-import TileState from "ol/TileState.js";
-import { SourceLoadErrorEvent } from "@geospatial-sdk/core";
-import {
-  handleTileError,
-  tileLoadErrorCatchFunction,
-} from "./handle-errors.js";
 import TileLayer from "ol/layer/Tile.js";
 import VectorLayer from "ol/layer/Vector.js";
-import { EndpointError } from "@camptocamp/ogc-client";
+import { emitLayerLoadingError } from "./register-events.js";
 
 globalThis.URL.createObjectURL = vi.fn(() => "blob:http://example.com/blob");
 
@@ -26,45 +19,29 @@ globalThis.fetch = vi.fn().mockImplementation((url: string) => {
 });
 
 describe("handle-errors", () => {
-  let tile: Tile;
-
-  beforeEach(() => {
-    tile = new ImageTile(
-      [0, 0, 0],
-      TileState.IDLE,
-      "",
-      null,
-      () => tileLoadErrorCatchFunction,
-    );
-  });
-
   describe("handleEndpointError", () => {
     it("should dispatch SourceLoadErrorEvent", () => {
-      const endpointErrorMock: EndpointError = {
-        name: "Error",
-        message: "FORBIDDEN",
-        httpStatus: 403,
-      };
       const layer = new VectorLayer({});
       const dispatchEventSpy = vi.spyOn(layer, "dispatchEvent");
-      handleTileError(endpointErrorMock, tile, layer);
-      expect(dispatchEventSpy).toHaveBeenCalledWith(
-        new SourceLoadErrorEvent(endpointErrorMock),
-      );
+      emitLayerLoadingError(layer, new Error("FORBIDDEN"), 403);
+      expect(dispatchEventSpy).toHaveBeenCalledWith({
+        type: "--geospatial-sdk-layer-loading-error",
+        error: new Error("FORBIDDEN"),
+        httpStatus: 403,
+      });
     });
   });
 
   describe("handleTileError", () => {
     it("should set tile state to ERROR and dispatch SourceLoadErrorEvent", () => {
-      const response = new Response("Forbidden", { status: 403 });
       const layer = new TileLayer({});
       const dispatchEventSpy = vi.spyOn(layer, "dispatchEvent");
-      const setStateEventSpy = vi.spyOn(tile, "setState");
-      handleTileError(response, tile, layer);
-      expect(setStateEventSpy).toHaveBeenCalledWith(TileState.ERROR);
-      expect(dispatchEventSpy).toHaveBeenCalledWith(
-        new SourceLoadErrorEvent(response),
-      );
+      emitLayerLoadingError(layer, new Error("Forbidden"), 403);
+      expect(dispatchEventSpy).toHaveBeenCalledWith({
+        type: "--geospatial-sdk-layer-loading-error",
+        error: new Error("Forbidden"),
+        httpStatus: 403,
+      });
     });
   });
 });
