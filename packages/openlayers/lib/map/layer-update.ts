@@ -1,8 +1,9 @@
-import { getHash, MapContextLayer } from "@geospatial-sdk/core";
 import {
+  getHash,
   MapContextBaseLayer,
+  MapContextLayer,
   MapContextLayerVector,
-} from "@geospatial-sdk/core/lib/model/map-context.js";
+} from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
 import VectorLayer from "ol/layer/Vector.js";
 import type VectorSource from "ol/source/Vector.js";

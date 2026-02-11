@@ -4,6 +4,7 @@ import {
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
   LayerLoadingErrorEventType,
+  MapLayerDataInfo,
   MapLayerLoadingStatus,
   MapLayerStateChangeEvent,
   MapLayerStateChangeEventType,
@@ -22,7 +23,6 @@ import MapBrowserEvent from "ol/MapBrowserEvent.js";
 import { equals } from "ol/extent.js";
 import { readMapViewState } from "./resolved-map-state.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import { MapLayerDataInfo } from "@geospatial-sdk/core/lib/model/resolved-map-state.js";
 
 export function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
@@ -80,7 +80,7 @@ export function emitLayerLoadingError(
   layer.dispatchEvent({
     type: `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
     error,
-    ...(httpStatus && { httpStatus }),
+    ...(httpStatus !== undefined ? { httpStatus } : {}),
   } as unknown as BaseEvent);
 }
 export function emitLayerDataInfo(
@@ -140,7 +140,9 @@ export function propagateLayerStateChangeEventToMap(
       currentLoadingStatus = {
         loadingError: true,
         loadingErrorMessage: event.error.message,
-        ...(event.httpStatus && { loadingErrorHttpStatus: event.httpStatus }),
+        ...(event.httpStatus !== undefined && {
+          loadingErrorHttpStatus: event.httpStatus,
+        }),
       };
       updateStateAndEmit();
 

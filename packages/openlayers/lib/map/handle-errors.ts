@@ -22,12 +22,14 @@ export function tileLoadErrorCatchFunction(
             emitLayerLoadingError(layer, error);
           });
       } else {
+        tile.setState(TileState.ERROR);
         response.text().then((text) => {
           emitLayerLoadingError(layer, new Error(text), response.status);
         });
       }
     })
     .catch((error) => {
+      tile.setState(TileState.ERROR);
       emitLayerLoadingError(layer, error);
     });
 }

@@ -7,8 +7,11 @@ import {
 } from "../maplibre.models.js";
 import { FeatureCollection, Geometry } from "geojson";
 import { contextStyleToMaplibreLayers } from "./style.helpers.js";
-import { getHash } from "@geospatial-sdk/core/dist/utils/hash.js";
-import { MapContextBaseLayer, MapContextLayer } from "@geospatial-sdk/core";
+import {
+  getHash,
+  MapContextBaseLayer,
+  MapContextLayer,
+} from "@geospatial-sdk/core";
 
 function getOpacityPaintPropNames(layerType: string): string[] {
   switch (layerType) {

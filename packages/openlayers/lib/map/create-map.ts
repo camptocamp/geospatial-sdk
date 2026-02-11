@@ -156,7 +156,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         .catch((e) => {
           const httpStatus =
             e instanceof EndpointError ? e.httpStatus : undefined;
-          emitLayerLoadingError(layer, e, httpStatus);
+          emitLayerLoadingError(olLayer, e, httpStatus);
         });
       layer = olLayer;
       break;
@@ -286,9 +286,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           style: layerModel.style ?? defaultStyle,
         });
       }
+      // FIXME: actually track layer loading
       defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
+
     case "geotiff": {
       const geoTiffSource = new GeoTIFF({
         sources: [{ url: layerModel.url }],
@@ -297,8 +299,11 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       layer = new WebGLTileLayer({
         source: geoTiffSource,
       });
+      // FIXME: actually track tile loading
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
+
     default: {
       // we create an empty placeholder layer so that we still have a corresponding layer in OL
       layer = new VectorLayer({
