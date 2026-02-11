@@ -26,6 +26,7 @@ Each layer has a `type` property that determines its data source:
 - **`geojson`**: Vector data in GeoJSON format (`url` or `data`, optional `style`)
 - **`ogcapi`**: OGC API, supports Features and Tiles (both raster and vector) (`url`, `collection`, optional `useTiles`, `tileMatrixSet`, `style`)
 - **`maplibre-style`**: MapLibre Style Spec (`styleUrl`, optional `accessToken`)
+- **`geotiff`**: remote GeoTIFF or COG file
 
 Other options include `id` and `version` (see chapter below), `label`, `visibility` (hidden or not), `opacity` and `attributions`.
 

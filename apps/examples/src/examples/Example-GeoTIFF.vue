@@ -18,8 +18,8 @@ onMounted(() => {
         }
       ],
       view: {
-        zoom: 10,
-        center: [34.8, 31.2]
+        zoom: 9,
+        center: [33.55, 16.69]
       }
     },
     mapRoot.value

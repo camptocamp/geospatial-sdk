@@ -1,11 +1,20 @@
 import { FeatureCollection, Geometry } from "geojson";
 import { VectorStyle } from "./style.js";
 
+export type LayerDimensionValueSingle = string | number | Date;
+export type LayerDimensionValueRange = {
+  start: LayerDimensionValueSingle | null;
+  end: LayerDimensionValueSingle | null;
+};
+
 /**
  * @private
  * @inline
  */
-export type LayerDimensions = Record<string, string>;
+export type LayerDimensionValues = Record<
+  string,
+  LayerDimensionValueSingle | LayerDimensionValueRange
+>;
 
 /**
  * @private
@@ -14,7 +23,13 @@ export type LayerDimensions = Record<string, string>;
 export type LayerExtras = Record<string, unknown>;
 
 export interface MapContextBaseLayer {
+  /**
+   * An optional identifier for the layer; if provided, will improve performance when the layers is updated through a context diff.
+   */
   id?: string | number;
+  /**
+   * Optional version indicator; if provided, must be increased by the application for the change detection to trigger, otherwise the SDK will consider that the layer is unchanged.
+   */
   version?: number;
 
   /**
@@ -23,11 +38,43 @@ export interface MapContextBaseLayer {
    * non-serializable entities
    */
   extras?: LayerExtras;
+
+  /**
+   * Whether the layer is visible or not on the map. A non-visible layer will still have its data queried and kept in memory, so switching this on/off shows immediately on the map.
+   *
+   * Default value is `true` (visible).
+   */
   visibility?: boolean;
+
+  /**
+   * Opacity level; between 0 and 1.
+   *
+   * Default value is 1 (fully opaque).
+   */
   opacity?: number;
+
+  /**
+   * Optional label for the layer, typically used to represent the layer in a layer list or when showing a popup above a feature.
+   */
   label?: string;
+
+  /**
+   * Attributions for the layer. Optional but strongly recommended: remember to attribute your map!
+   */
   attributions?: string;
+
+  /**
+   * Whether data on the layer can be picked up using the `feature-click` event.
+   *
+   * Default value is `true`. Set to `false` to save performance.
+   */
   clickable?: boolean;
+
+  /**
+   * Whether features on the layer can be picked up using the `feature-hover` event. Mostly has an effect only for vector layers.
+   *
+   * Default value is `false`.
+   */
   hoverable?: boolean;
 }
 
@@ -35,7 +82,8 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
   url: string;
   name: string;
-  dimensions?: LayerDimensions;
+  // TODO: add support for these
+  dimensionValues?: LayerDimensionValues;
   style?: string;
 }
 
@@ -43,7 +91,8 @@ export interface MapContextLayerWmts extends MapContextBaseLayer {
   type: "wmts";
   url: string;
   name: string;
-  dimensions?: LayerDimensions;
+  // TODO: add support for these
+  dimensionValues?: LayerDimensionValues;
   style?: string;
 }
 

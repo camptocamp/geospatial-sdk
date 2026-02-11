@@ -25,6 +25,8 @@ export default defineConfig({
           { text: "Map Context", link: "/guides/map-context" },
           { text: "Map Context Diff", link: "/guides/map-context-diff" },
           { text: "Layer Extent", link: "/guides/layer-extent" },
+          { text: "Events", link: "/guides/events" },
+          { text: "Reading a map state", link: "/guides/map-state" },
         ],
       },
       {

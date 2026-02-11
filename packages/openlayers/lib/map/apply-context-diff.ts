@@ -4,6 +4,7 @@ import { createLayer, createView, updateLayerInMap } from "./create-map.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";
+import { propagateLayerStateChangeEventToMap } from "./register-events.js";
 
 const GEOJSON = new GeoJSON();
 
@@ -35,12 +36,16 @@ export async function applyContextDiffToMap(
   );
 
   newLayers.forEach((layer, index) => {
+    if (!layer) {
+      return;
+    }
     const position = contextDiff.layersAdded[index].position;
     if (position >= layers.getLength()) {
       layers.push(layer);
     } else {
       layers.insertAt(position, layer);
     }
+    propagateLayerStateChangeEventToMap(map, layer);
   });
 
   // move reordered layers (sorted by ascending new position)
@@ -59,12 +64,15 @@ export async function applyContextDiffToMap(
   }
 
   // update or recreate changed layers
+  const updatePromises = [];
   for (const layerChanged of contextDiff.layersChanged) {
-    updateLayerInMap(
-      map,
-      layerChanged.layer,
-      layerChanged.position,
-      layerChanged.previousLayer,
+    updatePromises.push(
+      updateLayerInMap(
+        map,
+        layerChanged.layer,
+        layerChanged.position,
+        layerChanged.previousLayer,
+      ),
     );
   }
 
@@ -106,6 +114,9 @@ export async function applyContextDiffToMap(
       // }
     }
   }
+
+  // wait for all layers to have been updated
+  await Promise.all(updatePromises);
 
   return map;
 }

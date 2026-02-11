@@ -25,16 +25,14 @@ import OGCVectorTile from "ol/source/OGCVectorTile.js";
 import WMTS from "ol/source/WMTS.js";
 import MVT from "ol/format/MVT.js";
 import {
+  EndpointError,
   OgcApiEndpoint,
   WfsEndpoint,
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
 import { Tile } from "ol";
-import {
-  handleEndpointError,
-  tileLoadErrorCatchFunction,
-} from "./handle-errors.js";
+import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import VectorTile from "ol/source/VectorTile.js";
 import GeoTIFF from "ol/source/GeoTIFF.js";
 import WebGLTileLayer from "ol/layer/WebGLTile.js";
@@ -45,6 +43,13 @@ import {
   updateLayerProperties,
 } from "./layer-update.js";
 import { initHoverLayer } from "./feature-hover.js";
+import {
+  emitLayerCreationError,
+  emitLayerLoadingError,
+  emitLayerLoadingStatusSuccess,
+  propagateLayerStateChangeEventToMap,
+} from "./register-events.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 // Register proj4 with OpenLayers so that arbitrary EPSG codes
 // (e.g., UTM zones from GeoTIFF metadata) can be reprojected to the map projection
@@ -53,9 +58,15 @@ register(proj4);
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
+// We need to defer some events being dispatched to make sure they are caught by the map
+// where the layers sit
+// FIXME: this should be better handled in a separate module!
+const defer = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
   const { type } = layerModel;
-  let layer: Layer | undefined;
+  let layer: Layer;
+
   switch (type) {
     case "xyz":
       {
@@ -82,8 +93,10 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           });
           layer.setSource(source);
         }
+        defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
       break;
+
     case "wms":
       {
         layer = new TileLayer({});
@@ -104,9 +117,10 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           );
         });
         layer.setSource(source);
+        defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
-
       break;
+
     case "wmts": {
       const olLayer = new TileLayer({});
       const endpoint = new WmtsEndpoint(layerModel.url);
@@ -138,11 +152,16 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             }),
           );
         })
+        .then(() => emitLayerLoadingStatusSuccess(olLayer))
         .catch((e) => {
-          handleEndpointError(olLayer, e);
+          const httpStatus =
+            e instanceof EndpointError ? e.httpStatus : undefined;
+          emitLayerLoadingError(olLayer, e, httpStatus);
         });
-      return olLayer;
+      layer = olLayer;
+      break;
     }
+
     case "wfs": {
       const olLayer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
@@ -169,28 +188,35 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             }),
           );
         })
+        .then(() => emitLayerLoadingStatusSuccess(olLayer))
         .catch((e) => {
-          handleEndpointError(olLayer, e);
+          const httpStatus =
+            e instanceof EndpointError ? e.httpStatus : undefined;
+          emitLayerLoadingError(olLayer, e, httpStatus);
         });
       layer = olLayer;
       break;
     }
+
     case "maplibre-style": {
       layer = new MapboxVectorLayer({
         styleUrl: layerModel.styleUrl,
         accessToken: layerModel.accessToken,
       }) as unknown as Layer;
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
+
     case "geojson": {
+      layer = new VectorLayer({
+        style: layerModel.style ?? defaultStyle,
+      });
+      let source: VectorSource;
       if (layerModel.url !== undefined) {
-        layer = new VectorLayer({
-          source: new VectorSource({
-            format: new GeoJSON(),
-            url: layerModel.url,
-            attributions: layerModel.attributions,
-          }),
-          style: layerModel.style ?? defaultStyle,
+        source = new VectorSource({
+          format: new GeoJSON(),
+          url: layerModel.url,
+          attributions: layerModel.attributions,
         });
       } else {
         let geojson = layerModel.data;
@@ -206,16 +232,17 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           featureProjection: "EPSG:3857",
           dataProjection: "EPSG:4326",
         }) as Feature<Geometry>[];
-        layer = new VectorLayer({
-          source: new VectorSource({
-            features,
-            attributions: layerModel.attributions,
-          }),
-          style: layerModel.style ?? defaultStyle,
+        source = new VectorSource({
+          features,
+          attributions: layerModel.attributions,
         });
       }
+      layer.setSource(source);
+      // FIXME: actually track layer loading and data info
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
+
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
@@ -249,17 +276,21 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           layerModel.collection,
           layerModel.options,
         );
+        const source = new VectorSource({
+          format: new GeoJSON(),
+          url: layerUrl,
+          attributions: layerModel.attributions,
+        });
         layer = new VectorLayer({
-          source: new VectorSource({
-            format: new GeoJSON(),
-            url: layerUrl,
-            attributions: layerModel.attributions,
-          }),
+          source,
           style: layerModel.style ?? defaultStyle,
         });
       }
+      // FIXME: actually track layer loading
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
+
     case "geotiff": {
       const geoTiffSource = new GeoTIFF({
         sources: [{ url: layerModel.url }],
@@ -268,26 +299,38 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       layer = new WebGLTileLayer({
         source: geoTiffSource,
       });
+      // FIXME: actually track tile loading
+      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
-    default:
-      throw new Error(`Unrecognized layer type: ${JSON.stringify(layerModel)}`);
-  }
-  if (!layer) {
-    throw new Error(`Layer could not be created for type: ${layerModel.type}`);
+
+    default: {
+      // we create an empty placeholder layer so that we still have a corresponding layer in OL
+      layer = new VectorLayer({
+        properties: {
+          [`${GEOSPATIAL_SDK_PREFIX}layer-with-error`]: true,
+        },
+      });
+      defer().then(() =>
+        emitLayerCreationError(
+          layer,
+          new Error(`Unrecognized layer type: ${JSON.stringify(layerModel)}`),
+        ),
+      );
+    }
   }
 
-  updateLayerProperties(layerModel, layer);
+  updateLayerProperties(layerModel, layer!);
 
-  return layer;
+  return layer!;
 }
 
-export function updateLayerInMap(
+export async function updateLayerInMap(
   map: Map,
   layerModel: MapContextLayer,
   layerPosition: number,
   previousLayerModel: MapContextLayer,
-) {
+): Promise<void> {
   const layers = map.getLayers();
   const updatedLayer = layers.item(layerPosition) as Layer;
 
@@ -299,8 +342,9 @@ export function updateLayerInMap(
 
   // dispose and recreate layer
   updatedLayer.dispose();
-  createLayer(layerModel).then((layer) => {
+  await createLayer(layerModel).then((layer) => {
     layers.setAt(layerPosition, layer);
+    propagateLayerStateChangeEventToMap(map, layer);
   });
 }
 
@@ -369,6 +413,7 @@ export async function resetMapFromContext(
   for (const layerModel of context.layers) {
     const layer = await createLayer(layerModel);
     map.addLayer(layer);
+    propagateLayerStateChangeEventToMap(map, layer);
   }
   initHoverLayer(map);
   return map;

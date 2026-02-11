@@ -1,33 +1,41 @@
+import Map from "ol/Map.js";
 import {
   FeaturesClickEventType,
   FeaturesHoverEventType,
-  MapClickEventType,
-  MapEventsByType,
-  MapExtentChangeEventType,
+  LayerCreationErrorEventType,
+  LayerLoadingErrorEventType,
+  MapLayerDataInfo,
+  MapLayerLoadingStatus,
+  MapLayerStateChangeEvent,
+  MapLayerStateChangeEventType,
+  MapStateChangeEventType,
+  MapViewStateChangeEvent,
+  MapViewStateChangeEventType,
+  ResolvedMapLayerState,
+  ResolvedMapState,
+  SourceLoadErrorEvent,
   SourceLoadErrorType,
 } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
-import { equals } from "ol/extent.js";
 import type BaseLayer from "ol/layer/Base.js";
-import { BaseLayerObjectEventTypes } from "ol/layer/Base.js";
-import Layer from "ol/layer/Layer.js";
-import Map, { MapObjectEventTypes } from "ol/Map.js";
-import { toLonLat, transformExtent } from "ol/proj.js";
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { readFeaturesAtPixel } from "./get-features.js";
+import MapBrowserEvent from "ol/MapBrowserEvent.js";
+import { equals } from "ol/extent.js";
+import { readMapViewState } from "./resolved-map-state.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
-function registerFeatureClickEvent(map: Map) {
+export function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
 
   // Filter to only query clickable layers
   const layerFilter = (layer: BaseLayer) =>
     layer.get(`${GEOSPATIAL_SDK_PREFIX}clickable`) !== false;
 
-  map.on("click", async (event: any) => {
+  map.on("click", async (event: MapBrowserEvent<PointerEvent>) => {
     const featuresByLayer = await readFeaturesAtPixel(map, event, layerFilter);
     const features = Array.from(featuresByLayer.values()).flat();
     map.dispatchEvent({
-      type: FeaturesClickEventType,
+      type: `${GEOSPATIAL_SDK_PREFIX}${FeaturesClickEventType}`,
       features,
       featuresByLayer,
     } as unknown as BaseEvent);
@@ -36,119 +44,231 @@ function registerFeatureClickEvent(map: Map) {
   map.set(FeaturesClickEventType, true);
 }
 
-function registerFeatureHoverEvent(map: Map) {
+export function registerFeatureHoverEvent(map: Map) {
   if (map.get(FeaturesHoverEventType)) return;
   map.set(FeaturesHoverEventType, true);
 }
 
-function registerMapExtentChangeEvent(map: Map) {
-  if (map.get(MapExtentChangeEventType)) return;
+export function registerMapLayerStateChangeEvent(map: Map) {
+  if (map.get(MapLayerStateChangeEventType)) return;
+  map.set(MapLayerStateChangeEventType, true);
+}
+
+export function emitLayerCreationError(layer: BaseLayer, error: Error) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
+    error,
+  } as unknown as BaseEvent);
+}
+export function emitLayerLoadingStatusLoading(layer: BaseLayer) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+    layerState: { loading: true },
+  } as unknown as BaseEvent);
+}
+export function emitLayerLoadingStatusSuccess(layer: BaseLayer) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+    layerState: { loaded: true },
+  } as unknown as BaseEvent);
+}
+export function emitLayerLoadingError(
+  layer: BaseLayer,
+  error: Error,
+  httpStatus?: number,
+) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
+    error,
+    ...(httpStatus !== undefined ? { httpStatus } : {}),
+  } as unknown as BaseEvent);
+}
+export function emitLayerDataInfo(
+  layer: BaseLayer,
+  dataInfo: MapLayerDataInfo,
+) {
+  layer.dispatchEvent({
+    type: `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
+    layerState: dataInfo,
+  } as unknown as BaseEvent);
+}
+
+export function propagateLayerStateChangeEventToMap(
+  map: Map,
+  layer: BaseLayer,
+) {
+  let currentLayerState: Partial<ResolvedMapLayerState> = {
+    created: true,
+  };
+  let currentLoadingStatus: Partial<MapLayerLoadingStatus> = {};
+
+  function updateStateAndEmit() {
+    if (!map.get(MapLayerStateChangeEventType)) {
+      return;
+    }
+    const layerIndex = map.getLayers().getArray().indexOf(layer);
+    map.dispatchEvent({
+      type: `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
+      layerState: {
+        ...currentLayerState,
+        ...currentLoadingStatus,
+      },
+      layerIndex,
+    } as unknown as BaseEvent);
+  }
+
+  // on layer creation error update layer state and redispatch on map
+  layer.on(
+    `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
+    (event: BaseEvent & { error: Error }) => {
+      currentLayerState = {
+        creationError: true,
+        creationErrorMessage: event.error.message,
+      };
+      updateStateAndEmit();
+
+      if (map.get(LayerCreationErrorEventType)) {
+        map.dispatchEvent(event);
+      }
+    },
+  );
+
+  // on layer loading error update layer state and redispatch on map
+  layer.on(
+    `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
+    (event: BaseEvent & { error: Error; httpStatus?: number }) => {
+      currentLoadingStatus = {
+        loadingError: true,
+        loadingErrorMessage: event.error.message,
+        ...(event.httpStatus !== undefined && {
+          loadingErrorHttpStatus: event.httpStatus,
+        }),
+      };
+      updateStateAndEmit();
+
+      if (map.get(LayerLoadingErrorEventType)) {
+        map.dispatchEvent(event);
+      }
+
+      // deprecated event
+      if (map.get(SourceLoadErrorType)) {
+        const sourceLoadEvent = new SourceLoadErrorEvent(event.error);
+        if (event.httpStatus) {
+          sourceLoadEvent.httpStatus = event.httpStatus;
+        }
+        map.dispatchEvent(sourceLoadEvent as unknown as BaseEvent);
+      }
+    },
+  );
+
+  // When new information about a layer state is available, add it to the previous state & emit
+  layer.on(
+    `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
+    (event: MapLayerStateChangeEvent) => {
+      currentLayerState = {
+        ...currentLayerState,
+        ...event.layerState,
+      };
+      updateStateAndEmit();
+    },
+  );
+
+  // loading state can change over time
+  layer.on(
+    `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+    (event: MapLayerStateChangeEvent) => {
+      currentLoadingStatus = event.layerState;
+      updateStateAndEmit();
+    },
+  );
+}
+
+export function registerMapStateChangeEvent(map: Map) {
+  if (map.get(MapStateChangeEventType)) return;
+
+  // the global map state requires both view and layers state
+  registerMapLayerStateChangeEvent(map);
+  registerMapViewStateChangeEvent(map);
+
+  let currentState: ResolvedMapState = {
+    layers: [],
+    view: null,
+  };
+
+  function emitState() {
+    // we're making sure to have the right amount of layers in the state and to fill empty slots with null
+    currentState.layers.length = map.getLayers().getLength();
+    for (let i = 0; i < currentState.layers.length; i++) {
+      if (!currentState.layers[i]) {
+        currentState.layers[i] = null;
+      }
+    }
+    map.dispatchEvent({
+      type: `${GEOSPATIAL_SDK_PREFIX}${MapStateChangeEventType}`,
+      mapState: currentState as ResolvedMapState,
+    } as unknown as BaseEvent);
+  }
+
+  // collect view and layer states to re-emit them as a global state
+  map.on(
+    `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
+    (event: BaseEvent & MapLayerStateChangeEvent) => {
+      const layers = [...currentState.layers];
+      layers[event.layerIndex] = event.layerState;
+      currentState = { ...currentState, layers };
+      emitState();
+    },
+  );
+  map.on(
+    `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
+    (event: BaseEvent & MapViewStateChangeEvent) => {
+      currentState = { ...currentState, view: event.viewState };
+      emitState();
+    },
+  );
+
+  map.set(MapStateChangeEventType, true);
+}
+
+export function registerLayerCreationErrorEvent(map: Map) {
+  if (map.get(LayerCreationErrorEventType)) return;
+  map.set(LayerCreationErrorEventType, true);
+}
+
+export function registerLayerLoadingErrorEvent(map: Map) {
+  if (map.get(LayerLoadingErrorEventType)) return;
+  map.set(LayerLoadingErrorEventType, true);
+}
+
+// DEPRECATED EVENTS
+
+export function registerMapViewStateChangeEvent(map: Map) {
+  if (map.get(MapViewStateChangeEventType)) return;
 
   let lastExtent: number[] | null = null;
 
-  const handleExtentChange = () => {
-    const extent = map.getView().calculateExtent(map.getSize());
-    const reprojectedExtent = transformExtent(
-      extent,
-      map.getView().getProjection(),
-      "EPSG:4326",
-    );
-
-    if (lastExtent && equals(lastExtent, reprojectedExtent)) {
+  const handleViewChange = () => {
+    const viewState = readMapViewState(map);
+    if (lastExtent && equals(lastExtent, viewState.extent)) {
       return;
     }
-
-    lastExtent = reprojectedExtent;
+    lastExtent = viewState.extent;
 
     map.dispatchEvent({
-      type: MapExtentChangeEventType,
-      extent: reprojectedExtent,
+      type: `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
+      viewState,
     } as unknown as BaseEvent);
   };
 
-  map.getView().on("change:center", handleExtentChange);
-  map.getView().on("change:resolution", handleExtentChange);
-  map.getView().on("change:rotation", handleExtentChange);
-  map.on("change:size", handleExtentChange);
+  map.getView().on("change:center", handleViewChange);
+  map.getView().on("change:resolution", handleViewChange);
+  map.getView().on("change:rotation", handleViewChange);
+  map.on("change:size", handleViewChange);
 
-  map.set(MapExtentChangeEventType, true);
+  map.set(MapViewStateChangeEventType, true);
 }
 
-export function listen<T extends keyof MapEventsByType>(
-  map: Map,
-  eventType: T,
-  callback: (event: MapEventsByType[T]) => void,
-) {
-  switch (eventType) {
-    case FeaturesClickEventType:
-      registerFeatureClickEvent(map);
-      // we're using a custom event type here so we need to cast to unknown first
-      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
-        (callback as (event: unknown) => void)(event);
-      });
-      break;
-    case FeaturesHoverEventType:
-      registerFeatureHoverEvent(map);
-      // see comment above
-      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
-        (callback as (event: unknown) => void)(event);
-      });
-      break;
-    case MapClickEventType:
-      map.on("click", (event: any) => {
-        const coordinate = toLonLat(
-          event.coordinate,
-          map.getView().getProjection(),
-        ) as [number, number];
-        (callback as (event: unknown) => void)({
-          type: "map-click",
-          coordinate,
-        });
-      });
-      break;
-    case MapExtentChangeEventType:
-      registerMapExtentChangeEvent(map);
-      // see comment above
-      map.on(eventType as unknown as MapObjectEventTypes, (event: any) => {
-        (callback as (event: unknown) => void)(event);
-      });
-      break;
-    case SourceLoadErrorType: {
-      const errorCallback = (event: BaseEvent) => {
-        (callback as (event: unknown) => void)(event);
-      };
-      //attach event listener to all existing layers
-      map.getLayers().forEach((layer) => {
-        if (layer) {
-          layer.on(
-            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            errorCallback,
-          );
-        }
-      });
-      //attach event listener when layer is added
-      map.getLayers().on("add", (event: any) => {
-        const layer = event.element as Layer;
-        if (layer) {
-          layer.on(
-            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            errorCallback,
-          );
-        }
-      });
-      //remove event listener when layer is removed
-      map.getLayers().on("remove", (event: any) => {
-        const layer = event.element as Layer;
-        if (layer) {
-          layer.un(
-            SourceLoadErrorType as unknown as BaseLayerObjectEventTypes,
-            errorCallback,
-          );
-        }
-      });
-      break;
-    }
-    default:
-      throw new Error(`Unrecognized event type: ${eventType}`);
-  }
+export function registerSourceLoadErrorEvent(map: Map) {
+  if (map.get(SourceLoadErrorType)) return;
+  map.set(SourceLoadErrorType, true);
 }

@@ -1,4 +1,4 @@
-import { VectorStyle } from "@geospatial-sdk/core/dist/model/style.js";
+import { VectorStyle } from "@geospatial-sdk/core";
 import { LayerSpecification } from "maplibre-gl";
 import { FlatFill, FlatStyle, Rule } from "ol/style/flat.js";
 
