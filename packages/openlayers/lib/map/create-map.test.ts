@@ -46,6 +46,8 @@ import {
 } from "./create-map.js";
 import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import ImageLayer from "ol/layer/Image.js";
+import ImageWMS from "ol/source/ImageWMS.js";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual =
@@ -185,8 +187,11 @@ describe("MapContextService", () => {
       it("set correct WMS params", () => {
         const source = layer.getSource() as TileWMS;
         const params = source.getParams();
-        expect(params.LAYERS).toBe((layerModel as MapContextLayerWms).name);
-        expect(params.STYLES).toBe((layerModel as MapContextLayerWms).style);
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          STYLES: (layerModel as MapContextLayerWms).style,
+          TILED: true,
+        });
       });
       it("set correct url without existing REQUEST and SERVICE params", () => {
         const source = layer.getSource() as TileWMS;
@@ -223,6 +228,50 @@ describe("MapContextService", () => {
           },
           target: layer,
           type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+        });
+      });
+
+      describe("not using tiles", () => {
+        beforeEach(async () => {
+          layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, useTiles: false };
+          layer = await createLayer(layerModel);
+          layer.on(
+            `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+            eventCallback,
+          );
+          layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+        });
+        it("create an image layer", () => {
+          expect(layer).toBeTruthy();
+          expect(layer).toBeInstanceOf(ImageLayer);
+        });
+        it("set correct layer properties", () => {
+          expect(layer.getVisible()).toBe(false);
+          expect(layer.getOpacity()).toBe(0.5);
+          expect(layer.get("label")).toBe("Communes");
+          // @ts-expect-error TS2554 we're not providing a view extent here
+          expect(layer.getSource()?.getAttributions()!()).toEqual([
+            "camptocamp",
+          ]);
+        });
+        it("create an ImageWMS source", () => {
+          const source = layer.getSource();
+          expect(source).toBeInstanceOf(ImageWMS);
+        });
+        it("set correct WMS params", () => {
+          const source = layer.getSource() as ImageWMS;
+          const params = source.getParams();
+          expect(params).toEqual({
+            LAYERS: (layerModel as MapContextLayerWms).name,
+            STYLES: (layerModel as MapContextLayerWms).style,
+          });
+        });
+        it("set correct url without existing REQUEST and SERVICE params", () => {
+          const source = layer.getSource() as ImageWMS;
+          const url = source.getUrl();
+          expect(url).toBe(
+            "https://www.datagrandest.fr/geoserver/region-grand-est/ows",
+          );
         });
       });
     });

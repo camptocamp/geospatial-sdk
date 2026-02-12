@@ -50,6 +50,8 @@ import {
   propagateLayerStateChangeEventToMap,
 } from "./register-events.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import ImageLayer from "ol/layer/Image.js";
+import ImageWMS from "ol/source/ImageWMS.js";
 
 // Register proj4 with OpenLayers so that arbitrary EPSG codes
 // (e.g., UTM zones from GeoTIFF metadata) can be reprojected to the map projection
@@ -99,24 +101,36 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
 
     case "wms":
       {
-        layer = new TileLayer({});
-        const source = new TileWMS({
-          url: removeSearchParams(layerModel.url, ["request", "service"]),
-          params: {
-            LAYERS: layerModel.name,
-            ...(layerModel.style && { STYLES: layerModel.style }),
-          },
-          gutter: 20,
-          attributions: layerModel.attributions,
-        });
-        source.setTileLoadFunction(function (tile: Tile, src: string) {
-          return tileLoadErrorCatchFunction(
-            layer as TileLayer<TileWMS>,
-            tile,
-            src,
-          );
-        });
-        layer.setSource(source);
+        const url = removeSearchParams(layerModel.url, ["request", "service"]);
+        const params = {
+          LAYERS: layerModel.name,
+          ...(layerModel.style && { STYLES: layerModel.style }),
+        };
+        if (layerModel.useTiles === false) {
+          layer = new ImageLayer({
+            source: new ImageWMS({
+              url,
+              params,
+              attributions: layerModel.attributions,
+            }),
+          });
+        } else {
+          layer = new TileLayer({
+            source: new TileWMS({
+              url,
+              params: { ...params, TILED: true },
+              gutter: 20,
+              attributions: layerModel.attributions,
+              tileLoadFunction: function (tile: Tile, src: string) {
+                return tileLoadErrorCatchFunction(
+                  layer as TileLayer<TileWMS>,
+                  tile,
+                  src,
+                );
+              },
+            }),
+          });
+        }
         defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
       break;
