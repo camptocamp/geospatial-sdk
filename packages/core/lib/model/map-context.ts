@@ -87,7 +87,7 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   style?: string;
 
   /**
-   * Whether to use tiled WMS requests (i.e. using the `TILED=true` parameter).
+   * Whether to use tiled WMS requests. Tiled requests include a `TILED=true` parameter as per https://wiki.osgeo.org/wiki/WMS_Tiling_Client_Recommendation
    *
    * Using tiled requests allow tiles to be cached and thus the server load to potentially be reduced; on the other hand,
    * it can increase the time to show the layer and degrade the quality of the rendering (e.g. with labels).

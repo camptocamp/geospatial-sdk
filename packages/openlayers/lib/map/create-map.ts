@@ -118,7 +118,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           layer = new TileLayer({
             source: new TileWMS({
               url,
-              params,
+              params: { ...params, TILED: true },
               gutter: 20,
               attributions: layerModel.attributions,
               tileLoadFunction: function (tile: Tile, src: string) {

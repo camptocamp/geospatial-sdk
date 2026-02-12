@@ -187,8 +187,11 @@ describe("MapContextService", () => {
       it("set correct WMS params", () => {
         const source = layer.getSource() as TileWMS;
         const params = source.getParams();
-        expect(params.LAYERS).toBe((layerModel as MapContextLayerWms).name);
-        expect(params.STYLES).toBe((layerModel as MapContextLayerWms).style);
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          STYLES: (layerModel as MapContextLayerWms).style,
+          TILED: true,
+        });
       });
       it("set correct url without existing REQUEST and SERVICE params", () => {
         const source = layer.getSource() as TileWMS;
@@ -258,8 +261,10 @@ describe("MapContextService", () => {
         it("set correct WMS params", () => {
           const source = layer.getSource() as ImageWMS;
           const params = source.getParams();
-          expect(params.LAYERS).toBe((layerModel as MapContextLayerWms).name);
-          expect(params.STYLES).toBe((layerModel as MapContextLayerWms).style);
+          expect(params).toEqual({
+            LAYERS: (layerModel as MapContextLayerWms).name,
+            STYLES: (layerModel as MapContextLayerWms).style,
+          });
         });
         it("set correct url without existing REQUEST and SERVICE params", () => {
           const source = layer.getSource() as ImageWMS;
