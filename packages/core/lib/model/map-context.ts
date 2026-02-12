@@ -85,6 +85,18 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   // TODO: add support for these
   dimensionValues?: LayerDimensionValues;
   style?: string;
+
+  /**
+   * Whether to use tiled WMS requests (i.e. using the `TILED=true` parameter).
+   *
+   * Using tiled requests allow tiles to be cached and thus the server load to potentially be reduced; on the other hand,
+   * it can increase the time to show the layer and degrade the quality of the rendering (e.g. with labels).
+   *
+   * Note: untiled requests are not supported by MapLibre-GL-JS
+   *
+   * Default value: `true` (use tiled requests)
+   */
+  useTiles?: boolean;
 }
 
 export interface MapContextLayerWmts extends MapContextBaseLayer {
