@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { contextStyleToMaplibreLayers } from "./style.helpers.js";
 
 const defautlMaplibreFill = {
@@ -155,6 +155,127 @@ describe("createPaint", () => {
 
       expect(result[2].paint["circle-color"]).toBe("rgba(255,0,0,0.3)"); // mocked
       expect(result[2].paint["circle-stroke-color"]).toBe("rgba(0,0,255,0.6)"); // mocked
+    });
+  });
+
+  describe("Expression handling", () => {
+    it("passes through simple expressions like ['get', 'color']", () => {
+      const result = contextStyleToMaplibreLayers({
+        "fill-color": ["get", "color"],
+      } as any);
+      expect(result[0].paint["fill-color"]).toEqual(["get", "color"]);
+    });
+
+    it("passes through interpolate expressions", () => {
+      const expr = ["interpolate", ["linear"], ["zoom"], 0, 1, 10, 5];
+      const result = contextStyleToMaplibreLayers({
+        "stroke-width": expr,
+      } as any);
+      expect(result[1].paint["line-width"]).toEqual([
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0,
+        1,
+        10,
+        5,
+      ]);
+    });
+
+    it("passes through match expressions", () => {
+      const expr = ["match", ["get", "type"], "road", "red", "blue"];
+      const result = contextStyleToMaplibreLayers({
+        "stroke-color": expr,
+      } as any);
+      expect(result[1].paint["line-color"]).toEqual([
+        "match",
+        ["get", "type"],
+        "road",
+        "red",
+        "blue",
+      ]);
+    });
+
+    it("converts 'color' with 3 args to 'rgb'", () => {
+      const result = contextStyleToMaplibreLayers({
+        "fill-color": ["color", 255, 0, 0],
+      } as any);
+      expect(result[0].paint["fill-color"]).toEqual(["rgb", 255, 0, 0]);
+    });
+
+    it("converts 'color' with 4 args to 'rgba'", () => {
+      const result = contextStyleToMaplibreLayers({
+        "fill-color": ["color", 255, 0, 0, 0.5],
+      } as any);
+      expect(result[0].paint["fill-color"]).toEqual(["rgba", 255, 0, 0, 0.5]);
+    });
+
+    it("converts 'number' to 'to-number'", () => {
+      const result = contextStyleToMaplibreLayers({
+        "stroke-width": ["number", ["get", "width"]],
+      } as any);
+      expect(result[1].paint["line-width"]).toEqual([
+        "to-number",
+        ["get", "width"],
+      ]);
+    });
+
+    it("converts 'between' to 'all' with >= and <=", () => {
+      const result = contextStyleToMaplibreLayers({
+        "circle-radius": ["between", ["get", "val"], 0, 10],
+      } as any);
+      expect(result[2].paint["circle-radius"]).toEqual([
+        "all",
+        [">=", ["get", "val"], 0],
+        ["<=", ["get", "val"], 10],
+      ]);
+    });
+
+    it("handles nested expressions (case with color sub-expressions)", () => {
+      const expr = [
+        "case",
+        ["get", "active"],
+        ["color", 0, 255, 0],
+        ["color", 255, 0, 0],
+      ];
+      const result = contextStyleToMaplibreLayers({
+        "fill-color": expr,
+      } as any);
+      expect(result[0].paint["fill-color"]).toEqual([
+        "case",
+        ["get", "active"],
+        ["rgb", 0, 255, 0],
+        ["rgb", 255, 0, 0],
+      ]);
+    });
+
+    it("still works with literal values (regression)", () => {
+      const result = contextStyleToMaplibreLayers({
+        "fill-color": "red",
+        "stroke-width": 3,
+      } as any);
+      expect(result[0].paint["fill-color"]).toBe("red");
+      expect(result[1].paint["line-width"]).toBe(3);
+    });
+
+    it("does not treat numeric arrays as expressions", () => {
+      const result = contextStyleToMaplibreLayers({
+        "stroke-color": "red",
+        "stroke-line-dash": [2, 4],
+      } as any);
+      expect(result[1].paint["line-dasharray"]).toEqual([2, 4]);
+    });
+
+    it("warns on unsupported operators like 'resolution'", () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const result = contextStyleToMaplibreLayers({
+        "fill-color": ["resolution"],
+      } as any);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("resolution"),
+      );
+      expect(result[0].paint["fill-color"]).toBeUndefined();
+      warnSpy.mockRestore();
     });
   });
 });
