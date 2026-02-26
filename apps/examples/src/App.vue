@@ -15,6 +15,8 @@ import ExampleMaplibreRaw from '@/examples/Example-Maplibre.vue?raw'
 import ExampleMaplibre from '@/examples/Example-Maplibre.vue'
 import ExampleGeoTIFF from '@/examples/Example-GeoTIFF.vue'
 import ExampleGeoTIFFRaw from '@/examples/Example-GeoTIFF.vue?raw'
+import ExampleMaplibreCOG from '@/examples/Example-MaplibreCOG.vue'
+import ExampleMaplibreCOGRaw from '@/examples/Example-MaplibreCOG.vue?raw'
 import { onMounted, ref } from 'vue'
 import hljs from 'highlight.js'
 import '@geospatial-sdk/elements'
@@ -104,6 +106,13 @@ onMounted(() => {
       :source-code="ExampleGeoTIFFRaw"
     >
       <ExampleGeoTIFF></ExampleGeoTIFF>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 9: Maplibre COG"
+      example-id="example09"
+      :source-code="ExampleMaplibreCOGRaw"
+    >
+      <ExampleMaplibreCOG></ExampleMaplibreCOG>
     </ExampleContainer>
   </div>
 </template>

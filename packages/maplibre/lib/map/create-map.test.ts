@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
+  MAP_CTX_LAYER_GEOTIFF_FIXTURE,
   MAP_CTX_LAYER_OGCAPI_FIXTURE,
   MAP_CTX_LAYER_WFS_FIXTURE,
   MAP_CTX_LAYER_WMS_FIXTURE,
@@ -367,6 +368,38 @@ describe("MapContextService", () => {
             },
           },
         });
+      });
+    });
+
+    describe("GeoTIFF", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_GEOTIFF_FIXTURE;
+        style = (await createLayer(layerModel)) as PartialStyleSpecification;
+      });
+      it("create a raster layer and source", () => {
+        const sourceId = "123456";
+        const sourcesIds = Object.keys(style.sources);
+        expect(sourcesIds.length).toBe(1);
+        expect(sourcesIds[0]).toBe(sourceId);
+
+        const source = style.sources[sourceId] as RasterSourceSpecification;
+        expect(source.type).toBe("raster");
+        expect(source.url).toBe(
+          "cog://https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/Q/WD/2020/7/S2A_36QWD_20200701_0_L2A/TCI.tif",
+        );
+        expect(source.tileSize).toBe(256);
+      });
+      it("create a layer with correct properties", () => {
+        expect(style.layers.length).toBe(1);
+        const layer = style.layers[0] as RasterLayerSpecification;
+        const metadata = layer.metadata as LayerMetadataSpecification;
+
+        expect(layer.id).toBe("123456");
+        expect(layer.type).toBe("raster");
+        expect(layer.source).toBe("123456");
+        expect(layer.paint?.["raster-opacity"]).toBe(1);
+        expect(layer.layout?.visibility).toBe("visible");
+        expect(metadata.layerHash).toBeTypeOf("string");
       });
     });
 
