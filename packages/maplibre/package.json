@@ -27,10 +27,12 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "maplibre-gl": "^5.19.0"
+    "maplibre-gl": "^5.19.0",
+    "@geomatico/maplibre-cog-protocol": "^0.8.0"
   },
   "peerDependencies": {
-    "maplibre-gl": "^5.19.0"
+    "maplibre-gl": "^5.19.0",
+    "@geomatico/maplibre-cog-protocol": "^0.8.0"
   },
   "dependencies": {
     "@geospatial-sdk/core": "^0.0.5-alpha.2"

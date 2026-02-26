@@ -5,7 +5,8 @@ import {
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 
-import { LayerSpecification, Map, MapOptions } from "maplibre-gl";
+import { addProtocol, LayerSpecification, Map, MapOptions } from "maplibre-gl";
+import { cogProtocol } from "@geomatico/maplibre-cog-protocol";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -21,6 +22,8 @@ import {
   LayerMetadataSpecification,
   PartialStyleSpecification,
 } from "../maplibre.models.js";
+
+let cogProtocolRegistered = false;
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
@@ -134,6 +137,36 @@ export async function createLayer(
           [sourceId]: {
             type: "raster",
             tiles: [layerModel.url],
+            tileSize: 256,
+          },
+        },
+        layers: [
+          {
+            id: layerId,
+            type: "raster",
+            source: sourceId,
+            paint: {
+              "raster-opacity": layerModel.opacity ?? 1,
+            },
+            layout: {
+              visibility: layerModel.visibility === false ? "none" : "visible",
+            },
+            metadata,
+          },
+        ],
+      };
+    }
+    case "geotiff": {
+      if (!cogProtocolRegistered) {
+        addProtocol("cog", cogProtocol);
+        cogProtocolRegistered = true;
+      }
+      const sourceId = layerId;
+      return {
+        sources: {
+          [sourceId]: {
+            type: "raster",
+            url: `cog://${layerModel.url}`,
             tileSize: 256,
           },
         },
