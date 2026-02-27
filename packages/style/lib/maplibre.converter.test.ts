@@ -526,6 +526,84 @@ describe("openLayersStyleToMapLibreLayers", () => {
         },
       ],
     },
+    {
+      name: "style based on resolution",
+      input: {
+        "fill-color": [
+          "interpolate",
+          ["linear"],
+          ["resolution"],
+          0,
+          "red",
+          1000,
+          "blue",
+        ],
+      },
+      expected: [
+        {
+          type: "fill",
+          paint: {
+            "fill-color": [
+              "interpolate",
+              ["linear"],
+              // resolution is computed from zoom level
+              ["/", 156543.03392804097, ["^", 2, ["zoom"]]],
+              0,
+              "red",
+              1000,
+              "blue",
+            ],
+          },
+          filter: ["==", ["geometry-type"], "Polygon"],
+        },
+      ],
+    },
+    {
+      name: "style based on time",
+      input: {
+        "fill-color": [
+          "interpolate",
+          ["linear"],
+          ["time"],
+          0,
+          "red",
+          100000,
+          "blue",
+        ],
+      },
+      expected: [
+        {
+          type: "fill",
+          paint: {
+            "fill-color": [
+              "interpolate",
+              ["linear"],
+              0, // time gets converted to 0
+              0,
+              "red",
+              100000,
+              "blue",
+            ],
+          },
+          filter: ["==", ["geometry-type"], "Polygon"],
+        },
+      ],
+    },
+    {
+      name: "style relying on external variables",
+      input: {
+        "fill-color": ["case", ["var", "isSelected"], true, "red", "yellow"],
+      },
+      expected: [
+        {
+          type: "fill",
+          paint: {
+            "fill-color": ["case", 0 as any, true, "red", "yellow"],
+          },
+          filter: ["==", ["geometry-type"], "Polygon"],
+        },
+      ],
+    },
   ];
 
   testCases.forEach(({ name, input, expected }) => {
@@ -537,19 +615,12 @@ describe("openLayersStyleToMapLibreLayers", () => {
 
   it("warns on unsupported operators like 'resolution'", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = openLayersStyleToMapLibreLayers({
-      "fill-color": ["resolution"],
+    openLayersStyleToMapLibreLayers({
+      "fill-color": ["var"],
+      "stroke-width": ["time"],
     });
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("resolution"));
-    expect(result).toEqual([
-      {
-        type: "fill",
-        paint: {
-          "fill-color": undefined,
-        },
-        filter: ["==", ["geometry-type"], "Polygon"],
-      },
-    ]);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("var"));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("time"));
     warnSpy.mockRestore();
   });
 });

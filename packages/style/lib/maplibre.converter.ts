@@ -9,12 +9,7 @@ const OL_TO_MAPLIBRE_OPERATORS: Record<string, string> = {
   string: "to-string",
 };
 
-const UNSUPPORTED_OPERATORS = new Set([
-  "resolution",
-  "time",
-  "band",
-  "palette",
-]);
+const UNSUPPORTED_OPERATORS = new Set(["band", "palette", "var", "time"]);
 
 function isExpression(value: unknown): value is OlExpression {
   return Array.isArray(value) && typeof value[0] === "string";
@@ -25,7 +20,7 @@ function convertOlExpression(expr: OlExpression): unknown {
 
   if (UNSUPPORTED_OPERATORS.has(operator)) {
     console.warn(`Unsupported OL expression operator "${operator}", skipping.`);
-    return undefined;
+    return 0;
   }
 
   const convertedArgs = args.map((arg) => convertValue(arg));
@@ -45,6 +40,12 @@ function convertOlExpression(expr: OlExpression): unknown {
       return ["rgba", ...convertedArgs];
     }
     return ["rgb", ...convertedArgs];
+  }
+
+  if (operator === "resolution") {
+    // this assumes that the projection is web mercator
+    const maxResolutionAtZoom0 = 156543.03392804097;
+    return ["/", maxResolutionAtZoom0, ["^", 2, ["zoom"]]];
   }
 
   const mappedOperator = OL_TO_MAPLIBRE_OPERATORS[operator] ?? operator;
