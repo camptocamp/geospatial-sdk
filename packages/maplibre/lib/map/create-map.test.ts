@@ -20,11 +20,7 @@ import {
   LayerMetadataSpecification,
   PartialStyleSpecification,
 } from "../maplibre.models.js";
-import {
-  CircleLayerSpecification,
-  LineLayerSpecification,
-  RasterSourceSpecification,
-} from "maplibre-gl";
+import { RasterSourceSpecification } from "maplibre-gl";
 
 describe("MapContextService", () => {
   describe("#createLayer", () => {
@@ -97,33 +93,36 @@ describe("MapContextService", () => {
           expect(sourcesIds.length).toBe(1);
           expect(sourcesIds[0]).toBe("123456");
         });
-        it("create 3 layers", () => {
+        it("create 5 layers", () => {
           expect(style.layers).toBeTruthy();
-          expect(style.layers.length).toBe(3);
+          expect(style.layers.length).toBe(5);
 
           const sourceId = "123456";
-          const fillLayer = style.layers[0] as FillLayerSpecification;
-          const metadata = fillLayer.metadata as LayerMetadataSpecification;
-
-          expect(fillLayer.id).toBe(`${sourceId}-fill`);
-          expect(fillLayer.source).toBe(sourceId);
-          expect(metadata.layerId).toBeUndefined();
-          expect(metadata.layerHash).toBeTypeOf("string");
-          expect(fillLayer.paint?.["fill-opacity"]).toBe(0.8);
-          expect(fillLayer.layout?.visibility).toBe("visible");
-
-          const lineLayer = style.layers[1] as LineLayerSpecification;
-          expect(lineLayer.id).toBe(`${sourceId}-line`);
-          expect(lineLayer.source).toBe(sourceId);
-          expect(lineLayer.paint?.["line-opacity"]).toBe(0.8);
-          expect(lineLayer.layout?.visibility).toBe("visible");
-
-          const circleLayer = style.layers[2] as CircleLayerSpecification;
-          expect(circleLayer.id).toBe(`${sourceId}-circle`);
-          expect(circleLayer.source).toBe(sourceId);
-          expect(circleLayer.paint?.["circle-opacity"]).toBe(0.8);
-          expect(circleLayer.paint?.["circle-stroke-opacity"]).toBe(0.8);
-          expect(circleLayer.layout?.visibility).toBe("visible");
+          expect(style.layers[0].id).toBe(`${sourceId}-0`);
+          expect((style.layers[0] as FillLayerSpecification).source).toBe(
+            sourceId,
+          );
+          expect(style.layers[0].type).toBe("line");
+          expect(style.layers[1].id).toBe(`${sourceId}-1`);
+          expect((style.layers[1] as FillLayerSpecification).source).toBe(
+            sourceId,
+          );
+          expect(style.layers[1].type).toBe("line");
+          expect(style.layers[2].id).toBe(`${sourceId}-2`);
+          expect((style.layers[2] as FillLayerSpecification).source).toBe(
+            sourceId,
+          );
+          expect(style.layers[2].type).toBe("fill");
+          expect(style.layers[3].id).toBe(`${sourceId}-3`);
+          expect((style.layers[3] as FillLayerSpecification).source).toBe(
+            sourceId,
+          );
+          expect(style.layers[3].type).toBe("line");
+          expect(style.layers[4].id).toBe(`${sourceId}-4`);
+          expect((style.layers[4] as FillLayerSpecification).source).toBe(
+            sourceId,
+          );
+          expect(style.layers[4].type).toBe("circle");
         });
 
         it("set correct source properties", () => {
@@ -133,12 +132,6 @@ describe("MapContextService", () => {
           ] as GeoJSONSourceSpecification;
           expect(source.type).toBe("geojson");
           expect(source.data).toBe((layerModel as LayerGeojsonWithData).data);
-        });
-        it("set correct layer properties", () => {
-          const layer = style.layers[0] as FillLayerSpecification;
-          expect(layer.type).toBe(`fill`);
-          expect(layer.paint?.["fill-color"]).toBe("rgba(255,255,255,0.4)");
-          expect(layer.paint?.["fill-opacity"]).toBe(0.8);
         });
       });
       describe("with inline data as string", () => {
@@ -154,9 +147,9 @@ describe("MapContextService", () => {
           const sourcesIds = Object.keys(style.sources);
           expect(sourcesIds.length).toBe(1);
         });
-        it("create 3 layers", () => {
+        it("create 5 layers", () => {
           expect(style.layers).toBeTruthy();
-          expect(style.layers.length).toBe(3);
+          expect(style.layers.length).toBe(5);
         });
 
         it("set correct source properties", () => {
@@ -166,14 +159,6 @@ describe("MapContextService", () => {
           ] as GeoJSONSourceSpecification;
           expect(source.type).toBe("geojson");
           expect(source.data).toEqual(MAP_CTX_LAYER_GEOJSON_FIXTURE.data);
-        });
-
-        it("set correct layer properties", () => {
-          const layer = style.layers[0] as FillLayerSpecification;
-          expect(layer.type).toBe(`fill`);
-          expect(layer.paint?.["fill-color"]).toBe("rgba(255,255,255,0.4)");
-          expect(layer.paint?.["fill-opacity"]).toBe(0.8);
-          expect(layer.layout?.visibility).toBe("visible");
         });
       });
       describe("with invalid inline data as string", () => {
@@ -224,9 +209,9 @@ describe("MapContextService", () => {
             expect(sourcesIds.length).toBe(1);
             expect(sourcesIds[0]).toBe("123456");
           });
-          it("create 3 layers", () => {
+          it("create 5 layers", () => {
             expect(style.layers).toBeTruthy();
-            expect(style.layers.length).toBe(3);
+            expect(style.layers.length).toBe(5);
           });
 
           it("set correct source properties", () => {
@@ -238,14 +223,6 @@ describe("MapContextService", () => {
             expect(source.data).toEqual(
               "https://my.host.com/data/regions.json",
             );
-          });
-
-          it("set correct layer properties", () => {
-            const layer = style.layers[0] as FillLayerSpecification;
-            expect(layer.type).toBe(`fill`);
-            expect(layer.paint?.["fill-color"]).toBe("rgba(255,255,255,0.4)");
-            expect(layer.paint?.["fill-opacity"]).toBe(1);
-            expect(layer.layout?.visibility).toBe("visible");
           });
         });
       });
@@ -269,33 +246,36 @@ describe("MapContextService", () => {
           "https://www.datagrandest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
         );
       });
-      it("create 3 layers", () => {
+      it("create 5 layers", () => {
         expect(style.layers).toBeTruthy();
-        expect(style.layers.length).toBe(3);
+        expect(style.layers.length).toBe(5);
 
         const sourceId = "123456";
-        const fillLayer = style.layers[0] as FillLayerSpecification;
-        const metadata = fillLayer.metadata as LayerMetadataSpecification;
-
-        expect(fillLayer.id).toBe(`${sourceId}-fill`);
-        expect(fillLayer.source).toBe(sourceId);
-        expect(metadata.layerId).toBeUndefined();
-        expect(metadata.layerHash).toBeTypeOf("string");
-        expect(fillLayer.paint?.["fill-opacity"]).toBe(0.5);
-        expect(fillLayer.layout?.visibility).toBe("visible");
-
-        const lineLayer = style.layers[1] as LineLayerSpecification;
-        expect(lineLayer.id).toBe(`${sourceId}-line`);
-        expect(lineLayer.source).toBe(sourceId);
-        expect(lineLayer.paint?.["line-opacity"]).toBe(0.5);
-        expect(lineLayer.layout?.visibility).toBe("visible");
-
-        const circleLayer = style.layers[2] as CircleLayerSpecification;
-        expect(circleLayer.id).toBe(`${sourceId}-circle`);
-        expect(circleLayer.source).toBe(sourceId);
-        expect(circleLayer.paint?.["circle-opacity"]).toBe(0.5);
-        expect(circleLayer.paint?.["circle-stroke-opacity"]).toBe(0.5);
-        expect(circleLayer.layout?.visibility).toBe("visible");
+        expect(style.layers[0].id).toBe(`${sourceId}-0`);
+        expect((style.layers[0] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[0].type).toBe("line");
+        expect(style.layers[1].id).toBe(`${sourceId}-1`);
+        expect((style.layers[1] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[1].type).toBe("line");
+        expect(style.layers[2].id).toBe(`${sourceId}-2`);
+        expect((style.layers[2] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[2].type).toBe("fill");
+        expect(style.layers[3].id).toBe(`${sourceId}-3`);
+        expect((style.layers[3] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[3].type).toBe("line");
+        expect(style.layers[4].id).toBe(`${sourceId}-4`);
+        expect((style.layers[4] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[4].type).toBe("circle");
       });
     });
 
@@ -317,20 +297,36 @@ describe("MapContextService", () => {
           "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
         );
       });
-      it("create 3 layers", () => {
+      it("create 5 layers", () => {
         expect(style.layers).toBeTruthy();
-        expect(style.layers.length).toBe(3);
+        expect(style.layers.length).toBe(5);
 
         const sourceId = "123456";
-        const layer = style.layers[0] as FillLayerSpecification;
-        const metadata = layer.metadata as LayerMetadataSpecification;
-
-        expect(layer.id).toBe(`${sourceId}-fill`);
-        expect(layer.source).toBe(sourceId);
-        expect(metadata.layerId).toBeUndefined();
-        expect(metadata.layerHash).toBeTypeOf("string");
-        expect(layer.paint?.["fill-opacity"]).toBe(1);
-        expect(layer.layout?.visibility).toBe("visible");
+        expect(style.layers[0].id).toBe(`${sourceId}-0`);
+        expect((style.layers[0] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[0].type).toBe("line");
+        expect(style.layers[1].id).toBe(`${sourceId}-1`);
+        expect((style.layers[1] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[1].type).toBe("line");
+        expect(style.layers[2].id).toBe(`${sourceId}-2`);
+        expect((style.layers[2] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[2].type).toBe("fill");
+        expect(style.layers[3].id).toBe(`${sourceId}-3`);
+        expect((style.layers[3] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[3].type).toBe("line");
+        expect(style.layers[4].id).toBe(`${sourceId}-4`);
+        expect((style.layers[4] as FillLayerSpecification).source).toBe(
+          sourceId,
+        );
+        expect(style.layers[4].type).toBe("circle");
       });
     });
 

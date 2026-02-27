@@ -38,9 +38,9 @@ export function createDatasetFromGeoJsonLayer(
   const partialLayers = openLayersStyleToMapLibreLayers(
     layerModel.style ?? defaultStyle,
   );
-  const layers = partialLayers.map((layer) => ({
+  const layers = partialLayers.map((layer, index) => ({
     ...layer,
-    id: `${sourceId}-${layer.type}`,
+    id: `${sourceId}-${index}`,
     source: sourceId,
     paint: {
       ...layer.paint,
