@@ -33,7 +33,8 @@
     "maplibre-gl": "^5.19.0"
   },
   "dependencies": {
-    "@geospatial-sdk/core": "^0.0.5-alpha.2"
+    "@geospatial-sdk/core": "^0.0.5-alpha.2",
+    "@geospatial-sdk/style": "^0.0.5-alpha.2"
   },
   "gitHead": "99dbb945a303b96e576a02a02bc0590785456bd3"
 }
