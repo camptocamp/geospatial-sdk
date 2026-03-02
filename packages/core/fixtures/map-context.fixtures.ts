@@ -3,8 +3,8 @@ import {
   LayerGeojsonWithData,
   LayerGeojsonWithUrl,
   MapContext,
-  MapContextLayerGeotiff,
   MapContextLayerGeojson,
+  MapContextLayerGeotiff,
   MapContextLayerMapLibreStyle,
   MapContextLayerOgcApi,
   MapContextLayerWfs,
@@ -132,6 +132,8 @@ export const SAMPLE_LAYER3: MapContextLayerGeojson = deepFreeze({
     {
       "circle-radius": 3,
       "circle-fill-color": "red",
+      "fill-color": "orange",
+      "stroke-width": 2,
     },
   ],
 });

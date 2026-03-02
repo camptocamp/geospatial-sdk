@@ -6,12 +6,13 @@ import {
   LayerSpecificationWithSource,
 } from "../maplibre.models.js";
 import { FeatureCollection, Geometry } from "geojson";
-import { contextStyleToMaplibreLayers } from "./style.helpers.js";
 import {
+  defaultStyle,
   getHash,
   MapContextBaseLayer,
   MapContextLayer,
 } from "@geospatial-sdk/core";
+import { openLayersStyleToMapLibreLayers } from "@geospatial-sdk/style";
 
 function getOpacityPaintPropNames(layerType: string): string[] {
   switch (layerType) {
@@ -34,10 +35,12 @@ export function createDatasetFromGeoJsonLayer(
   metadata: LayerMetadataSpecification,
 ): Dataset {
   const sourceId = generateLayerId();
-  const partialLayers = contextStyleToMaplibreLayers(layerModel.style);
-  const layers = partialLayers.map((layer) => ({
+  const partialLayers = openLayersStyleToMapLibreLayers(
+    layerModel.style ?? defaultStyle,
+  );
+  const layers = partialLayers.map((layer, index) => ({
     ...layer,
-    id: `${sourceId}-${layer.type}`,
+    id: `${sourceId}-${index}`,
     source: sourceId,
     paint: {
       ...layer.paint,

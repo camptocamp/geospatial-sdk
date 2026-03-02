@@ -20,7 +20,10 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['@geospatial-sdk/geocoding', '@geospatial-sdk/openlayers'],
-    exclude: []
-  }
+    include: [],
+    exclude: [],
+    esbuildOptions: {
+      target: "es2022",
+    },
+  },
 })

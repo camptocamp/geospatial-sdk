@@ -387,6 +387,14 @@ describe("applyContextDiffToMap (mocked Map)", () => {
     });
     describe("4 layers moved", () => {
       let layer1WithId: MapContextLayer;
+      const layer4WithStyle = {
+        ...SAMPLE_LAYER4,
+        style: {
+          "stroke-width": 5,
+          "fill-color": "blue",
+          "circle-radius": 10,
+        },
+      };
 
       beforeEach(async () => {
         layer1WithId = {
@@ -395,7 +403,7 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         };
         const context = {
           ...SAMPLE_CONTEXT,
-          layers: [layer1WithId, SAMPLE_LAYER3, SAMPLE_LAYER4, SAMPLE_LAYER2],
+          layers: [layer1WithId, SAMPLE_LAYER3, layer4WithStyle, SAMPLE_LAYER2],
         };
         await resetMapFromContext(map, context);
         vi.clearAllMocks();
@@ -421,7 +429,7 @@ describe("applyContextDiffToMap (mocked Map)", () => {
               previousPosition: 0,
             },
             {
-              layer: SAMPLE_LAYER4,
+              layer: layer4WithStyle,
               newPosition: 0,
               previousPosition: 2,
             },
@@ -434,17 +442,20 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         expect(map.getStyle().layers).toEqual([
           expect.objectContaining({
             metadata: {
-              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER4),
+              layerHash:
+                generateLayerHashWithoutUpdatableProps(layer4WithStyle),
             },
           }),
           expect.objectContaining({
             metadata: {
-              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER4),
+              layerHash:
+                generateLayerHashWithoutUpdatableProps(layer4WithStyle),
             },
           }),
           expect.objectContaining({
             metadata: {
-              layerHash: generateLayerHashWithoutUpdatableProps(SAMPLE_LAYER4),
+              layerHash:
+                generateLayerHashWithoutUpdatableProps(layer4WithStyle),
             },
           }),
           expect.objectContaining({
