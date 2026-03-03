@@ -56,6 +56,16 @@ describe("createLegendFromLayer", () => {
     expect(img?.src).toContain("HEIGHT=100");
   });
 
+  it("includes STYLE parameter in WMS legend URL when layer has a style", async () => {
+    const result = await createLegendFromLayer(
+      { ...baseWmsLayer, style: "my_custom_style" },
+    );
+
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toContain("STYLE=my_custom_style");
+  });
+
   it("creates a legend for a valid WMTS layer with legend URL", async () => {
     const mockLegendUrl = "https://example.com/legend.png";
     const mockIsReady = {
@@ -96,6 +106,26 @@ describe("createLegendFromLayer", () => {
     expect(errorSpan?.textContent).toBe(
       "Legend not available for test-wmts-layer",
     );
+  });
+
+  it("uses matching style legend URL for WMTS layer when layer.style is set", async () => {
+    const mockIsReady = {
+      getLayerByName: () => ({
+        styles: [
+          { name: "default", legendUrl: "https://example.com/default-legend.png" },
+          { name: "night", legendUrl: "https://example.com/night-legend.png" },
+        ],
+      }),
+    } as unknown as WmtsEndpoint;
+
+    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockImplementation(function () {
+      return Promise.resolve(mockIsReady);
+    });
+
+    const result = await createLegendFromLayer({ ...baseWmtsLayer, style: "night" });
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toBe("https://example.com/night-legend.png");
   });
 
   it("returns null for invalid layer type", async () => {
