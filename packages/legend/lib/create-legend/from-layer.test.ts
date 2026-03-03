@@ -57,9 +57,10 @@ describe("createLegendFromLayer", () => {
   });
 
   it("includes STYLE parameter in WMS legend URL when layer has a style", async () => {
-    const result = await createLegendFromLayer(
-      { ...baseWmsLayer, style: "my_custom_style" },
-    );
+    const result = await createLegendFromLayer({
+      ...baseWmsLayer,
+      style: "my_custom_style",
+    });
 
     const img = (result as HTMLElement).querySelector("img");
 
@@ -112,7 +113,10 @@ describe("createLegendFromLayer", () => {
     const mockIsReady = {
       getLayerByName: () => ({
         styles: [
-          { name: "default", legendUrl: "https://example.com/default-legend.png" },
+          {
+            name: "default",
+            legendUrl: "https://example.com/default-legend.png",
+          },
           { name: "night", legendUrl: "https://example.com/night-legend.png" },
         ],
       }),
@@ -122,7 +126,10 @@ describe("createLegendFromLayer", () => {
       return Promise.resolve(mockIsReady);
     });
 
-    const result = await createLegendFromLayer({ ...baseWmtsLayer, style: "night" });
+    const result = await createLegendFromLayer({
+      ...baseWmtsLayer,
+      style: "night",
+    });
     const img = (result as HTMLElement).querySelector("img");
 
     expect(img?.src).toBe("https://example.com/night-legend.png");
