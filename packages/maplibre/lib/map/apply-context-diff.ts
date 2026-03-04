@@ -155,6 +155,10 @@ export async function applyContextDiffToMap(
           duration: 1000,
         },
       );
+    } else if (viewChanges && "center" in viewChanges) {
+      const { center, zoom } = viewChanges;
+      if (center) map.setCenter(center as [number, number]);
+      if (zoom !== undefined) map.setZoom(zoom);
     }
   }
 
