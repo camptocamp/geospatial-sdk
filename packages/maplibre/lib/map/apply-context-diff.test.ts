@@ -325,6 +325,34 @@ describe("applyContextDiffToMap (mocked Map)", () => {
     );
   });
 
+  it("calls setCenter and setZoom for viewChanges with center and zoom", async () => {
+    diff = {
+      layersAdded: [],
+      layersChanged: [],
+      layersRemoved: [],
+      layersReordered: [],
+      viewChanges: { center: [2.35, 48.86], zoom: 12 },
+    };
+    await applyContextDiffToMap(map, diff);
+    expect(map.setCenter).toHaveBeenCalledWith([2.35, 48.86]);
+    expect(map.setZoom).toHaveBeenCalledWith(12);
+    expect(map.fitBounds).not.toHaveBeenCalled();
+  });
+
+  it("calls setCenter without setZoom when only center is provided", async () => {
+    diff = {
+      layersAdded: [],
+      layersChanged: [],
+      layersRemoved: [],
+      layersReordered: [],
+      viewChanges: { center: [2.35, 48.86] },
+    };
+    await applyContextDiffToMap(map, diff);
+    expect(map.setCenter).toHaveBeenCalledWith([2.35, 48.86]);
+    expect(map.setZoom).not.toHaveBeenCalled();
+    expect(map.fitBounds).not.toHaveBeenCalled();
+  });
+
   describe("reordering", () => {
     describe("2 layers inverted", () => {
       beforeEach(async () => {
