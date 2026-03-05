@@ -36,6 +36,7 @@ function createWmsLegendUrl(
       "LAYER",
       "LAYERTITLE",
       "SLD_VERSION",
+      "STYLE",
       "WIDTH",
       "HEIGHT",
     ]),
@@ -46,7 +47,9 @@ function createWmsLegendUrl(
   legendUrl.searchParams.set("LAYER", layer.name);
   legendUrl.searchParams.set("LAYERTITLE", false.toString()); // Disable layer title for QGIS Server
   legendUrl.searchParams.set("SLD_VERSION", "1.1.0"); // Default SLD version
-
+  if (layer.style !== undefined) {
+    legendUrl.searchParams.set("STYLE", layer.style);
+  }
   if (widthPxHint) {
     legendUrl.searchParams.set("WIDTH", widthPxHint.toString());
   }
@@ -70,12 +73,20 @@ async function createWmtsLegendUrl(
 
   const layerByName = endpoint.getLayerByName(layer.name);
 
-  if (
-    layerByName.styles &&
-    layerByName.styles.length > 0 &&
-    layerByName.styles[0].legendUrl
-  ) {
-    return layerByName.styles[0].legendUrl;
+  if (layerByName.styles && layerByName.styles.length > 0) {
+    // If a specific style is requested, find its legend URL
+    if (layer.style !== undefined) {
+      const matchingStyle = layerByName.styles.find(
+        (s: { name?: string }) => s.name === layer.style,
+      );
+      if (matchingStyle?.legendUrl) {
+        return matchingStyle.legendUrl;
+      }
+    }
+    // Fall back to the first style's legend URL
+    if (layerByName.styles[0].legendUrl) {
+      return layerByName.styles[0].legendUrl;
+    }
   }
 
   return null;

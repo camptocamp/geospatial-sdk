@@ -15,6 +15,8 @@ import ExampleMaplibreRaw from '@/examples/Example-Maplibre.vue?raw'
 import ExampleMaplibre from '@/examples/Example-Maplibre.vue'
 import ExampleGeoTIFF from '@/examples/Example-GeoTIFF.vue'
 import ExampleGeoTIFFRaw from '@/examples/Example-GeoTIFF.vue?raw'
+import ExampleLegend from '@/examples/Example-Legend.vue'
+import ExampleLegendRaw from '@/examples/Example-Legend.vue?raw'
 import { onMounted, ref } from 'vue'
 import hljs from 'highlight.js'
 import '@geospatial-sdk/elements'
@@ -104,6 +106,13 @@ onMounted(() => {
       :source-code="ExampleGeoTIFFRaw"
     >
       <ExampleGeoTIFF></ExampleGeoTIFF>
+    </ExampleContainer>
+    <ExampleContainer
+      example-name="Example 9: Legend with style switching"
+      example-id="example09"
+      :source-code="ExampleLegendRaw"
+    >
+      <ExampleLegend></ExampleLegend>
     </ExampleContainer>
   </div>
 </template>
