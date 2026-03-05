@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { applyContextDiffToMap, createMapFromContext } from '@geospatial-sdk/openlayers'
-import { computeMapContextDiff, type MapContext, type MapContextLayerWms } from '@geospatial-sdk/core'
+import { computeMapContextDiff, createViewFromLayer, updateLayerInContext, type MapContextLayerWms } from '@geospatial-sdk/core'
 import { createLegendFromLayer } from '@geospatial-sdk/legend'
+import { WmsEndpoint } from '@camptocamp/ogc-client'
 import ButtonSimple from '@/components/ButtonSimple.vue'
+import { DEFAULT_CONTEXT } from '@/constants'
 
-const wmsUrl = 'https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/limites_admin.qgz'
-const styles = ['Etat d\'avancement', 'aplat bleu', 'aplat blanc']
+const wmsLayer: MapContextLayerWms = {
+  type: 'wms',
+  url: 'https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/limites_admin.qgz',
+  name: 'scot_en_cours'
+}
 
 const mapRoot = ref<HTMLElement>()
 const legendRoot = ref<HTMLElement>()
-const currentStyle = ref(styles[0])
+const styles = ref<string[]>([])
+const currentStyle = ref('')
 let map: any
-let context: MapContext = {
-  layers: [
-    { type: 'xyz', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' },
-    { type: 'wms', url: wmsUrl, name: 'scot_en_cours', style: styles[0] }
-  ],
-  view: { zoom: 8, center: [2.5, 49.9] }
+let context = {
+  ...DEFAULT_CONTEXT,
+  layers: [...DEFAULT_CONTEXT.layers, wmsLayer]
 }
 
 async function showLegend(layer: MapContextLayerWms) {
@@ -27,15 +30,21 @@ async function showLegend(layer: MapContextLayerWms) {
 }
 
 async function switchStyle(style: string) {
-  const layer: MapContextLayerWms = { type: 'wms', url: wmsUrl, name: 'scot_en_cours', style }
-  const newContext: MapContext = { ...context, layers: [context.layers[0], layer] }
+  const newContext = updateLayerInContext(context, context.layers[1], { style })
   await applyContextDiffToMap(map, computeMapContextDiff(newContext, context))
   context = newContext
   currentStyle.value = style
-  await showLegend(layer)
+  await showLegend(newContext.layers[1] as MapContextLayerWms)
 }
 
 onMounted(async () => {
+  const endpoint = await new WmsEndpoint(wmsLayer.url).isReady()
+  const layerInfo = endpoint.getLayerByName(wmsLayer.name)
+  styles.value = layerInfo?.styles?.slice(-3).map(s => s.name) ?? []
+  currentStyle.value = styles.value[0] ?? ''
+  context = updateLayerInContext(context, wmsLayer, { style: currentStyle.value })
+  const view = await createViewFromLayer(wmsLayer)
+  if (view) context = { ...context, view }
   map = await createMapFromContext(context, mapRoot.value)
   await showLegend(context.layers[1] as MapContextLayerWms)
 })
