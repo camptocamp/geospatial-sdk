@@ -50,7 +50,7 @@ export async function createLayer(
         widthPx: 256,
         heightPx: 256,
         extent: [0, 0, 0, 0], // will be replaced by maplibre-gl
-        outputFormat: "image/png",
+        outputFormat: layerModel.format ?? "image/png",
         crs: "EPSG:3857",
       });
       url = removeSearchParams(url, ["bbox"]);

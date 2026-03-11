@@ -97,6 +97,13 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
    * Default value: `true` (use tiled requests)
    */
   useTiles?: boolean;
+
+  /**
+   * The image format to use for WMS requests, e.g. `"image/png"` or `"image/jpeg"`.
+   *
+   * If not specified, the WMS server's default format will be used.
+   */
+  format?: string;
 }
 
 export interface MapContextLayerWmts extends MapContextBaseLayer {
