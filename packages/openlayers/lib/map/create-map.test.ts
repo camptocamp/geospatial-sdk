@@ -193,6 +193,18 @@ describe("MapContextService", () => {
           TILED: true,
         });
       });
+      it("sets custom WMS FORMAT param when provided", async () => {
+        layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, format: "image/jpeg" };
+        layer = await createLayer(layerModel);
+        const source = layer.getSource() as TileWMS;
+        const params = source.getParams();
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          FORMAT: "image/jpeg",
+          STYLES: (layerModel as MapContextLayerWms).style,
+          TILED: true,
+        });
+      });
       it("set correct url without existing REQUEST and SERVICE params", () => {
         const source = layer.getSource() as TileWMS;
         const urls = source.getUrls() || [];
@@ -263,6 +275,21 @@ describe("MapContextService", () => {
           const params = source.getParams();
           expect(params).toEqual({
             LAYERS: (layerModel as MapContextLayerWms).name,
+            STYLES: (layerModel as MapContextLayerWms).style,
+          });
+        });
+        it("sets custom WMS FORMAT param when provided", async () => {
+          layerModel = {
+            ...MAP_CTX_LAYER_WMS_FIXTURE,
+            useTiles: false,
+            format: "image/jpeg",
+          };
+          layer = await createLayer(layerModel);
+          const source = layer.getSource() as ImageWMS;
+          const params = source.getParams();
+          expect(params).toEqual({
+            LAYERS: (layerModel as MapContextLayerWms).name,
+            FORMAT: "image/jpeg",
             STYLES: (layerModel as MapContextLayerWms).style,
           });
         });

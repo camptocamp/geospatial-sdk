@@ -49,6 +49,14 @@ describe("MapContextService", () => {
           "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&BBOX={bbox-epsg-3857}",
         ]);
       });
+      it("uses the provided WMS output format", async () => {
+        layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, format: "image/jpeg" };
+        style = (await createLayer(layerModel)) as PartialStyleSpecification;
+        const source = style.sources["123456"] as RasterSourceSpecification;
+        expect(source.tiles).toEqual([
+          "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fjpeg&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&BBOX={bbox-epsg-3857}",
+        ]);
+      });
       it("create a layer", () => {
         expect(style.layers).toBeTruthy();
         expect(style.layers.length).toBe(1);

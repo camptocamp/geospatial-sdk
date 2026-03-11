@@ -99,7 +99,7 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   useTiles?: boolean;
 
   /**
-   * The image format to use for WMS requests, e.g. `"image/png"` or `"image/jpeg"`.
+   * The image format MIME type to use for WMS requests, e.g. `"image/png"` or `"image/jpeg"`.
    *
    * If not specified, the WMS server's default format will be used.
    */
