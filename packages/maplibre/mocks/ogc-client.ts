@@ -15,8 +15,10 @@ export class WmsEndpoint {
           latLonBoundingBox: [1.33, 48.81, 4.3, 51.1],
         };
       },
-      getMapUrl: () => {
-        return "https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=image%2Fpng&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&bbox=0%2C0%2C0%2C0";
+      getMapUrl: (_layers, options) => {
+        const outputFormat = options?.outputFormat ?? "image/png";
+        const format = encodeURIComponent(outputFormat);
+        return `https://www.datagrandest.fr/geoserver/region-grand-est/ows?REQUEST=GetMap&SERVICE=WMS&layers=commune_actuelle_3857&styles=&format=${format}&transparent=true&version=1.1.1&height=256&width=256&srs=EPSG%3A3857&bbox=0%2C0%2C0%2C0`;
       },
     });
   }

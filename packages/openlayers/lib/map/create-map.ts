@@ -104,6 +104,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         const url = removeSearchParams(layerModel.url, ["request", "service"]);
         const params = {
           LAYERS: layerModel.name,
+          ...(layerModel.format && { FORMAT: layerModel.format }),
           ...(layerModel.style && { STYLES: layerModel.style }),
         };
         if (layerModel.useTiles === false) {
