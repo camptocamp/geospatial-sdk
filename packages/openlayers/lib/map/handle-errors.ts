@@ -8,7 +8,11 @@ export function tileLoadErrorCatchFunction(
   tile: Tile,
   src: string,
 ) {
-  fetch(src)
+  const referrerPolicy =
+    "getReferrerPolicy" in tile
+      ? (tile as ImageTile).getReferrerPolicy()
+      : undefined;
+  fetch(src, { ...(referrerPolicy && { referrerPolicy }) })
     .then((response) => {
       if (response.ok) {
         response

@@ -84,6 +84,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           layer = new TileLayer({});
           const source = new XYZ({
             url: layerModel.url,
+            referrerPolicy: layerModel.referrerPolicy,
             attributions: layerModel.attributions,
           });
           source.setTileLoadFunction(function (tile: Tile, src: string) {
@@ -112,6 +113,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
             source: new ImageWMS({
               url,
               params,
+              referrerPolicy: layerModel.referrerPolicy,
               attributions: layerModel.attributions,
             }),
           });
@@ -160,6 +162,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
               format: resourceUrl.format,
               url: resourceUrl.url,
               requestEncoding: resourceUrl.encoding,
+              referrerPolicy: layerModel.referrerPolicy,
               tileGrid,
               projection: matrixSet.crs,
               dimensions,
