@@ -112,7 +112,7 @@ const getFeaturesFromWmsSourcesThrottled = throttle(
 
 export async function readFeaturesAtPixel(
   map: OlMap,
-  event: MapBrowserEvent<PointerEvent>,
+  event: MapBrowserEvent,
   layerFilter?: (layer: Layer) => boolean,
 ): Promise<FeaturesByLayerIndex> {
   return new Map([

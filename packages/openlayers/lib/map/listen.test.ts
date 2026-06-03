@@ -687,6 +687,8 @@ describe("event listener registration", () => {
         layer.render(frameState, mockCanvas);
         frameState.tileQueue.loadMoreTiles(1, 1);
         layer.render(frameState, mockCanvas);
+        // flush fetch + response.text() promise chains (2 async levels)
+        await vi.runAllTimersAsync();
       });
       it("emits an error", async () => {
         expect(errorEventCallback).toHaveBeenCalledOnce();

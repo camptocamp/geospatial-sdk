@@ -1,4 +1,5 @@
 import Map from "ol/Map.js";
+import MapBrowserEvent from "ol/MapBrowserEvent.js";
 import MapEvent from "ol/MapEvent.js";
 import { toLonLat } from "ol/proj.js";
 import {
@@ -6,7 +7,6 @@ import {
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
   LayerLoadingErrorEventType,
-  MapClickEvent,
   MapClickEventType,
   MapEventsByType,
   MapExtentChangeEvent,
@@ -35,7 +35,8 @@ function addEventListener<T extends keyof MapEventsByType>(
   eventType: T,
   callback: (event: MapEventsByType[T]) => void,
 ) {
-  map.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (map.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}${eventType}`,
     ({
       target: _target,
@@ -64,7 +65,7 @@ export function listen<T extends keyof MapEventsByType>(
       addEventListener(map, eventType, callback);
       break;
     case MapClickEventType:
-      map.on("click", (event: MapClickEvent) => {
+      map.on("click", (event: MapBrowserEvent) => {
         const coordinate = toLonLat(
           event.coordinate,
           map.getView().getProjection(),
@@ -101,7 +102,8 @@ export function listen<T extends keyof MapEventsByType>(
      */
     case MapExtentChangeEventType:
       registerMapViewStateChangeEvent(map);
-      map.on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (map.on as any)(
         `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
         (event: MapViewStateChangeEvent) =>
           callback({
@@ -112,7 +114,8 @@ export function listen<T extends keyof MapEventsByType>(
       break;
     case SourceLoadErrorType: {
       registerSourceLoadErrorEvent(map);
-      map.on(SourceLoadErrorType, (event: SourceLoadErrorEvent) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (map.on as any)(SourceLoadErrorType, (event: SourceLoadErrorEvent) =>
         callback(event as MapEventsByType[T]),
       );
       break;

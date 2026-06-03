@@ -31,7 +31,7 @@ export function registerFeatureClickEvent(map: Map) {
   const layerFilter = (layer: BaseLayer) =>
     layer.get(`${GEOSPATIAL_SDK_PREFIX}clickable`) !== false;
 
-  map.on("click", async (event: MapBrowserEvent<PointerEvent>) => {
+  map.on("click", async (event: MapBrowserEvent) => {
     const featuresByLayer = await readFeaturesAtPixel(map, event, layerFilter);
     const features = Array.from(featuresByLayer.values()).flat();
     map.dispatchEvent({
@@ -118,7 +118,8 @@ export function propagateLayerStateChangeEventToMap(
   }
 
   // on layer creation error update layer state and redispatch on map
-  layer.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (layer.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}${LayerCreationErrorEventType}`,
     (event: BaseEvent & { error: Error }) => {
       currentLayerState = {
@@ -134,7 +135,8 @@ export function propagateLayerStateChangeEventToMap(
   );
 
   // on layer loading error update layer state and redispatch on map
-  layer.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (layer.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}${LayerLoadingErrorEventType}`,
     (event: BaseEvent & { error: Error; httpStatus?: number }) => {
       currentLoadingStatus = {
@@ -162,7 +164,8 @@ export function propagateLayerStateChangeEventToMap(
   );
 
   // When new information about a layer state is available, add it to the previous state & emit
-  layer.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (layer.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}layer-data-info`,
     (event: MapLayerStateChangeEvent) => {
       currentLayerState = {
@@ -174,7 +177,8 @@ export function propagateLayerStateChangeEventToMap(
   );
 
   // loading state can change over time
-  layer.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (layer.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
     (event: MapLayerStateChangeEvent) => {
       currentLoadingStatus = event.layerState;
@@ -210,7 +214,8 @@ export function registerMapStateChangeEvent(map: Map) {
   }
 
   // collect view and layer states to re-emit them as a global state
-  map.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (map.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
     (event: BaseEvent & MapLayerStateChangeEvent) => {
       const layers = [...currentState.layers];
@@ -219,7 +224,8 @@ export function registerMapStateChangeEvent(map: Map) {
       emitState();
     },
   );
-  map.on(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (map.on as any)(
     `${GEOSPATIAL_SDK_PREFIX}${MapViewStateChangeEventType}`,
     (event: BaseEvent & MapViewStateChangeEvent) => {
       currentState = { ...currentState, view: event.viewState };

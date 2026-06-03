@@ -30,7 +30,7 @@
   "devDependencies": {
     "@types/chroma-js": "^2.4.3",
     "@types/lodash.throttle": "^4.1.9",
-    "ol": "^10.7.0",
+    "ol": "^10.9.0",
     "ol-mapbox-style": "12.4.0"
   },
   "peerDependencies": {

@@ -42,79 +42,76 @@ export function initHoverLayer(map: OlMap) {
   const layerFilter = (layer: BaseLayer) =>
     layer.get(`${GEOSPATIAL_SDK_PREFIX}hoverable`);
 
-  const unKey = map.on(
-    "pointermove",
-    async (event: MapBrowserEvent<PointerEvent>) => {
-      // skip hit detection if the view is moving as it can have an impact on performance
-      if (map.getView().getInteracting() || map.getView().getAnimating()) {
-        return;
-      }
+  const unKey = map.on("pointermove", async (event: MapBrowserEvent) => {
+    // skip hit detection if the view is moving as it can have an impact on performance
+    if (map.getView().getInteracting() || map.getView().getAnimating()) {
+      return;
+    }
 
-      // change cursor if above a feature
-      const hasFeature = map.hasFeatureAtPixel(event.pixel, {
+    // change cursor if above a feature
+    const hasFeature = map.hasFeatureAtPixel(event.pixel, {
+      layerFilter,
+    });
+    if (map.getTargetElement()) {
+      map.getTargetElement().style.cursor = hasFeature
+        ? "pointer"
+        : originalCursorStyle;
+    }
+
+    const hoveredSource = hoverLayer.getSource() as VectorSource;
+    hoveredSource.clear(true);
+    if (!hasFeature) {
+      return;
+    }
+
+    // add hovered feature to the layer
+    const hoveredFeatureResult: {
+      feature: OlFeature;
+      layer: BaseLayer;
+    }[] = [];
+    map.forEachFeatureAtPixel(
+      event.pixel,
+      (feature, layer) => {
+        if (feature instanceof OlFeature) {
+          hoveredFeatureResult.push({ feature, layer });
+          return true;
+        }
+      },
+      {
         layerFilter,
-      });
-      if (map.getTargetElement()) {
-        map.getTargetElement().style.cursor = hasFeature
-          ? "pointer"
-          : originalCursorStyle;
-      }
+      },
+    );
+    if (hoveredFeatureResult.length === 0) {
+      return;
+    }
 
-      const hoveredSource = hoverLayer.getSource() as VectorSource;
-      hoveredSource.clear(true);
-      if (!hasFeature) {
-        return;
-      }
+    const { feature: firstFeature, layer: sourceLayer } =
+      hoveredFeatureResult[0];
 
-      // add hovered feature to the layer
-      const hoveredFeatureResult: {
-        feature: OlFeature;
-        layer: BaseLayer;
-      }[] = [];
-      map.forEachFeatureAtPixel(
-        event.pixel,
-        (feature, layer) => {
-          if (feature instanceof OlFeature) {
-            hoveredFeatureResult.push({ feature, layer });
-            return true;
-          }
-        },
-        {
-          layerFilter,
-        },
+    // Get the hoverStyle from the source layer, fallback to defaultHighlightStyle
+    const hoverStyle =
+      sourceLayer.get(`${GEOSPATIAL_SDK_PREFIX}hover-style`) ??
+      defaultHighlightStyle;
+
+    // Apply the hover style to the layer (FlatStyleLike works on layers, not features)
+    hoverLayer.setStyle(hoverStyle);
+    hoveredSource.addFeature(firstFeature);
+
+    // dispatch event if subscribed to
+    if (map.get(FeaturesHoverEventType)) {
+      const featuresByLayer = await readFeaturesAtPixel(
+        map,
+        event,
+        layerFilter,
       );
-      if (hoveredFeatureResult.length === 0) {
-        return;
-      }
-
-      const { feature: firstFeature, layer: sourceLayer } =
-        hoveredFeatureResult[0];
-
-      // Get the hoverStyle from the source layer, fallback to defaultHighlightStyle
-      const hoverStyle =
-        sourceLayer.get(`${GEOSPATIAL_SDK_PREFIX}hover-style`) ??
-        defaultHighlightStyle;
-
-      // Apply the hover style to the layer (FlatStyleLike works on layers, not features)
-      hoverLayer.setStyle(hoverStyle);
-      hoveredSource.addFeature(firstFeature);
-
-      // dispatch event if subscribed to
-      if (map.get(FeaturesHoverEventType)) {
-        const featuresByLayer = await readFeaturesAtPixel(
-          map,
-          event,
-          layerFilter,
-        );
-        const features = Array.from(featuresByLayer.values()).flat();
-        map.dispatchEvent({
-          type: `${GEOSPATIAL_SDK_PREFIX}${FeaturesHoverEventType}`,
-          features,
-          featuresByLayer,
-        } as unknown as BaseEvent);
-      }
-    },
-  );
+      const features = Array.from(featuresByLayer.values()).flat();
+      map.dispatchEvent({
+        type: `${GEOSPATIAL_SDK_PREFIX}${FeaturesHoverEventType}`,
+        features,
+        featuresByLayer,
+      } as unknown as BaseEvent);
+    }
+  });
   map.set(unsubscribeKey, unKey);
 }
 
