@@ -112,6 +112,17 @@ describe("MapContextService", () => {
         tileLoadFunction(tile, "http://example.com/tile");
         expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
       });
+      it("should configure XYZ source with referrerPolicy from layer model", async () => {
+        const layerWithPolicy = await createLayer({
+          ...MAP_CTX_LAYER_XYZ_FIXTURE,
+          referrerPolicy: "strict-origin-when-cross-origin",
+        });
+        const source = layerWithPolicy.getSource() as XYZ;
+        // referrerPolicy is protected on TileImage; access via bracket to verify it is set
+        expect(
+          (source as unknown as Record<string, unknown>)["referrerPolicy"],
+        ).toBe("strict-origin-when-cross-origin");
+      });
       it("emits a loaded event initially", async () => {
         await vi.runAllTimersAsync();
         expect(eventCallback).toHaveBeenCalledWith({
@@ -232,6 +243,7 @@ describe("MapContextService", () => {
         tileLoadFunction(tile, "http://example.com/tile");
         expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
       });
+
       it("emits a loaded event initially", async () => {
         await vi.runAllTimersAsync();
         expect(eventCallback).toHaveBeenCalledWith({

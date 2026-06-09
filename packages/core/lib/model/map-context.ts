@@ -76,6 +76,14 @@ export interface MapContextBaseLayer {
    * Default value is `false`.
    */
   hoverable?: boolean;
+
+  /**
+   * Controls the `Referer` header sent with tile/image requests.
+   * See the [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/Request/referrerPolicy) for possible values.
+   *
+   * Support depends on the layer type and the map library used.
+   */
+  referrerPolicy?: ReferrerPolicy;
 }
 
 export interface MapContextLayerWms extends MapContextBaseLayer {
