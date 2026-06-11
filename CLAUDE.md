@@ -48,7 +48,7 @@ Change detection on a layer uses `id` + `version` when present (cheap), otherwis
 
 ### Package roles
 
-- **`core`** — models (`lib/model/`), diff algorithm, context-manipulation utils (`addLayerToContext`, `updateLayerInContext`, …), event types, projections. The only required package. Has `ol` as a *peer* dependency (used for some types/extent math).
+- **`core`** — models (`lib/model/`), diff algorithm, context-manipulation utils (`addLayerToContext`, `updateLayerInContext`, …), event types, projections. The only required package. Has `ol` as a _peer_ dependency (used for some types/extent math).
 - **`openlayers`** — renders a Map Context with OpenLayers; the most complete renderer. Holds the create-map / apply-diff / event-listening logic. Does **not** subclass OpenLayers classes (composition over inheritance — a core design principle).
 - **`maplibre`** — MapLibre GL renderer; depends on `core` + `style`.
 - **`style`** — style models and conversion shared by renderers.
