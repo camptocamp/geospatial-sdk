@@ -3,3 +3,4 @@ node_modules/
 **/.vitepress/dist
 packages/*/dist
 .idea
+.claude/settings.local.json
