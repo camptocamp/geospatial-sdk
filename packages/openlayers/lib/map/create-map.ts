@@ -264,48 +264,54 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     case "ogcapi": {
       const ogcEndpoint = new OgcApiEndpoint(layerModel.url);
       let layerUrl: string;
-      if (layerModel.useTiles) {
-        if (layerModel.useTiles === "vector") {
-          layerUrl = await ogcEndpoint.getVectorTilesetUrl(
+      try {
+        if (layerModel.useTiles) {
+          if (layerModel.useTiles === "vector") {
+            layerUrl = await ogcEndpoint.getVectorTilesetUrl(
+              layerModel.collection,
+              layerModel.tileMatrixSet,
+            );
+            layer = new VectorTileLayer({
+              source: new OGCVectorTile({
+                url: layerUrl,
+                format: new MVT(),
+                attributions: layerModel.attributions,
+              }),
+            });
+          } else if (layerModel.useTiles === "map") {
+            layerUrl = await ogcEndpoint.getMapTilesetUrl(
+              layerModel.collection,
+              layerModel.tileMatrixSet,
+            );
+            layer = new TileLayer({
+              source: new OGCMapTile({
+                url: layerUrl,
+                attributions: layerModel.attributions,
+              }),
+            });
+          }
+        } else {
+          layerUrl = await ogcEndpoint.getCollectionItemsUrl(
             layerModel.collection,
-            layerModel.tileMatrixSet,
+            layerModel.options,
           );
-          layer = new VectorTileLayer({
-            source: new OGCVectorTile({
+          layer = new VectorLayer({
+            source: new VectorSource({
+              format: new GeoJSON(),
               url: layerUrl,
-              format: new MVT(),
               attributions: layerModel.attributions,
             }),
-          });
-        } else if (layerModel.useTiles === "map") {
-          layerUrl = await ogcEndpoint.getMapTilesetUrl(
-            layerModel.collection,
-            layerModel.tileMatrixSet,
-          );
-          layer = new TileLayer({
-            source: new OGCMapTile({
-              url: layerUrl,
-              attributions: layerModel.attributions,
-            }),
+            style: layerModel.style ?? defaultStyle,
           });
         }
-      } else {
-        layerUrl = await ogcEndpoint.getCollectionItemsUrl(
-          layerModel.collection,
-          layerModel.options,
-        );
-        const source = new VectorSource({
-          format: new GeoJSON(),
-          url: layerUrl,
-          attributions: layerModel.attributions,
-        });
-        layer = new VectorLayer({
-          source,
-          style: layerModel.style ?? defaultStyle,
-        });
+        defer().then(() => emitLayerLoadingStatusSuccess(layer));
+      } catch (e) {
+        layer = new VectorLayer({ style: layerModel.style ?? defaultStyle });
+        const httpStatus =
+          e instanceof EndpointError ? e.httpStatus : undefined;
+        const err = e instanceof Error ? e : new Error(String(e));
+        defer().then(() => emitLayerLoadingError(layer, err, httpStatus));
       }
-      // FIXME: actually track layer loading
-      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
 
