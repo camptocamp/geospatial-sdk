@@ -48,6 +48,7 @@ import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import ImageLayer from "ol/layer/Image.js";
 import ImageWMS from "ol/source/ImageWMS.js";
+import { OgcApiEndpoint } from "@camptocamp/ogc-client";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual =
@@ -171,6 +172,37 @@ describe("MapContextService", () => {
           target: layer,
           type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
         });
+      });
+    });
+    describe("OGCAPI (with failing endpoint)", () => {
+      beforeEach(async () => {
+        vi.spyOn(
+          OgcApiEndpoint.prototype,
+          "getCollectionItemsUrl",
+        ).mockRejectedValue(new Error("Failed to load collection"));
+        layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+        layer = await createLayer(layerModel);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it("creates an empty vector layer", () => {
+        expect(layer).toBeInstanceOf(VectorLayer);
+        expect(layer.getSource()).toBeNull();
+      });
+
+      it("emits a loading error event", async () => {
+        await vi.runAllTimersAsync();
+        expect(eventCallback).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+            error: expect.any(Error),
+            target: layer,
+          }),
+        );
       });
     });
     describe("WMS", () => {
