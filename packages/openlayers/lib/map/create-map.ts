@@ -306,7 +306,20 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         }
         defer().then(() => emitLayerLoadingStatusSuccess(layer));
       } catch (e) {
-        layer = new VectorLayer({ style: layerModel.style ?? defaultStyle });
+        if (layerModel.useTiles === "vector") {
+          layer = new VectorTileLayer({
+            properties: { [`${GEOSPATIAL_SDK_PREFIX}layer-with-error`]: true },
+          });
+        } else if (layerModel.useTiles === "map") {
+          layer = new TileLayer({
+            properties: { [`${GEOSPATIAL_SDK_PREFIX}layer-with-error`]: true },
+          });
+        } else {
+          layer = new VectorLayer({
+            style: layerModel.style ?? defaultStyle,
+            properties: { [`${GEOSPATIAL_SDK_PREFIX}layer-with-error`]: true },
+          });
+        }
         const httpStatus =
           e instanceof EndpointError ? e.httpStatus : undefined;
         const err = e instanceof Error ? e : new Error(String(e));

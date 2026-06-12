@@ -179,9 +179,7 @@ describe("MapContextService", () => {
         vi.spyOn(
           OgcApiEndpoint.prototype,
           "getCollectionItemsUrl",
-        ).mockImplementation(() => {
-          throw new Error("Failed to load collection");
-        });
+        ).mockRejectedValue(new Error("Failed to load collection"));
         layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
         layer = await createLayer(layerModel);
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);

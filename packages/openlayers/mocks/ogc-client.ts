@@ -149,4 +149,14 @@ export class OgcApiEndpoint {
   getCollectionItemsUrl(collection) {
     return "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json";
   }
+  getVectorTilesetUrl(collection, tileMatrixSet) {
+    return Promise.resolve(
+      "https://demo.ldproxy.net/zoomstack/collections/airports/tiles/WebMercatorQuad",
+    );
+  }
+  getMapTilesetUrl(collection, tileMatrixSet) {
+    return Promise.resolve(
+      "https://demo.ldproxy.net/zoomstack/collections/airports/map/tiles/WebMercatorQuad",
+    );
+  }
 }
