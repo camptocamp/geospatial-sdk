@@ -1,5 +1,14 @@
-import { createLegendFromLayer } from "./from-layer.js";
-import { MapContextLayerWms, MapContextLayerWmts } from "@geospatial-sdk/core";
+import {
+  createLegendEntriesFromLayer,
+  createLegendFromLayer,
+  createLegendUrlFromLayer,
+  hasLegendSupport,
+} from "./from-layer.js";
+import {
+  MapContextLayer,
+  MapContextLayerWms,
+  MapContextLayerWmts,
+} from "@geospatial-sdk/core";
 import { WmtsEndpoint } from "@camptocamp/ogc-client";
 
 // Mock dependencies
@@ -9,7 +18,7 @@ vi.mock("@camptocamp/ogc-client", () => ({
   },
 }));
 
-describe("createLegendFromLayer", () => {
+describe("legend", () => {
   const baseWmsLayer: MapContextLayerWms = {
     type: "wms",
     url: "https://example.com/wms",
@@ -22,162 +31,216 @@ describe("createLegendFromLayer", () => {
     name: "test-wmts-layer",
   };
 
+  function mockWmtsLayer(styles: unknown[]) {
+    const endpoint = {
+      getLayerByName: () => ({ styles }),
+    } as unknown as WmtsEndpoint;
+    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockResolvedValue(endpoint);
+  }
+
   beforeEach(() => {
-    // Clear all mocks before each test
     vi.clearAllMocks();
   });
 
-  it("creates a legend for a valid WMS layer", async () => {
-    const result = await createLegendFromLayer(baseWmsLayer);
-
-    expect(result).toBeInstanceOf(HTMLElement);
-
-    const legendDiv = result as HTMLElement;
-    const img = legendDiv.querySelector("img");
-    const title = legendDiv.querySelector("h4");
-
-    expect(title?.textContent).toBe("test-layer");
-    expect(img).toBeTruthy();
-    expect(img?.src).toContain("REQUEST=GetLegendGraphic");
-    expect(img?.alt).toBe("Legend for test-layer");
-  });
-
-  it("creates a legend for a valid WMS layer with custom options", async () => {
-    const result = await createLegendFromLayer(baseWmsLayer, {
-      format: "image/jpeg",
-      widthPxHint: 200,
-      heightPxHint: 100,
+  describe("hasLegendSupport", () => {
+    it("returns true for a WMS layer with url and name", () => {
+      expect(hasLegendSupport(baseWmsLayer)).toBe(true);
     });
 
-    const img = (result as HTMLElement).querySelector("img");
-
-    expect(img?.src).toContain("FORMAT=image%2Fjpeg");
-    expect(img?.src).toContain("WIDTH=200");
-    expect(img?.src).toContain("HEIGHT=100");
-  });
-
-  it("includes STYLE parameter in WMS legend URL when layer has a style", async () => {
-    const result = await createLegendFromLayer({
-      ...baseWmsLayer,
-      style: "my_custom_style",
+    it("returns true for a WMTS layer with url and name", () => {
+      expect(hasLegendSupport(baseWmtsLayer)).toBe(true);
     });
 
-    const img = (result as HTMLElement).querySelector("img");
-
-    expect(img?.src).toContain("STYLE=my_custom_style");
-  });
-
-  it("creates a legend for a valid WMTS layer with legend URL", async () => {
-    const mockLegendUrl = "https://example.com/legend.png";
-    const mockIsReady = {
-      getLayerByName: () => ({
-        styles: [{ legendUrl: mockLegendUrl }],
-      }),
-    } as unknown as WmtsEndpoint;
-
-    // Mock WmtsEndpoint
-    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockImplementation(function () {
-      return Promise.resolve(mockIsReady);
+    it("returns false for an unsupported layer type", () => {
+      const geojsonLayer = {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      } as unknown as MapContextLayer;
+      expect(hasLegendSupport(geojsonLayer)).toBe(false);
     });
 
-    const result = await createLegendFromLayer(baseWmtsLayer);
-
-    const img = (result as HTMLElement).querySelector("img");
-
-    expect(img?.src).toBe(mockLegendUrl);
-  });
-
-  it("handles WMTS layer without legend URL", async () => {
-    const mockIsReady = {
-      getLayerByName: () => ({
-        styles: [],
-      }),
-    } as unknown as WmtsEndpoint;
-
-    // Mock WmtsEndpoint
-    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockImplementation(function () {
-      return Promise.resolve(mockIsReady);
+    it("returns false when the url is missing", () => {
+      expect(hasLegendSupport({ ...baseWmsLayer, url: "" })).toBe(false);
     });
 
-    const result = await createLegendFromLayer(baseWmtsLayer);
-
-    const errorSpan = (result as HTMLElement).querySelector("span");
-
-    expect(result).toBeInstanceOf(HTMLElement);
-    expect(errorSpan?.textContent).toBe(
-      "Legend not available for test-wmts-layer",
-    );
+    it("returns false when the name is missing", () => {
+      expect(hasLegendSupport({ ...baseWmsLayer, name: "" })).toBe(false);
+    });
   });
 
-  it("uses matching style legend URL for WMTS layer when layer.style is set", async () => {
-    const mockIsReady = {
-      getLayerByName: () => ({
-        styles: [
-          {
-            name: "default",
-            legendUrl: "https://example.com/default-legend.png",
-          },
-          { name: "night", legendUrl: "https://example.com/night-legend.png" },
-        ],
-      }),
-    } as unknown as WmtsEndpoint;
+  describe("createLegendUrlFromLayer", () => {
+    it("builds a WMS GetLegendGraphic URL", async () => {
+      const url = await createLegendUrlFromLayer(baseWmsLayer);
 
-    vi.spyOn(WmtsEndpoint.prototype, "isReady").mockImplementation(function () {
-      return Promise.resolve(mockIsReady);
+      expect(url).toContain("REQUEST=GetLegendGraphic");
+      expect(url).toContain("SERVICE=WMS");
+      expect(url).toContain("LAYER=test-layer");
     });
 
-    const result = await createLegendFromLayer({
-      ...baseWmtsLayer,
-      style: "night",
+    it("applies custom options", async () => {
+      const url = await createLegendUrlFromLayer(baseWmsLayer, {
+        format: "image/jpeg",
+        widthPxHint: 200,
+        heightPxHint: 100,
+      });
+
+      expect(url).toContain("FORMAT=image%2Fjpeg");
+      expect(url).toContain("WIDTH=200");
+      expect(url).toContain("HEIGHT=100");
     });
-    const img = (result as HTMLElement).querySelector("img");
 
-    expect(img?.src).toBe("https://example.com/night-legend.png");
+    it("includes the STYLE parameter when the layer has a style", async () => {
+      const url = await createLegendUrlFromLayer({
+        ...baseWmsLayer,
+        style: "my_custom_style",
+      });
+
+      expect(url).toContain("STYLE=my_custom_style");
+    });
+
+    it("resolves a WMTS legend URL", async () => {
+      mockWmtsLayer([{ legendUrl: "https://example.com/legend.png" }]);
+
+      const url = await createLegendUrlFromLayer(baseWmtsLayer);
+
+      expect(url).toBe("https://example.com/legend.png");
+    });
+
+    it("uses the matching style legend URL when layer.style is set", async () => {
+      mockWmtsLayer([
+        {
+          name: "default",
+          legendUrl: "https://example.com/default-legend.png",
+        },
+        { name: "night", legendUrl: "https://example.com/night-legend.png" },
+      ]);
+
+      const url = await createLegendUrlFromLayer({
+        ...baseWmtsLayer,
+        style: "night",
+      });
+
+      expect(url).toBe("https://example.com/night-legend.png");
+    });
+
+    it("returns null when a WMTS layer declares no legend", async () => {
+      mockWmtsLayer([]);
+
+      const url = await createLegendUrlFromLayer(baseWmtsLayer);
+
+      expect(url).toBeNull();
+    });
+
+    it("throws for an unsupported layer type", async () => {
+      const invalidLayer = { ...baseWmsLayer, type: "invalid" as never };
+
+      await expect(createLegendUrlFromLayer(invalidLayer)).rejects.toThrow(
+        /type "invalid"/,
+      );
+    });
+
+    it("throws a missing-field error (not a type error) when the url is empty", async () => {
+      await expect(
+        createLegendUrlFromLayer({ ...baseWmsLayer, url: "" }),
+      ).rejects.toThrow(/missing url or name/);
+    });
+
+    it("throws a missing-field error (not a type error) when the name is empty", async () => {
+      await expect(
+        createLegendUrlFromLayer({ ...baseWmsLayer, name: "" }),
+      ).rejects.toThrow(/missing url or name/);
+    });
+
+    it("propagates a failing WMTS endpoint", async () => {
+      vi.spyOn(WmtsEndpoint.prototype, "isReady").mockRejectedValue(
+        new Error("capabilities unreachable"),
+      );
+
+      await expect(createLegendUrlFromLayer(baseWmtsLayer)).rejects.toThrow(
+        "capabilities unreachable",
+      );
+    });
   });
 
-  it("returns null for invalid layer type", async () => {
-    const invalidLayer = { ...baseWmsLayer, type: "invalid" as any };
+  describe("createLegendEntriesFromLayer", () => {
+    it("returns a single image entry for a WMS layer", async () => {
+      const entries = await createLegendEntriesFromLayer(baseWmsLayer);
 
-    const result = await createLegendFromLayer(invalidLayer);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].label).toBe("test-layer");
+      expect(entries[0].url).toContain("REQUEST=GetLegendGraphic");
+    });
 
-    expect(result).toBe(null);
+    it("returns an empty array when the layer has no legend", async () => {
+      mockWmtsLayer([]);
+
+      const entries = await createLegendEntriesFromLayer(baseWmtsLayer);
+
+      expect(entries).toEqual([]);
+    });
+
+    it("accepts a general MapContextLayer and throws for unsupported types", async () => {
+      const geojsonLayer = {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      } as unknown as MapContextLayer;
+
+      // Compiles without a cast: the param accepts the broad MapContextLayer union.
+      await expect(
+        createLegendEntriesFromLayer(geojsonLayer),
+      ).rejects.toThrow();
+    });
   });
 
-  it("returns null for layer without URL", async () => {
-    const layerWithoutUrl = { ...baseWmsLayer, url: "" };
+  describe("createLegendFromLayer (deprecated)", () => {
+    it("builds a legend element with title and image for a WMS layer", async () => {
+      const el = await createLegendFromLayer(baseWmsLayer);
 
-    const result = await createLegendFromLayer(layerWithoutUrl);
+      expect(el).toBeInstanceOf(HTMLElement);
+      expect(el?.getAttribute("role")).toBe("region");
+      expect(el?.querySelector("h4")?.textContent).toBe("test-layer");
+      const img = el?.querySelector("img");
+      expect(img?.alt).toBe("Legend for test-layer");
+      expect(img?.src).toContain("REQUEST=GetLegendGraphic");
+    });
 
-    expect(result).toBe(null);
-  });
+    it("returns null for an unsupported layer type", async () => {
+      const invalidLayer = { ...baseWmsLayer, type: "invalid" as never };
 
-  it("returns null for layer without name", async () => {
-    const layerWithoutName = { ...baseWmsLayer, name: "" };
+      expect(await createLegendFromLayer(invalidLayer)).toBeNull();
+    });
 
-    const result = await createLegendFromLayer(layerWithoutName);
+    it("renders a message when the layer has no legend", async () => {
+      mockWmtsLayer([]);
 
-    expect(result).toBe(null);
-  });
+      const el = await createLegendFromLayer(baseWmtsLayer);
 
-  it("handles image load error", async () => {
-    const result = await createLegendFromLayer(baseWmsLayer);
-    const img = (result as HTMLElement).querySelector("img");
+      expect(el?.querySelector("span")?.textContent).toBe(
+        "Legend not available for test-wmts-layer",
+      );
+    });
 
-    if (img) {
-      const errorEvent = new Event("error");
-      img.dispatchEvent(errorEvent);
+    it("renders an error message when resolving fails", async () => {
+      vi.spyOn(WmtsEndpoint.prototype, "isReady").mockRejectedValue(
+        new Error("capabilities unreachable"),
+      );
 
-      const errorSpan = (result as HTMLElement).querySelector("span");
-      expect(errorSpan?.textContent).toBe(
+      const el = await createLegendFromLayer(baseWmtsLayer);
+
+      expect(el?.querySelector("span")?.textContent).toBe(
+        "Error loading legend for test-wmts-layer",
+      );
+    });
+
+    it("renders a message when the legend image fails to load", async () => {
+      const el = await createLegendFromLayer(baseWmsLayer);
+      const img = el?.querySelector("img");
+
+      img?.dispatchEvent(new Event("error"));
+
+      expect(el?.querySelector("span")?.textContent).toBe(
         "Legend not available for test-layer",
       );
-    }
-  });
-
-  it("adds accessibility attributes", async () => {
-    const result = await createLegendFromLayer(baseWmsLayer);
-
-    expect(result?.getAttribute("role")).toBe("region");
-    expect(result?.getAttribute("aria-label")).toBe("Map Layer Legend");
+    });
   });
 });
