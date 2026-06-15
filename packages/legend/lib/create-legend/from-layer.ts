@@ -4,7 +4,7 @@ import {
   MapContextLayerWmts,
   removeSearchParams,
 } from "@geospatial-sdk/core";
-import { WmtsEndpoint } from "@camptocamp/ogc-client";
+import { WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 
 /**
  * Configuration options for legend generation.
@@ -53,13 +53,50 @@ export function hasLegendSupport(
 }
 
 /**
- * Create a legend URL for a WMS layer.
+ * Resolve the legend URL for a WMS layer.
+ *
+ * Prefers the `LegendURL` advertised in the service capabilities (matching the
+ * requested style, else the first style), since many WMS servers do not implement
+ * the `GetLegendGraphic` operation. Falls back to a built `GetLegendGraphic`
+ * request when no legend is advertised or the capabilities cannot be read.
+ *
+ * @param layer - The WMS layer to resolve a legend URL for.
+ * @param options - Optional configuration for legend generation.
+ * @returns The advertised or built WMS legend URL.
+ */
+async function createWmsLegendUrl(
+  layer: MapContextLayerWms,
+  options: LegendOptions = {},
+): Promise<string> {
+  try {
+    const endpoint = await new WmsEndpoint(layer.url).isReady();
+    const layerByName = endpoint.getLayerByName(layer.name);
+    const style =
+      (layer.style
+        ? layerByName?.styles?.find((s) => s.name === layer.style)
+        : undefined) ?? layerByName?.styles?.[0];
+    if (style?.legendUrl) {
+      return style.legendUrl;
+    }
+  } catch (error) {
+    console.warn(
+      `Failed to read WMS capabilities for legend of "${layer.name}"; ` +
+        `falling back to GetLegendGraphic`,
+      error,
+    );
+  }
+
+  return buildWmsGetLegendGraphicUrl(layer, options).toString();
+}
+
+/**
+ * Build a `GetLegendGraphic` request URL for a WMS layer.
  *
  * @param layer - The MapContextLayer to create a legend URL for.
  * @param options - Optional configuration for legend generation.
  * @returns A URL for the WMS legend graphic.
  */
-function createWmsLegendUrl(
+function buildWmsGetLegendGraphicUrl(
   layer: MapContextLayerWms,
   options: LegendOptions = {},
 ): URL {
@@ -162,7 +199,7 @@ export async function createLegendUrlFromLayer(
   }
 
   if (layer.type === "wms") {
-    return createWmsLegendUrl(layer, options).toString();
+    return createWmsLegendUrl(layer, options);
   }
 
   // Only case left is WMTS

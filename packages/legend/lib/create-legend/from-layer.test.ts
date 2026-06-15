@@ -9,10 +9,13 @@ import {
   MapContextLayerWms,
   MapContextLayerWmts,
 } from "@geospatial-sdk/core";
-import { WmtsEndpoint } from "@camptocamp/ogc-client";
+import { WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 
 // Mock dependencies
 vi.mock("@camptocamp/ogc-client", () => ({
+  WmsEndpoint: class WmsMock {
+    isReady() {}
+  },
   WmtsEndpoint: class WmtsMock {
     isReady() {}
   },
@@ -38,8 +41,18 @@ describe("legend", () => {
     vi.spyOn(WmtsEndpoint.prototype, "isReady").mockResolvedValue(endpoint);
   }
 
+  function mockWmsLayer(styles: unknown[]) {
+    const endpoint = {
+      getLayerByName: () => ({ styles }),
+    } as unknown as WmsEndpoint;
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue(endpoint);
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // WMS resolution reads capabilities; default to a layer with no advertised
+    // legend so the GetLegendGraphic fallback is exercised unless a test overrides.
+    mockWmsLayer([]);
   });
 
   describe("hasLegendSupport", () => {
@@ -105,6 +118,41 @@ describe("legend", () => {
       });
 
       expect(url).not.toContain("STYLE=");
+    });
+
+    it("returns the advertised WMS LegendURL when capabilities declare one", async () => {
+      mockWmsLayer([
+        { name: "default", legendUrl: "https://example.com/wms-legend.png" },
+      ]);
+
+      const url = await createLegendUrlFromLayer(baseWmsLayer);
+
+      expect(url).toBe("https://example.com/wms-legend.png");
+    });
+
+    it("uses the matching WMS style's LegendURL when layer.style is set", async () => {
+      mockWmsLayer([
+        { name: "default", legendUrl: "https://example.com/wms-default.png" },
+        { name: "night", legendUrl: "https://example.com/wms-night.png" },
+      ]);
+
+      const url = await createLegendUrlFromLayer({
+        ...baseWmsLayer,
+        style: "night",
+      });
+
+      expect(url).toBe("https://example.com/wms-night.png");
+    });
+
+    it("falls back to GetLegendGraphic when the WMS capabilities cannot be read", async () => {
+      vi.spyOn(WmsEndpoint.prototype, "isReady").mockRejectedValue(
+        new Error("capabilities unreachable"),
+      );
+
+      const url = await createLegendUrlFromLayer(baseWmsLayer);
+
+      expect(url).toContain("REQUEST=GetLegendGraphic");
+      expect(url).toContain("LAYER=test-layer");
     });
 
     it("resolves a WMTS legend URL", async () => {
