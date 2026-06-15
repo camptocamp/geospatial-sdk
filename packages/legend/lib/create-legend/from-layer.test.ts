@@ -98,6 +98,12 @@ describe("legend", () => {
       expect(url).toContain("STYLE=my_custom_style");
     });
 
+    it("omits the STYLE parameter when the style is an empty string", async () => {
+      const url = await createLegendUrlFromLayer({ ...baseWmsLayer, style: "" });
+
+      expect(url).not.toContain("STYLE=");
+    });
+
     it("resolves a WMTS legend URL", async () => {
       mockWmtsLayer([{ legendUrl: "https://example.com/legend.png" }]);
 
