@@ -469,6 +469,10 @@ describe("MapContextService", () => {
             data: "blargz",
           };
           layer = await createLayer(layerModel);
+          layer.on(
+            `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+            eventCallback,
+          );
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -481,6 +485,16 @@ describe("MapContextService", () => {
           const source = layer.getSource() as VectorSource;
           expect(source).toBeInstanceOf(VectorSource);
           expect(source.getFeatures().length).toBe(0);
+        });
+        it("emits a loading error event", async () => {
+          await vi.runAllTimersAsync();
+          expect(eventCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+              type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+              error: expect.any(Error),
+              target: layer,
+            }),
+          );
         });
       });
       describe("with remote file url", () => {

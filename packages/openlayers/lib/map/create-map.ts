@@ -249,23 +249,32 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         );
       } else {
         let geojson = layerModel.data;
-        if (typeof geojson === "string") {
-          try {
+        try {
+          if (typeof geojson === "string") {
             geojson = JSON.parse(geojson);
-          } catch (e) {
-            console.warn("A layer could not be created", layerModel, e);
-            geojson = { type: "FeatureCollection", features: [] };
           }
+          const features = GEOJSON.readFeatures(geojson, {
+            featureProjection: "EPSG:3857",
+            dataProjection: "EPSG:4326",
+          }) as Feature<Geometry>[];
+          source = new VectorSource({
+            features,
+            attributions: layerModel.attributions,
+          });
+          defer().then(() => emitLayerLoadingStatusSuccess(layer));
+        } catch (e) {
+          console.warn(
+            "GeoJSON layer data could not be parsed/read",
+            layerModel,
+            e,
+          );
+          source = new VectorSource({
+            features: [],
+            attributions: layerModel.attributions,
+          });
+          const err = e instanceof Error ? e : new Error(String(e));
+          defer().then(() => emitLayerLoadingError(layer, err));
         }
-        const features = GEOJSON.readFeatures(geojson, {
-          featureProjection: "EPSG:3857",
-          dataProjection: "EPSG:4326",
-        }) as Feature<Geometry>[];
-        source = new VectorSource({
-          features,
-          attributions: layerModel.attributions,
-        });
-        defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
       layer.setSource(source);
       break;
