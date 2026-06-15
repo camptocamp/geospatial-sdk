@@ -11,10 +11,9 @@ export type LayerDimensionValueRange = {
  * @private
  * @inline
  */
-export type LayerDimensionValues = Record<
-  string,
-  LayerDimensionValueSingle | LayerDimensionValueRange
->;
+// TODO: support `LayerDimensionValueRange` values (formatted as `start/end` per
+// the WMS spec) in the map implementations; only single values are handled today.
+export type LayerDimensionValues = Record<string, LayerDimensionValueSingle>;
 
 /**
  * @private
@@ -90,7 +89,6 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
   url: string;
   name: string;
-  // TODO: add support for these
   dimensionValues?: LayerDimensionValues;
   style?: string;
 

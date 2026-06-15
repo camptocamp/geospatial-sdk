@@ -23,6 +23,21 @@ describe("getHash", () => {
     ]);
     expect(hashB).toEqual(hashA);
   });
+  it("stable for identical Date values", () => {
+    const hashA = getHash(new Date("2020-01-01T00:00:00.000Z"));
+    const hashB = getHash(new Date("2020-01-01T00:00:00.000Z"));
+    expect(hashB).toEqual(hashA);
+  });
+  it("different for different Date values", () => {
+    const hashA = getHash(new Date("2020-01-01T00:00:00.000Z"));
+    const hashB = getHash(new Date("2021-06-15T12:30:00.000Z"));
+    expect(hashB).not.toEqual(hashA);
+  });
+  it("different when a nested Date value changes", () => {
+    const hashA = getHash({ time: new Date("2020-01-01T00:00:00.000Z") });
+    const hashB = getHash({ time: new Date("2021-06-15T12:30:00.000Z") });
+    expect(hashB).not.toEqual(hashA);
+  });
   it("stable for null", () => {
     const hashA = getHash(null);
     const hashB = getHash(null);

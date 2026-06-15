@@ -216,6 +216,25 @@ describe("MapContextService", () => {
           TILED: true,
         });
       });
+      it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
+        layerModel = {
+          ...MAP_CTX_LAYER_WMS_FIXTURE,
+          dimensionValues: {
+            time: new Date("2020-01-01T00:00:00.000Z"),
+            elevation: 500,
+          },
+        };
+        layer = await createLayer(layerModel);
+        const source = layer.getSource() as TileWMS;
+        const params = source.getParams();
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          STYLES: (layerModel as MapContextLayerWms).style,
+          TILED: true,
+          TIME: "2020-01-01T00:00:00.000Z",
+          ELEVATION: 500,
+        });
+      });
       it("set correct url without existing REQUEST and SERVICE params", () => {
         const source = layer.getSource() as TileWMS;
         const urls = source.getUrls() || [];
@@ -303,6 +322,25 @@ describe("MapContextService", () => {
             LAYERS: (layerModel as MapContextLayerWms).name,
             FORMAT: "image/jpeg",
             STYLES: (layerModel as MapContextLayerWms).style,
+          });
+        });
+        it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
+          layerModel = {
+            ...MAP_CTX_LAYER_WMS_FIXTURE,
+            useTiles: false,
+            dimensionValues: {
+              time: new Date("2020-01-01T00:00:00.000Z"),
+              elevation: 500,
+            },
+          };
+          layer = await createLayer(layerModel);
+          const source = layer.getSource() as ImageWMS;
+          const params = source.getParams();
+          expect(params).toEqual({
+            LAYERS: (layerModel as MapContextLayerWms).name,
+            STYLES: (layerModel as MapContextLayerWms).style,
+            TIME: "2020-01-01T00:00:00.000Z",
+            ELEVATION: 500,
           });
         });
         it("set correct url without existing REQUEST and SERVICE params", () => {

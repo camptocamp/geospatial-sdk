@@ -2,15 +2,15 @@ import {
   canDoIncrementalUpdate,
   updateLayerProperties,
 } from "./layer-update.js";
-import { MapContextLayer } from "@geospatial-sdk/core";
+import { MapContextLayer, MapContextLayerWms } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
-import { Source } from "ol/source.js";
 import {
   SAMPLE_LAYER1,
   SAMPLE_LAYER3,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
-import VectorSource from "ol/source/Vector.js";
 import VectorLayer from "ol/layer/Vector.js";
+import TileLayer from "ol/layer/Tile.js";
+import TileWMS from "ol/source/TileWMS.js";
 
 describe("Layer update utils", () => {
   describe("canDoIncrementalUpdate", () => {
@@ -52,14 +52,30 @@ describe("Layer update utils", () => {
       } as MapContextLayer;
       expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(false);
     });
+    it("returns true when only WMS dimension values change", () => {
+      const oldLayer = {
+        name: "layer1",
+        type: "wms",
+        url: "https://example.com/wms",
+        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
+      } as MapContextLayer;
+      const newLayer = {
+        name: "layer1",
+        type: "wms",
+        url: "https://example.com/wms",
+        dimensionValues: { time: new Date("2021-06-15T12:30:00.000Z") },
+      } as MapContextLayer;
+      expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(true);
+    });
   });
 
   describe("updateLayerProperties", () => {
     let olLayer: Layer;
-    let olSource: Source;
+    let olSource: TileWMS;
 
     beforeEach(() => {
-      olSource = new VectorSource({});
+      // SAMPLE_LAYER1 is a WMS model, so its source must be a WMS source
+      olSource = new TileWMS({ url: "http://abc.org/wms", params: {} });
       olLayer = new Layer({ source: olSource });
       vi.spyOn(olLayer, "setVisible");
       vi.spyOn(olLayer, "setOpacity");
@@ -141,6 +157,75 @@ describe("Layer update utils", () => {
         "--geospatial-sdk-clickable",
         false,
       );
+    });
+  });
+
+  describe("updateLayerProperties (WMS source params)", () => {
+    let olLayer: Layer;
+    let olSource: TileWMS;
+
+    const baseModel = {
+      type: "wms",
+      url: "https://example.com/wms",
+      name: "myLayer",
+    } as MapContextLayerWms;
+
+    beforeEach(() => {
+      olSource = new TileWMS({
+        url: "https://example.com/wms",
+        params: { LAYERS: "myLayer", TILED: true },
+      });
+      olLayer = new TileLayer({ source: olSource });
+      vi.spyOn(olSource, "updateParams");
+    });
+
+    it("applies changed dimension values to the source with uppercased keys and ISO dates", () => {
+      const prev = {
+        ...baseModel,
+        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
+      };
+      const next = {
+        ...baseModel,
+        dimensionValues: {
+          time: new Date("2021-06-15T12:30:00.000Z"),
+          elevation: 500,
+        },
+      };
+      updateLayerProperties(next, olLayer, prev);
+      expect(olSource.updateParams).toHaveBeenCalledWith({
+        LAYERS: "myLayer",
+        TIME: "2021-06-15T12:30:00.000Z",
+        ELEVATION: 500,
+      });
+    });
+
+    it("resets dimension params that no longer exist to undefined", () => {
+      const prev = {
+        ...baseModel,
+        dimensionValues: {
+          time: new Date("2020-01-01T00:00:00.000Z"),
+          elevation: 500,
+        },
+      };
+      const next = {
+        ...baseModel,
+        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
+      };
+      updateLayerProperties(next, olLayer, prev);
+      expect(olSource.updateParams).toHaveBeenCalledWith({
+        LAYERS: "myLayer",
+        TIME: "2020-01-01T00:00:00.000Z",
+        ELEVATION: undefined,
+      });
+    });
+
+    it("does not touch the source on creation (no previous model)", () => {
+      const next = {
+        ...baseModel,
+        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
+      };
+      updateLayerProperties(next, olLayer);
+      expect(olSource.updateParams).not.toHaveBeenCalled();
     });
   });
 });

@@ -50,6 +50,7 @@ import {
   propagateLayerStateChangeEventToMap,
 } from "./register-events.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import { buildWmsParams } from "./wms-params.js";
 import ImageLayer from "ol/layer/Image.js";
 import ImageWMS from "ol/source/ImageWMS.js";
 
@@ -103,11 +104,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
     case "wms":
       {
         const url = removeSearchParams(layerModel.url, ["request", "service"]);
-        const params = {
-          LAYERS: layerModel.name,
-          ...(layerModel.format && { FORMAT: layerModel.format }),
-          ...(layerModel.style && { STYLES: layerModel.style }),
-        };
+        const params = buildWmsParams(layerModel);
         if (layerModel.useTiles === false) {
           layer = new ImageLayer({
             source: new ImageWMS({
