@@ -151,6 +151,17 @@ describe("legend", () => {
       ).rejects.toThrow(/missing url or name/);
     });
 
+    it("throws when the WMTS layer is not found in the capabilities", async () => {
+      const endpoint = {
+        getLayerByName: () => null,
+      } as unknown as WmtsEndpoint;
+      vi.spyOn(WmtsEndpoint.prototype, "isReady").mockResolvedValue(endpoint);
+
+      await expect(createLegendUrlFromLayer(baseWmtsLayer)).rejects.toThrow(
+        /was not found/,
+      );
+    });
+
     it("propagates a failing WMTS endpoint", async () => {
       vi.spyOn(WmtsEndpoint.prototype, "isReady").mockRejectedValue(
         new Error("capabilities unreachable"),

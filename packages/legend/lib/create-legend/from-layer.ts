@@ -108,6 +108,11 @@ async function createWmtsLegendUrl(
   const endpoint = await new WmtsEndpoint(layer.url).isReady();
 
   const layerByName = endpoint.getLayerByName(layer.name);
+  if (!layerByName) {
+    throw new Error(
+      `WMTS layer "${layer.name}" was not found in the endpoint capabilities`,
+    );
+  }
 
   if (layerByName.styles && layerByName.styles.length > 0) {
     // If a specific style is requested, find its legend URL
