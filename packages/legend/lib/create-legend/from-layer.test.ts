@@ -99,7 +99,10 @@ describe("legend", () => {
     });
 
     it("omits the STYLE parameter when the style is an empty string", async () => {
-      const url = await createLegendUrlFromLayer({ ...baseWmsLayer, style: "" });
+      const url = await createLegendUrlFromLayer({
+        ...baseWmsLayer,
+        style: "",
+      });
 
       expect(url).not.toContain("STYLE=");
     });
