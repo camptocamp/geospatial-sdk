@@ -216,6 +216,7 @@ describe("legend", () => {
 
       expect(el).toBeInstanceOf(HTMLElement);
       expect(el?.getAttribute("role")).toBe("region");
+      expect(el?.getAttribute("aria-label")).toBe("Map Layer Legend");
       expect(el?.querySelector("h4")?.textContent).toBe("test-layer");
       const img = el?.querySelector("img");
       expect(img?.alt).toBe("Legend for test-layer");
