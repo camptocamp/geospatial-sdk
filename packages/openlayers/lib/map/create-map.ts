@@ -236,6 +236,17 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           url: layerModel.url,
           attributions: layerModel.attributions,
         });
+        source.once("featuresloadend", () =>
+          emitLayerLoadingStatusSuccess(layer),
+        );
+        source.once("featuresloaderror", () =>
+          emitLayerLoadingError(
+            layer,
+            new Error(
+              `GeoJSON features could not be loaded from: ${layerModel.url}`,
+            ),
+          ),
+        );
       } else {
         let geojson = layerModel.data;
         if (typeof geojson === "string") {
@@ -254,10 +265,9 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           features,
           attributions: layerModel.attributions,
         });
+        defer().then(() => emitLayerLoadingStatusSuccess(layer));
       }
       layer.setSource(source);
-      // FIXME: actually track layer loading and data info
-      defer().then(() => emitLayerLoadingStatusSuccess(layer));
       break;
     }
 
