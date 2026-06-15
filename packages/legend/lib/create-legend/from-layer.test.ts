@@ -178,6 +178,7 @@ describe("legend", () => {
       const entries = await createLegendEntriesFromLayer(baseWmsLayer);
 
       expect(entries).toHaveLength(1);
+      expect(entries[0].type).toBe("image");
       expect(entries[0].label).toBe("test-layer");
       expect(entries[0].url).toContain("REQUEST=GetLegendGraphic");
     });

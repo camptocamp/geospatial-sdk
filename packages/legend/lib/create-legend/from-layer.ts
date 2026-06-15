@@ -18,14 +18,16 @@ export interface LegendOptions {
 /**
  * A single legend entry for a layer.
  *
- * Currently an entry is an image graphic (WMS GetLegendGraphic, WMTS legend URL)
- * that can be rendered directly with an `<img>`.
+ * Currently the only kind is an `"image"` graphic (WMS GetLegendGraphic, WMTS
+ * legend URL) that can be rendered directly with an `<img>`.
  *
- * Vector layers are not handled yet; they will be supported later, likely by
- * adding a discriminating `type` field and a `VectorStyle` (from
- * `@geospatial-sdk/core`) to be rendered client-side as a swatch.
+ * The `type` discriminant is present from the start so vector layers can be
+ * added later (e.g. a `"swatch"` entry carrying a `VectorStyle` from
+ * `@geospatial-sdk/core`, rendered client-side) without a breaking change to
+ * existing consumers.
  */
 export interface LegendEntry {
+  type: "image";
   url: string;
   label: string;
 }
@@ -191,7 +193,7 @@ export async function createLegendEntriesFromLayer(
   // createLegendUrlFromLayer throws unless the layer is a WMS/WMTS layer with a
   // name, so a non-null url guarantees `layer.name` is present.
   const { name } = layer as MapContextLayerWms | MapContextLayerWmts;
-  return [{ url, label: name }];
+  return [{ type: "image", url, label: name }];
 }
 
 /**
