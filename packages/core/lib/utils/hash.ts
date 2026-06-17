@@ -3,6 +3,9 @@ function isGeoJsonGeometry(object: object) {
 }
 
 export function getHash(input: unknown, ignoreKeys: string[] = []): string {
+  if (input instanceof Date) {
+    return input.toISOString();
+  }
   if (input instanceof Object && isGeoJsonGeometry(input)) {
     return JSON.stringify(input); // do not compute an actual hash as it will take too long
   } else if (input instanceof Object) {
