@@ -139,10 +139,14 @@ function updateWmsSourceParams(
   if (!source) return;
 
   const params = buildWmsParams(layerModel);
+  const previousParams = buildWmsParams(previousLayerModel);
+
+  // nothing WMS-relevant changed: skip updateParams to avoid a needless re-render
+  if (getHash(params) === getHash(previousParams)) return;
 
   // reset params that existed before but no longer do, so stale dimensions
   // (e.g. a removed TIME) don't linger after the merge performed by updateParams
-  for (const key of Object.keys(buildWmsParams(previousLayerModel))) {
+  for (const key of Object.keys(previousParams)) {
     if (!(key in params)) {
       params[key] = undefined;
     }
