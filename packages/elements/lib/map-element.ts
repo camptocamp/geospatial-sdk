@@ -1,11 +1,8 @@
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
-import { computeMapContextDiff, MapContext } from "@geospatial-sdk/core";
+import { MapContext } from "@geospatial-sdk/core";
 import OlMap from "ol/Map.js";
-import {
-  applyContextDiffToMap,
-  createMapFromContext,
-} from "@geospatial-sdk/openlayers";
+import { syncMapWithContext, MapSyncHandle } from "@geospatial-sdk/openlayers";
 
 @customElement("geosdk-map")
 export class SdkMapElement extends LitElement {
@@ -25,25 +22,42 @@ export class SdkMapElement extends LitElement {
   @query("div")
   accessor mapElement!: HTMLDivElement;
 
-  private map: OlMap | null = null;
+  private sync: MapSyncHandle | null = null;
+  private onContextChange: (() => void) | null = null;
 
   public async firstUpdated() {
-    this.map = await createMapFromContext(this.context, this.mapElement);
+    await this.startSync();
   }
 
-  public async updated(changedProperties: PropertyValues<this>) {
+  // Re-attaching the element to the DOM rebuilds the map; disconnect tears it
+  // down. firstUpdated handles the very first connect (mapElement isn't
+  // rendered yet at the initial connectedCallback).
+  public connectedCallback() {
+    super.connectedCallback();
+    if (this.hasUpdated && !this.sync) void this.startSync();
+  }
+
+  private async startSync() {
+    this.sync = await syncMapWithContext(
+      this.mapElement,
+      () => this.context,
+      (onChange) => {
+        this.onContextChange = onChange;
+        return () => (this.onContextChange = null);
+      },
+    );
+  }
+
+  public updated(changedProperties: PropertyValues<this>) {
     if (changedProperties.has("context")) {
-      await this.contextHasChanged(
-        changedProperties.get("context"),
-        this.context,
-      );
+      this.onContextChange?.();
     }
   }
 
-  async contextHasChanged(value: MapContext | undefined, oldValue: MapContext) {
-    if (!this.map || !value) return;
-    const diff = computeMapContextDiff(value, oldValue);
-    await applyContextDiffToMap(this.map, diff);
+  public disconnectedCallback() {
+    super.disconnectedCallback();
+    this.sync?.stop();
+    this.sync = null;
   }
 
   render() {
@@ -55,7 +69,7 @@ export class SdkMapElement extends LitElement {
     return this;
   }
 
-  public get olMap() {
-    return this.map;
+  public get olMap(): OlMap | null {
+    return this.sync?.map ?? null;
   }
 }
