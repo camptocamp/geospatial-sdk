@@ -27,9 +27,14 @@ export interface MapLayerDataInfo {
   geometryTypes?: Array<"Point" | "LineString" | "Polygon">;
 }
 
+export interface ResolvedMapLayerIdentity {
+  id?: string | number;
+}
+
 export type ResolvedMapLayerState = MapLayerCreationStatus &
   MapLayerLoadingStatus &
-  MapLayerDataInfo;
+  MapLayerDataInfo &
+  ResolvedMapLayerIdentity;
 
 /**
  * Describes the actual view state of a map

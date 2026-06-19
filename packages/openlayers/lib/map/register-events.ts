@@ -107,6 +107,10 @@ export function propagateLayerStateChangeEventToMap(
       return;
     }
     const layerIndex = map.getLayers().getArray().indexOf(layer);
+    const layerId = layer.get(`${GEOSPATIAL_SDK_PREFIX}layer-id`) as
+      | string
+      | number
+      | undefined;
     map.dispatchEvent({
       type: `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
       layerState: {
@@ -114,6 +118,7 @@ export function propagateLayerStateChangeEventToMap(
         ...currentLoadingStatus,
       },
       layerIndex,
+      ...(layerId !== undefined ? { layerId } : {}),
     } as unknown as BaseEvent);
   }
 
@@ -219,7 +224,10 @@ export function registerMapStateChangeEvent(map: Map) {
     `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
     (event: BaseEvent & MapLayerStateChangeEvent) => {
       const layers = [...currentState.layers];
-      layers[event.layerIndex] = event.layerState;
+      layers[event.layerIndex] = {
+        ...event.layerState,
+        ...(event.layerId !== undefined ? { id: event.layerId } : {}),
+      };
       currentState = { ...currentState, layers };
       emitState();
     },

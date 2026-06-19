@@ -350,6 +350,28 @@ describe("event listener registration", () => {
     });
 
     describe("layer loading & data info", () => {
+      it("includes layerId in the event when the layer has an id", async () => {
+        await resetMapFromContext(map, {
+          layers: [{ ...MAP_CTX_LAYER_XYZ_FIXTURE, id: "my-layer" }],
+          view: null,
+        });
+        await vi.runAllTimersAsync();
+        callback.mockClear();
+
+        const layer = map.getLayers().item(0);
+        layer.dispatchEvent({
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+          layerState: { loaded: true },
+        } as unknown as BaseEvent);
+
+        expect(callback).toHaveBeenCalledWith({
+          layerState: { created: true, loaded: true },
+          layerIndex: 0,
+          layerId: "my-layer",
+          type: "map-layer-state-change",
+        });
+      });
+
       it("transmits updated layer state as they update", async () => {
         await resetMapFromContext(map, {
           layers: [MAP_CTX_LAYER_XYZ_FIXTURE, MAP_CTX_LAYER_WMS_FIXTURE],
@@ -838,6 +860,31 @@ describe("event listener registration", () => {
             resolution: 1,
             scaleDenominator: 3571.428571428571,
           },
+        },
+      });
+    });
+
+    it("includes layer id in mapState.layers when the layer has an id", async () => {
+      await resetMapFromContext(map, {
+        layers: [{ ...MAP_CTX_LAYER_XYZ_FIXTURE, id: "my-layer" }],
+        view: null,
+      });
+      await vi.runAllTimersAsync();
+      callback.mockClear();
+
+      map
+        .getLayers()
+        .item(0)
+        .dispatchEvent({
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+          layerState: { loaded: true },
+        } as unknown as BaseEvent);
+
+      expect(callback).toHaveBeenCalledWith({
+        type: "map-state-change",
+        mapState: {
+          layers: [{ created: true, loaded: true, id: "my-layer" }],
+          view: null,
         },
       });
     });
