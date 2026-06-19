@@ -29,6 +29,7 @@ const UPDATABLE_PROPERTIES: (
   "style",
   "hoverStyle",
   "dimensionValues",
+  "customParams",
   // TODO (when available) "zIndex"
 ];
 

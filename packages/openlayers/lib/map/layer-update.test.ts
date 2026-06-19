@@ -67,6 +67,21 @@ describe("Layer update utils", () => {
       } as MapContextLayer;
       expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(true);
     });
+    it("returns true when only customParams change", () => {
+      const oldLayer = {
+        name: "layer1",
+        type: "wms",
+        url: "https://example.com/wms",
+        customParams: { COLORSCALERANGE: "-2,35" },
+      } as MapContextLayer;
+      const newLayer = {
+        name: "layer1",
+        type: "wms",
+        url: "https://example.com/wms",
+        customParams: { COLORSCALERANGE: "0,100", LOGSCALE: "true" },
+      } as MapContextLayer;
+      expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(true);
+    });
   });
 
   describe("updateLayerProperties", () => {
@@ -226,6 +241,39 @@ describe("Layer update utils", () => {
       };
       updateLayerProperties(next, olLayer);
       expect(olSource.updateParams).not.toHaveBeenCalled();
+    });
+
+    it("applies changed customParams to the source via updateParams", () => {
+      const prev = {
+        ...baseModel,
+        customParams: { COLORSCALERANGE: "-2,35" },
+      };
+      const next = {
+        ...baseModel,
+        customParams: { COLORSCALERANGE: "0,100", LOGSCALE: "true" },
+      };
+      updateLayerProperties(next, olLayer, prev);
+      expect(olSource.updateParams).toHaveBeenCalledWith(
+        expect.objectContaining({ COLORSCALERANGE: "0,100", LOGSCALE: "true" }),
+      );
+    });
+
+    it("resets customParams that were removed to undefined", () => {
+      const prev = {
+        ...baseModel,
+        customParams: { COLORSCALERANGE: "-2,35", LOGSCALE: "false" },
+      };
+      const next = {
+        ...baseModel,
+        customParams: { COLORSCALERANGE: "0,100" },
+      };
+      updateLayerProperties(next, olLayer, prev);
+      expect(olSource.updateParams).toHaveBeenCalledWith(
+        expect.objectContaining({
+          COLORSCALERANGE: "0,100",
+          LOGSCALE: undefined,
+        }),
+      );
     });
   });
 });
