@@ -73,7 +73,7 @@ WMS layers accept an optional `customParams` property (`Record<string, string>`)
 }
 ```
 
-This is the intended mechanism for NcWMS-specific parameters (Thredds, ERDDAP, CMEMS). Note that `customParams` keys take precedence over SDK-derived params if there is a conflict.
+Use this for any vendor-specific parameters not covered by the OGC standard — NcWMS-based servers (Thredds, ERDDAP, CMEMS) are a common example. Note that `customParams` keys take precedence over SDK-derived params if there is a conflict.
 
 ### Extras
 
