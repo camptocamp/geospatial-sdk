@@ -20,7 +20,7 @@ interface MapContext {
 Each layer has a `type` property that determines its data source:
 
 - **`xyz`**: Tiles (raster or vector) aligned on the global Web Mercator grid (EPSG:3857) (`url`)
-- **`wms`**: OGC Web Map Service (`url`, `name`, optional `dimensions`, `style`)
+- **`wms`**: OGC Web Map Service (`url`, `name`, optional `dimensions`, `style`, `customParams`)
 - **`wmts`**: OGC Web Map Tile Service (`url`, `name`, optional `dimensions`, `style`)
 - **`wfs`**: OGC Web Feature Service (`url`, `featureType`, optional `style`)
 - **`geojson`**: Vector data in GeoJSON format (`url` or `data`, optional `style`)
@@ -56,6 +56,24 @@ What this means is that _using an `id` for layers is optional, and changes the w
 The vector layers take a `style` property for their symbology. They use the so-called [_OpenLayers flat style format_ (see API doc)](https://openlayers.org/en/latest/apidoc/module-ol_style_flat.html).
 
 This property is optional; if not provided, a default style will be used (depending on the library).
+
+### WMS vendor parameters
+
+WMS layers accept an optional `customParams` property (`Record<string, string>`) for non-standard server extensions. These key-value pairs are appended as-is to every GetMap request:
+
+```typescript
+{
+  type: "wms",
+  url: "https://my.thredds.server/thredds/wms",
+  name: "temperature",
+  customParams: {
+    COLORSCALERANGE: "-2,35",
+    LOGSCALE: "false",
+  },
+}
+```
+
+This is the intended mechanism for NcWMS-specific parameters (Thredds, ERDDAP, CMEMS). Note that `customParams` keys take precedence over SDK-derived params if there is a conflict.
 
 ### Extras
 

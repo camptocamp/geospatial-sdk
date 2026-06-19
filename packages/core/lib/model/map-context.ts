@@ -93,6 +93,13 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   style?: string;
 
   /**
+   * Vendor-specific WMS parameters that are appended as-is to every GetMap request.
+   * Use this for non-standard server extensions such as NcWMS (`COLORSCALERANGE`, `LOGSCALE`).
+   * Keys are case-sensitive; they are passed without transformation.
+   */
+  customParams?: Record<string, string>;
+
+  /**
    * Whether to use tiled WMS requests. Tiled requests include a `TILED=true` parameter as per https://wiki.osgeo.org/wiki/WMS_Tiling_Client_Recommendation
    *
    * Using tiled requests allow tiles to be cached and thus the server load to potentially be reduced; on the other hand,
