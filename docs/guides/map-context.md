@@ -20,8 +20,8 @@ interface MapContext {
 Each layer has a `type` property that determines its data source:
 
 - **`xyz`**: Tiles (raster or vector) aligned on the global Web Mercator grid (EPSG:3857) (`url`)
-- **`wms`**: OGC Web Map Service (`url`, `name`, optional `dimensions`, `style`, `customParams`)
-- **`wmts`**: OGC Web Map Tile Service (`url`, `name`, optional `dimensions`, `style`)
+- **`wms`**: OGC Web Map Service (`url`, `name`, optional `dimensionValues`, `style`, `customParams`)
+- **`wmts`**: OGC Web Map Tile Service (`url`, `name`, optional `dimensionValues`, `style`)
 - **`wfs`**: OGC Web Feature Service (`url`, `featureType`, optional `style`)
 - **`geojson`**: Vector data in GeoJSON format (`url` or `data`, optional `style`)
 - **`ogcapi`**: OGC API, supports Features and Tiles (both raster and vector) (`url`, `collection`, optional `useTiles`, `tileMatrixSet`, `style`)
