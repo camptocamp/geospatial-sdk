@@ -149,3 +149,13 @@ export const SAMPLE_LAYER5: MapContextLayerXyz = deepFreeze({
   url: "http://my.tiles/server",
   label: "My XYZ Layer",
 });
+export const SAMPLE_LAYER6: MapContextLayerGeotiff = deepFreeze({
+  type: "geotiff",
+  url: "http://my.tiles/cog",
+  label: "My COG Layer",
+});
+export const SAMPLE_LAYER7: MapContextLayerMapLibreStyle = deepFreeze({
+  type: "maplibre-style",
+  styleUrl: "http://my.tiles/style.json",
+  label: "My MapLibre Style Layer",
+});

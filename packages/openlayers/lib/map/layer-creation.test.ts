@@ -1,0 +1,705 @@
+import {
+  MapContextLayer,
+  MapContextLayerGeojson,
+  MapContextLayerWms,
+} from "@geospatial-sdk/core";
+import {
+  MAP_CTX_LAYER_GEOJSON_FIXTURE,
+  MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
+  MAP_CTX_LAYER_GEOTIFF_FIXTURE,
+  MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE,
+  MAP_CTX_LAYER_MVT_FIXTURE,
+  MAP_CTX_LAYER_OGCAPI_FIXTURE,
+  MAP_CTX_LAYER_WFS_FIXTURE,
+  MAP_CTX_LAYER_WMS_FIXTURE,
+  MAP_CTX_LAYER_WMTS_FIXTURE,
+  MAP_CTX_LAYER_XYZ_FIXTURE,
+} from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
+import { FeatureCollection } from "geojson";
+import { MapboxVectorLayer } from "ol-mapbox-style";
+import { FeatureUrlFunction } from "ol/featureloader.js";
+import GeoJSON from "ol/format/GeoJSON.js";
+import ImageTile from "ol/ImageTile.js";
+import Layer from "ol/layer/Layer.js";
+import TileLayer from "ol/layer/Tile.js";
+import VectorLayer from "ol/layer/Vector.js";
+import VectorTileLayer from "ol/layer/VectorTile.js";
+import WebGLTileLayer from "ol/layer/WebGLTile.js";
+import { VectorTile } from "ol/source.js";
+import GeoTIFF from "ol/source/GeoTIFF.js";
+import TileWMS from "ol/source/TileWMS.js";
+import VectorSource from "ol/source/Vector.js";
+import WMTS from "ol/source/WMTS.js";
+import XYZ from "ol/source/XYZ.js";
+import TileState from "ol/TileState.js";
+import { beforeEach } from "vitest";
+import { tileLoadErrorCatchFunction } from "./handle-errors.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import ImageLayer from "ol/layer/Image.js";
+import ImageWMS from "ol/source/ImageWMS.js";
+import { OgcApiEndpoint } from "@camptocamp/ogc-client";
+import { createLayer } from "./layer-creation.js";
+
+vi.mock("./handle-errors", async (importOriginal) => {
+  const actual =
+    (await importOriginal()) as typeof import("./handle-errors.js");
+  return {
+    ...actual,
+    tileLoadErrorCatchFunction: vi.fn(),
+    handleEndpointError: vi.fn(),
+  };
+});
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.clearAllMocks();
+});
+
+describe("createLayer", () => {
+  let layerModel: MapContextLayer, layer: Layer;
+  const eventCallback = vi.fn();
+
+  describe("XYZ", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_XYZ_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a tile layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(TileLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(1);
+      expect(layer.get("label")).toBeUndefined();
+      expect(layer.getSource()?.getAttributions()).toBeNull();
+    });
+    it("create a XYZ source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(XYZ);
+    });
+    it("set correct urls", () => {
+      const source = layer.getSource() as XYZ;
+      const urls = source.getUrls() ?? [];
+      expect(urls.length).toBe(3);
+      expect(urls[0]).toEqual(
+        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      );
+    });
+    it("should set tileLoadErrorCatchFunction to handle errors", () => {
+      const source = layer.getSource() as XYZ;
+      const tileLoadFunction = source.getTileLoadFunction();
+      expect(tileLoadFunction).toBeInstanceOf(Function);
+      const tile = new ImageTile([0, 0, 0], TileState.IDLE, "", null, () => {});
+      tileLoadFunction(tile, "http://example.com/tile");
+      expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
+    });
+    it("should configure XYZ source with referrerPolicy from layer model", async () => {
+      const layerWithPolicy = await createLayer({
+        ...MAP_CTX_LAYER_XYZ_FIXTURE,
+        referrerPolicy: "strict-origin-when-cross-origin",
+      });
+      const source = layerWithPolicy.getSource() as XYZ;
+      // referrerPolicy is protected on TileImage; access via bracket to verify it is set
+      expect(
+        (source as unknown as Record<string, unknown>)["referrerPolicy"],
+      ).toBe("strict-origin-when-cross-origin");
+    });
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+  });
+  describe("OGCAPI (as geojson items)", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a vector layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(VectorLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(1);
+      expect(layer.get("label")).toBeUndefined();
+      expect(layer.getSource()?.getAttributions()).toBeNull();
+    });
+    it("create a vector source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(VectorSource);
+    });
+    it("set correct url", () => {
+      const source = layer.getSource() as VectorSource;
+      const url = source.getUrl();
+      expect(url).toBe(
+        "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json",
+      );
+    });
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+  });
+  describe("OGCAPI (with failing endpoint)", () => {
+    beforeEach(async () => {
+      vi.spyOn(
+        OgcApiEndpoint.prototype,
+        "getCollectionItemsUrl",
+      ).mockRejectedValue(new Error("Failed to load collection"));
+      layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("creates an empty vector layer", () => {
+      expect(layer).toBeInstanceOf(VectorLayer);
+      expect(layer.getSource()).toBeNull();
+    });
+
+    it("emits a loading error event", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+          error: expect.any(Error),
+          target: layer,
+        }),
+      );
+    });
+  });
+  describe("WMS", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_WMS_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a tile layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(TileLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(false);
+      expect(layer.getOpacity()).toBe(0.5);
+      expect(layer.get("label")).toBe("Communes");
+      // @ts-expect-error TS2554 we're not providing a view extent here
+      expect(layer.getSource()?.getAttributions()!()).toEqual(["camptocamp"]);
+    });
+    it("create a TileWMS source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(TileWMS);
+    });
+    it("set correct WMS params", () => {
+      const source = layer.getSource() as TileWMS;
+      const params = source.getParams();
+      expect(params).toEqual({
+        LAYERS: (layerModel as MapContextLayerWms).name,
+        STYLES: (layerModel as MapContextLayerWms).style,
+        TILED: true,
+      });
+    });
+    it("sets custom WMS FORMAT param when provided", async () => {
+      layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, format: "image/jpeg" };
+      layer = await createLayer(layerModel);
+      const source = layer.getSource() as TileWMS;
+      const params = source.getParams();
+      expect(params).toEqual({
+        LAYERS: (layerModel as MapContextLayerWms).name,
+        FORMAT: "image/jpeg",
+        STYLES: (layerModel as MapContextLayerWms).style,
+        TILED: true,
+      });
+    });
+    it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
+      layerModel = {
+        ...MAP_CTX_LAYER_WMS_FIXTURE,
+        dimensionValues: {
+          time: new Date("2020-01-01T00:00:00.000Z"),
+          elevation: 500,
+        },
+      };
+      layer = await createLayer(layerModel);
+      const source = layer.getSource() as TileWMS;
+      const params = source.getParams();
+      expect(params).toEqual({
+        LAYERS: (layerModel as MapContextLayerWms).name,
+        STYLES: (layerModel as MapContextLayerWms).style,
+        TILED: true,
+        TIME: "2020-01-01T00:00:00.000Z",
+        ELEVATION: 500,
+      });
+    });
+    it("set correct url without existing REQUEST and SERVICE params", () => {
+      const source = layer.getSource() as TileWMS;
+      const urls = source.getUrls() || [];
+      expect(urls.length).toBe(1);
+      expect(urls[0]).toBe(
+        "https://www.datagrandest.fr/geoserver/region-grand-est/ows",
+      );
+    });
+    it("set WMS gutter of 20px", () => {
+      const source = layer.getSource() as TileWMS;
+      const gutter = source["gutter_"];
+      expect(gutter).toBe(20);
+    });
+    it("should set tileLoadErrorCatchFunction to handle errors", () => {
+      const source = layer.getSource() as TileWMS;
+      const tileLoadFunction = source.getTileLoadFunction();
+      expect(tileLoadFunction).toBeInstanceOf(Function);
+      const tile = new ImageTile([0, 0, 0], TileState.IDLE, "", null, () => {});
+      tileLoadFunction(tile, "http://example.com/tile");
+      expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
+    });
+
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+
+    describe("not using tiles", () => {
+      beforeEach(async () => {
+        layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, useTiles: false };
+        layer = await createLayer(layerModel);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+      });
+      it("create an image layer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(ImageLayer);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(false);
+        expect(layer.getOpacity()).toBe(0.5);
+        expect(layer.get("label")).toBe("Communes");
+        // @ts-expect-error TS2554 we're not providing a view extent here
+        expect(layer.getSource()?.getAttributions()!()).toEqual(["camptocamp"]);
+      });
+      it("create an ImageWMS source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(ImageWMS);
+      });
+      it("set correct WMS params", () => {
+        const source = layer.getSource() as ImageWMS;
+        const params = source.getParams();
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          STYLES: (layerModel as MapContextLayerWms).style,
+        });
+      });
+      it("sets custom WMS FORMAT param when provided", async () => {
+        layerModel = {
+          ...MAP_CTX_LAYER_WMS_FIXTURE,
+          useTiles: false,
+          format: "image/jpeg",
+        };
+        layer = await createLayer(layerModel);
+        const source = layer.getSource() as ImageWMS;
+        const params = source.getParams();
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          FORMAT: "image/jpeg",
+          STYLES: (layerModel as MapContextLayerWms).style,
+        });
+      });
+      it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
+        layerModel = {
+          ...MAP_CTX_LAYER_WMS_FIXTURE,
+          useTiles: false,
+          dimensionValues: {
+            time: new Date("2020-01-01T00:00:00.000Z"),
+            elevation: 500,
+          },
+        };
+        layer = await createLayer(layerModel);
+        const source = layer.getSource() as ImageWMS;
+        const params = source.getParams();
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          STYLES: (layerModel as MapContextLayerWms).style,
+          TIME: "2020-01-01T00:00:00.000Z",
+          ELEVATION: 500,
+        });
+      });
+      it("set correct url without existing REQUEST and SERVICE params", () => {
+        const source = layer.getSource() as ImageWMS;
+        const url = source.getUrl();
+        expect(url).toBe(
+          "https://www.datagrandest.fr/geoserver/region-grand-est/ows",
+        );
+      });
+    });
+  });
+
+  describe("WFS", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_WFS_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a vector layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(VectorLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(0.5);
+      expect(layer.get("label")).toBe("Communes");
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(VectorSource);
+
+      const attributions = layer.getSource()?.getAttributions();
+      expect(attributions).not.toBeNull();
+      // @ts-expect-error TS2554 we're not providing a view extent here
+      expect(attributions!()).toEqual(["camptocamp"]);
+    });
+    it("create a Vector source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(VectorSource);
+    });
+    it("set correct url load function", () => {
+      const source = layer.getSource() as VectorSource;
+      const urlLoader = source.getUrl() as FeatureUrlFunction;
+      // @ts-expect-error TS2345
+      expect(urlLoader([10, 20, 30, 40])).toBe(
+        "https://www.datagrandest.fr/geoserver/region-grand-est/ows?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application%2Fjson&typename=ms%3Acommune_actuelle_3857&srsname=EPSG%3A3857&bbox=10%2C20%2C30%2C40%2CEPSG%3A3857&maxFeatures=10000",
+      );
+    });
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+  });
+
+  describe("GEOJSON", () => {
+    describe("with inline data", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
+        layer = await createLayer(layerModel);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+      });
+      it("create a VectorLayer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(VectorLayer);
+      });
+      it("set correct layer properties", () => {
+        expect(layer.getVisible()).toBe(true);
+        expect(layer.getOpacity()).toBe(0.8);
+        expect(layer.get("label")).toBe("Regions");
+      });
+      it("create a VectorSource source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorSource);
+      });
+      it("add features", () => {
+        const source = layer.getSource() as VectorSource;
+        const features = source.getFeatures();
+        const data = (layerModel as MapContextLayerGeojson)
+          .data as FeatureCollection;
+        expect(features.length).toBe(data.features.length);
+      });
+      it("emits a loaded event", async () => {
+        await vi.runAllTimersAsync();
+        expect(eventCallback).toHaveBeenCalledWith({
+          layerState: {
+            loaded: true,
+          },
+          target: layer,
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+        });
+      });
+    });
+    describe("with inline data as string", () => {
+      beforeEach(async () => {
+        layerModel = { ...MAP_CTX_LAYER_GEOJSON_FIXTURE };
+        layerModel.data = JSON.stringify(layerModel.data);
+        layer = await createLayer(layerModel);
+      });
+      it("create a VectorLayer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(VectorLayer);
+      });
+      it("create a VectorSource source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorSource);
+      });
+      it("add features", () => {
+        const source = layer.getSource() as VectorSource;
+        const features = source.getFeatures();
+        expect(features.length).toBe(
+          (MAP_CTX_LAYER_GEOJSON_FIXTURE.data as FeatureCollection).features
+            .length,
+        );
+      });
+    });
+    describe("with invalid inline data as string", () => {
+      beforeEach(async () => {
+        const spy = vi.spyOn(window.console, "warn");
+        spy.mockClear();
+        layerModel = {
+          ...MAP_CTX_LAYER_GEOJSON_FIXTURE,
+          url: undefined,
+          data: "blargz",
+        };
+        layer = await createLayer(layerModel);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
+      });
+      it("create a VectorLayer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(VectorLayer);
+      });
+      it("outputs error in the console", () => {
+        expect(window.console.warn).toHaveBeenCalled();
+      });
+      it("create an empty VectorSource source", () => {
+        const source = layer.getSource() as VectorSource;
+        expect(source).toBeInstanceOf(VectorSource);
+        expect(source.getFeatures().length).toBe(0);
+      });
+      it("emits a loading error event", async () => {
+        await vi.runAllTimersAsync();
+        expect(eventCallback).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+            error: expect.any(Error),
+            target: layer,
+          }),
+        );
+      });
+    });
+    describe("with remote file url", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
+        layer = await createLayer(layerModel);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+      });
+      it("create a VectorLayer", () => {
+        expect(layer).toBeTruthy();
+        expect(layer).toBeInstanceOf(VectorLayer);
+      });
+      it("create a VectorSource source", () => {
+        const source = layer.getSource();
+        expect(source).toBeInstanceOf(VectorSource);
+      });
+      it("sets the format as GeoJSON", () => {
+        const source = layer.getSource() as VectorSource;
+        expect(source.getFormat()).toBeInstanceOf(GeoJSON);
+      });
+      it("set the url to point to the file", () => {
+        const source = layer.getSource() as VectorSource;
+        expect(source.getUrl()).toBe(
+          (layerModel as MapContextLayerGeojson).url,
+        );
+      });
+      it("emits a loaded event when features load", () => {
+        const source = layer.getSource() as VectorSource;
+        source.dispatchEvent("featuresloadend");
+        expect(eventCallback).toHaveBeenCalledWith({
+          layerState: { loaded: true },
+          target: layer,
+          type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+        });
+      });
+    });
+    describe("with remote file url (failing to load)", () => {
+      beforeEach(async () => {
+        layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
+        layer = await createLayer(layerModel);
+        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
+      });
+      it("creates a vector layer with an empty source", () => {
+        const source = layer.getSource() as VectorSource;
+        expect(layer).toBeInstanceOf(VectorLayer);
+        expect(source).toBeInstanceOf(VectorSource);
+        expect(source.getFeatures().length).toBe(0);
+      });
+      it("emits a loading error event when features fail to load", () => {
+        const source = layer.getSource() as VectorSource;
+        source.dispatchEvent("featuresloaderror");
+        expect(eventCallback).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+            error: expect.any(Error),
+            target: layer,
+          }),
+        );
+      });
+    });
+  });
+
+  describe("WMTS", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_WMTS_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a tile layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(TileLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(1);
+      expect(layer.get("label")).toBeUndefined();
+      const source = layer.getSource() as WMTS;
+      expect(source.getAttributions()).toBeNull();
+      expect(source.getStyle()).toBe("default");
+    });
+    it("create a WMTS source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(WMTS);
+    });
+    it("set correct urls", () => {
+      const source = layer.getSource() as WMTS;
+      const urls = source.getUrls() ?? [];
+      expect(urls).toEqual([
+        "https://services.geo.sg.ch/wss/service/SG00066_WMTS/guest/tile/1.0.0/SG00066/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}",
+      ]);
+    });
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+  });
+  describe("WMTS without default style given", () => {
+    beforeEach(async () => {
+      layerModel = {
+        ...MAP_CTX_LAYER_WMTS_FIXTURE,
+        url: "https://wmts/no-default-style",
+      };
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("uses the first style as default", async () => {
+      const source = layer.getSource() as WMTS;
+      expect(source.getStyle()).toEqual("first");
+    });
+  });
+
+  describe("Maplibre Style", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a tile layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(MapboxVectorLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(1);
+      expect(layer.get("label")).toBeUndefined();
+    });
+    it("create a Vector Tile source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(VectorTile);
+    });
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+  });
+
+  describe("MVT", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_MVT_FIXTURE;
+      layer = await createLayer(layerModel);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
+      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
+    });
+    it("create a VectorTileLayer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(VectorTileLayer);
+    });
+    it("create a VectorTile source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(VectorTile);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(1);
+      expect(layer.get("label")).toBeUndefined();
+    });
+    it("emits a loaded event initially", async () => {
+      await vi.runAllTimersAsync();
+      expect(eventCallback).toHaveBeenCalledWith({
+        layerState: {
+          loaded: true,
+        },
+        target: layer,
+        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
+      });
+    });
+  });
+
+  describe("GeoTIFF", () => {
+    beforeEach(async () => {
+      layerModel = MAP_CTX_LAYER_GEOTIFF_FIXTURE;
+      layer = await createLayer(layerModel);
+    });
+    it("create a WebGLTile layer", () => {
+      expect(layer).toBeTruthy();
+      expect(layer).toBeInstanceOf(WebGLTileLayer);
+    });
+    it("set correct layer properties", () => {
+      expect(layer.getVisible()).toBe(true);
+      expect(layer.getOpacity()).toBe(1);
+      expect(layer.get("label")).toBeUndefined();
+    });
+    it("create a GeoTIFF source", () => {
+      const source = layer.getSource();
+      expect(source).toBeInstanceOf(GeoTIFF);
+    });
+  });
+});

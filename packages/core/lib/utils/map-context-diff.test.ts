@@ -7,6 +7,8 @@ import {
   SAMPLE_LAYER3,
   SAMPLE_LAYER4,
   SAMPLE_LAYER5,
+  SAMPLE_LAYER6,
+  SAMPLE_LAYER7,
 } from "../../fixtures/map-context.fixtures.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -387,6 +389,115 @@ describe("Context diff utils", () => {
           viewChanges: {
             extent: [0, 1, 2, 3],
           },
+        });
+      });
+    });
+
+    describe("combined changes (2)", () => {
+      beforeEach(() => {
+        contextOld = {
+          ...SAMPLE_CONTEXT,
+          layers: [
+            SAMPLE_LAYER1,
+            SAMPLE_LAYER5,
+            SAMPLE_LAYER3,
+            SAMPLE_LAYER4,
+            SAMPLE_LAYER6,
+          ],
+        };
+        contextNew = {
+          ...SAMPLE_CONTEXT,
+          layers: [SAMPLE_LAYER3, SAMPLE_LAYER1],
+        };
+      });
+      it("outputs the correct diff", async () => {
+        diff = computeMapContextDiff(contextNew, contextOld);
+        expect(diff).toEqual({
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [
+            {
+              layer: SAMPLE_LAYER5,
+              position: 1,
+            },
+            {
+              layer: SAMPLE_LAYER4,
+              position: 3,
+            },
+            {
+              layer: SAMPLE_LAYER6,
+              position: 4,
+            },
+          ],
+          layersReordered: [
+            {
+              layer: SAMPLE_LAYER3,
+              newPosition: 0,
+              previousPosition: 1,
+            },
+            {
+              layer: SAMPLE_LAYER1,
+              newPosition: 1,
+              previousPosition: 0,
+            },
+          ],
+        });
+      });
+    });
+
+    describe("combined changes (3)", () => {
+      beforeEach(() => {
+        contextOld = {
+          ...SAMPLE_CONTEXT,
+          layers: [SAMPLE_LAYER5, SAMPLE_LAYER1, SAMPLE_LAYER2],
+        };
+        contextNew = {
+          ...SAMPLE_CONTEXT,
+          layers: [
+            SAMPLE_LAYER2,
+            SAMPLE_LAYER3,
+            SAMPLE_LAYER6,
+            SAMPLE_LAYER1,
+            SAMPLE_LAYER7,
+          ],
+        };
+      });
+      it("outputs the correct diff", async () => {
+        diff = computeMapContextDiff(contextNew, contextOld);
+        expect(diff).toEqual({
+          layersAdded: [
+            {
+              layer: SAMPLE_LAYER3,
+              position: 1,
+            },
+            {
+              layer: SAMPLE_LAYER6,
+              position: 2,
+            },
+            {
+              layer: SAMPLE_LAYER7,
+              position: 4,
+            },
+          ],
+          layersChanged: [],
+          layersRemoved: [
+            {
+              layer: SAMPLE_LAYER5,
+              position: 0,
+            },
+          ],
+          layersReordered: [
+            {
+              layer: SAMPLE_LAYER2,
+              previousPosition: 3,
+              newPosition: 0,
+            },
+            {
+              layer: SAMPLE_LAYER1,
+              previousPosition: 0,
+              newPosition: 3,
+            },
+          ],
         });
       });
     });

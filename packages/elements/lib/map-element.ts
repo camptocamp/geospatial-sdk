@@ -28,22 +28,19 @@ export class SdkMapElement extends LitElement {
   private map: OlMap | null = null;
 
   public async firstUpdated() {
-    this.map = await createMapFromContext(this.context, this.mapElement);
+    this.map = createMapFromContext(this.context, this.mapElement);
   }
 
   public async updated(changedProperties: PropertyValues<this>) {
     if (changedProperties.has("context")) {
-      await this.contextHasChanged(
-        changedProperties.get("context"),
-        this.context,
-      );
+      this.contextHasChanged(changedProperties.get("context"), this.context);
     }
   }
 
-  async contextHasChanged(value: MapContext | undefined, oldValue: MapContext) {
+  contextHasChanged(value: MapContext | undefined, oldValue: MapContext) {
     if (!this.map || !value) return;
     const diff = computeMapContextDiff(value, oldValue);
-    await applyContextDiffToMap(this.map, diff);
+    applyContextDiffToMap(this.map, diff);
   }
 
   render() {

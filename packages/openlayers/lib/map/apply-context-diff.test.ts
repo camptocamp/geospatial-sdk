@@ -1,4 +1,5 @@
 import {
+  computeMapContextDiff,
   MapContext,
   MapContextDiff,
   MapContextLayer,
@@ -12,10 +13,11 @@ import {
   SAMPLE_LAYER5,
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import Map from "ol/Map.js";
-import { createLayer, createMapFromContext } from "./create-map.js";
+import { createMapFromContext, getMapUpdatesPromise } from "./create-map.js";
 import { applyContextDiffToMap } from "./apply-context-diff.js";
 import { beforeEach } from "vitest";
 import BaseLayer from "ol/layer/Base.js";
+import { createLayer } from "./layer-creation.js";
 
 async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
   const reference = (await createLayer(layerModel)) as any;
@@ -38,12 +40,12 @@ describe("applyContextDiffToMap", () => {
   let map: Map;
   let layersArray: BaseLayer[];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     context = {
       ...SAMPLE_CONTEXT,
       layers: [SAMPLE_LAYER2, SAMPLE_LAYER1],
     };
-    map = await createMapFromContext(context);
+    map = createMapFromContext(context);
   });
 
   describe("no change", () => {
@@ -54,13 +56,14 @@ describe("applyContextDiffToMap", () => {
         layersRemoved: [],
         layersReordered: [],
       };
-      await applyContextDiffToMap(map, diff);
+      applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
       layersArray = map.getLayers().getArray();
     });
-    it("does not affect the map", () => {
+    it("does not affect the map", async () => {
       expect(layersArray.length).toEqual(2);
-      assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
-      assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
+      await assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
+      await assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
     });
   });
 
@@ -81,20 +84,21 @@ describe("applyContextDiffToMap", () => {
         layersRemoved: [],
         layersReordered: [],
       };
-      await applyContextDiffToMap(map, diff);
+      applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
       layersArray = map.getLayers().getArray();
     });
-    it("adds the layers to the map", () => {
+    it("adds the layers to the map", async () => {
       expect(layersArray.length).toEqual(4);
-      assertEqualsToModel(layersArray[0], SAMPLE_LAYER3);
-      assertEqualsToModel(layersArray[1], SAMPLE_LAYER2);
-      assertEqualsToModel(layersArray[2], SAMPLE_LAYER4);
-      assertEqualsToModel(layersArray[3], SAMPLE_LAYER1);
+      await assertEqualsToModel(layersArray[0], SAMPLE_LAYER3);
+      await assertEqualsToModel(layersArray[1], SAMPLE_LAYER2);
+      await assertEqualsToModel(layersArray[2], SAMPLE_LAYER4);
+      await assertEqualsToModel(layersArray[3], SAMPLE_LAYER1);
     });
   });
 
   describe("layers removed", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       diff = {
         layersAdded: [],
         layersChanged: [],
@@ -111,6 +115,7 @@ describe("applyContextDiffToMap", () => {
         layersReordered: [],
       };
       applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
     });
     it("deletes the layers", () => {
       expect(map.getLayers().getLength()).toEqual(0);
@@ -118,7 +123,7 @@ describe("applyContextDiffToMap", () => {
   });
 
   describe("layers changed", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       diff = {
         layersAdded: [],
         layersChanged: [
@@ -146,18 +151,19 @@ describe("applyContextDiffToMap", () => {
         layersReordered: [],
       };
       applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
       layersArray = map.getLayers().getArray();
     });
-    it("modifies the layers accordingly", () => {
+    it("modifies the layers accordingly", async () => {
       expect(layersArray.length).toEqual(2);
-      assertEqualsToModel(layersArray[0], diff.layersChanged[0].layer);
-      assertEqualsToModel(layersArray[1], diff.layersChanged[1].layer);
+      await assertEqualsToModel(layersArray[0], diff.layersChanged[0].layer);
+      await assertEqualsToModel(layersArray[1], diff.layersChanged[1].layer);
     });
 
     describe("layers changed (updatable properties only)", () => {
       let prevOlLayer: BaseLayer;
       let newOlLayer: BaseLayer;
-      beforeEach(() => {
+      beforeEach(async () => {
         diff = {
           layersAdded: [],
           layersChanged: [
@@ -175,6 +181,7 @@ describe("applyContextDiffToMap", () => {
         };
         prevOlLayer = map.getLayers().item(1);
         applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
         newOlLayer = map.getLayers().item(1);
       });
       it("modifies the layer without recreating it", () => {
@@ -194,7 +201,7 @@ describe("applyContextDiffToMap", () => {
           ...SAMPLE_CONTEXT,
           layers: [SAMPLE_LAYER1, SAMPLE_LAYER2, SAMPLE_LAYER3],
         };
-        map = await createMapFromContext(context);
+        map = createMapFromContext(context);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -213,13 +220,14 @@ describe("applyContextDiffToMap", () => {
           ],
         };
         applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
         layersArray = map.getLayers().getArray();
       });
-      it("moves the layers accordingly", () => {
+      it("moves the layers accordingly", async () => {
         expect(layersArray.length).toEqual(3);
-        assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
-        assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
-        assertEqualsToModel(layersArray[2], SAMPLE_LAYER3);
+        await assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
+        await assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
+        await assertEqualsToModel(layersArray[2], SAMPLE_LAYER3);
       });
     });
 
@@ -229,7 +237,7 @@ describe("applyContextDiffToMap", () => {
           ...SAMPLE_CONTEXT,
           layers: [SAMPLE_LAYER1, SAMPLE_LAYER3, SAMPLE_LAYER4, SAMPLE_LAYER2],
         };
-        map = await createMapFromContext(context);
+        map = createMapFromContext(context);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -248,14 +256,15 @@ describe("applyContextDiffToMap", () => {
           ],
         };
         applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
         layersArray = map.getLayers().getArray();
       });
-      it("moves the layers accordingly", () => {
+      it("moves the layers accordingly", async () => {
         expect(layersArray.length).toEqual(4);
-        assertEqualsToModel(layersArray[0], SAMPLE_LAYER4);
-        assertEqualsToModel(layersArray[1], SAMPLE_LAYER3);
-        assertEqualsToModel(layersArray[2], SAMPLE_LAYER1);
-        assertEqualsToModel(layersArray[3], SAMPLE_LAYER2);
+        await assertEqualsToModel(layersArray[0], SAMPLE_LAYER4);
+        await assertEqualsToModel(layersArray[1], SAMPLE_LAYER3);
+        await assertEqualsToModel(layersArray[2], SAMPLE_LAYER1);
+        await assertEqualsToModel(layersArray[3], SAMPLE_LAYER2);
       });
     });
   });
@@ -263,7 +272,7 @@ describe("applyContextDiffToMap", () => {
   describe("view change", () => {
     describe("set to default view", () => {
       beforeEach(async () => {
-        map = await createMapFromContext(SAMPLE_CONTEXT);
+        map = createMapFromContext(SAMPLE_CONTEXT);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -272,6 +281,7 @@ describe("applyContextDiffToMap", () => {
           viewChanges: null,
         };
         applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
       });
       it("set the view back to default", () => {
         const view = map.getView();
@@ -282,7 +292,7 @@ describe("applyContextDiffToMap", () => {
 
     describe("set to view with extent", () => {
       beforeEach(async () => {
-        map = await createMapFromContext(SAMPLE_CONTEXT);
+        map = createMapFromContext(SAMPLE_CONTEXT);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -293,6 +303,7 @@ describe("applyContextDiffToMap", () => {
           },
         };
         applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
       });
       it("set the view to the given extent, transformed to the view projection", () => {
         const view = map.getView();
@@ -305,7 +316,7 @@ describe("applyContextDiffToMap", () => {
 
     describe("set to view with geometry", () => {
       beforeEach(async () => {
-        map = await createMapFromContext(SAMPLE_CONTEXT);
+        map = createMapFromContext(SAMPLE_CONTEXT);
         diff = {
           layersAdded: [],
           layersChanged: [],
@@ -323,6 +334,7 @@ describe("applyContextDiffToMap", () => {
           },
         };
         applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
       });
       it("set the view to the given extent, transformed to the view projection", () => {
         const view = map.getView();
@@ -342,7 +354,7 @@ describe("applyContextDiffToMap", () => {
         ...context,
         layers: [SAMPLE_LAYER1, SAMPLE_LAYER5, SAMPLE_LAYER3, SAMPLE_LAYER4],
       };
-      map = await createMapFromContext(context);
+      map = createMapFromContext(context);
       diff = {
         layersAdded: [
           {
@@ -381,13 +393,75 @@ describe("applyContextDiffToMap", () => {
         ],
       };
       applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
       layersArray = map.getLayers().getArray();
     });
-    it("applies all changes", () => {
+    it("applies all changes", async () => {
       expect(layersArray.length).toEqual(3);
-      assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
-      assertEqualsToModel(layersArray[1], changedLayer);
-      assertEqualsToModel(layersArray[2], SAMPLE_LAYER5);
+      await assertEqualsToModel(layersArray[0], SAMPLE_LAYER2);
+      await assertEqualsToModel(layersArray[1], changedLayer);
+      await assertEqualsToModel(layersArray[2], SAMPLE_LAYER5);
+    });
+  });
+
+  describe("combined changes (2)", () => {
+    beforeEach(async () => {
+      context = {
+        ...context,
+        layers: [SAMPLE_LAYER1, SAMPLE_LAYER5, SAMPLE_LAYER3, SAMPLE_LAYER4],
+      };
+      const newContext = {
+        ...context,
+        layers: [SAMPLE_LAYER3, SAMPLE_LAYER1],
+      };
+      map = createMapFromContext(context);
+      applyContextDiffToMap(map, computeMapContextDiff(newContext, context));
+      await getMapUpdatesPromise(map);
+      layersArray = map.getLayers().getArray();
+    });
+    it("applies all changes", async () => {
+      expect(layersArray.length).toEqual(2);
+      await assertEqualsToModel(layersArray[0], SAMPLE_LAYER3);
+      await assertEqualsToModel(layersArray[1], SAMPLE_LAYER1);
+    });
+  });
+
+  describe("multiple sequential changes", () => {
+    beforeEach(() => {
+      context = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER1, SAMPLE_LAYER2, SAMPLE_LAYER3],
+      };
+      map = createMapFromContext(context);
+    });
+
+    it("applies three successive diffs in order without awaiting between them", async () => {
+      // Diff 1: remove LAYER1, add LAYER4 at end
+      const context1: MapContext = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER2, SAMPLE_LAYER3, SAMPLE_LAYER4],
+      };
+      // Diff 2: add LAYER5 at position 0
+      const context2: MapContext = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER5, SAMPLE_LAYER2, SAMPLE_LAYER3, SAMPLE_LAYER4],
+      };
+      // Diff 3: reorder LAYER4 to front, remove LAYER3
+      const context3: MapContext = {
+        ...SAMPLE_CONTEXT,
+        layers: [SAMPLE_LAYER4, SAMPLE_LAYER5, SAMPLE_LAYER2],
+      };
+
+      applyContextDiffToMap(map, computeMapContextDiff(context1, context));
+      applyContextDiffToMap(map, computeMapContextDiff(context2, context1));
+      applyContextDiffToMap(map, computeMapContextDiff(context3, context2));
+      await getMapUpdatesPromise(map);
+
+      layersArray = map.getLayers().getArray();
+      expect(layersArray.length).toEqual(3);
+      await assertEqualsToModel(layersArray[0], SAMPLE_LAYER4);
+      await assertEqualsToModel(layersArray[1], SAMPLE_LAYER5);
+      await assertEqualsToModel(layersArray[2], SAMPLE_LAYER2);
     });
   });
 });
