@@ -16,6 +16,22 @@ interface LegendOptions {
 }
 
 /**
+ * Whether a layer type can carry a legend.
+ *
+ * This is a cheap, type-level check; it does not guarantee that a legend actually
+ * exists (a WMTS layer may declare no legend URL). Use it to gate UI, and use the
+ * result of {@link createLegendFromLayer} to know whether a graphic is available.
+ *
+ * @param layer - The layer to check.
+ * @returns `true` if the layer is a WMS or WMTS layer.
+ */
+export function hasLegendSupport(
+  layer: MapContextLayer,
+): layer is MapContextLayerWms | MapContextLayerWmts {
+  return (layer.type === "wms" || layer.type === "wmts");
+}
+
+/**
  * Create a legend URL for a WMS layer
  *
  * @param layer - The MapContextLayer to create a legend URL for
@@ -103,11 +119,7 @@ export async function createLegendFromLayer(
   layer: MapContextLayer,
   options: LegendOptions = {},
 ): Promise<HTMLElement | null> {
-  if (
-    (layer.type !== "wms" && layer.type !== "wmts") ||
-    !layer.url ||
-    !layer.name
-  ) {
+  if (!hasLegendSupport(layer)) {
     console.error("Invalid layer for legend creation");
     return null;
   }

@@ -3,4 +3,4 @@
  * @packageDocumentation
  */
 
-export { createLegendFromLayer } from "./from-layer.js";
+export { createLegendFromLayer, hasLegendSupport } from "./from-layer.js";
