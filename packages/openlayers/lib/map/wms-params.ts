@@ -14,6 +14,7 @@ export function buildWmsParams(
     LAYERS: layerModel.name,
     ...(layerModel.format && { FORMAT: layerModel.format }),
     ...(layerModel.style && { STYLES: layerModel.style }),
+    ...(layerModel.filter && { FILTER: layerModel.filter }),
     ...(layerModel.dimensionValues &&
       Object.fromEntries(
         Object.entries(layerModel.dimensionValues).map(([k, v]) => [
