@@ -507,6 +507,10 @@ describe("MapContextService", () => {
             data: "blargz",
           };
           layer = await createLayer(layerModel);
+          layer.on(
+            `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+            eventCallback,
+          );
         });
         it("create a VectorLayer", () => {
           expect(layer).toBeTruthy();
@@ -519,6 +523,16 @@ describe("MapContextService", () => {
           const source = layer.getSource() as VectorSource;
           expect(source).toBeInstanceOf(VectorSource);
           expect(source.getFeatures().length).toBe(0);
+        });
+        it("emits a loading error event", async () => {
+          await vi.runAllTimersAsync();
+          expect(eventCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+              type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+              error: expect.any(Error),
+              target: layer,
+            }),
+          );
         });
       });
       describe("with remote file url", () => {
@@ -549,15 +563,41 @@ describe("MapContextService", () => {
             (layerModel as MapContextLayerGeojson).url,
           );
         });
-        it("emits a loaded event as well as data info eventually", async () => {
-          await vi.runAllTimersAsync();
+        it("emits a loaded event when features load", () => {
+          const source = layer.getSource() as VectorSource;
+          source.dispatchEvent("featuresloadend");
           expect(eventCallback).toHaveBeenCalledWith({
-            layerState: {
-              loaded: true,
-            },
+            layerState: { loaded: true },
             target: layer,
             type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
           });
+        });
+      });
+      describe("with remote file url (failing to load)", () => {
+        beforeEach(async () => {
+          layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
+          layer = await createLayer(layerModel);
+          layer.on(
+            `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+            eventCallback,
+          );
+        });
+        it("creates a vector layer with an empty source", () => {
+          const source = layer.getSource() as VectorSource;
+          expect(layer).toBeInstanceOf(VectorLayer);
+          expect(source).toBeInstanceOf(VectorSource);
+          expect(source.getFeatures().length).toBe(0);
+        });
+        it("emits a loading error event when features fail to load", () => {
+          const source = layer.getSource() as VectorSource;
+          source.dispatchEvent("featuresloaderror");
+          expect(eventCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+              type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,
+              error: expect.any(Error),
+              target: layer,
+            }),
+          );
         });
       });
     });
