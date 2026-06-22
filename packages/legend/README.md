@@ -30,7 +30,7 @@ createLegendFromLayer(layer).then((legendDiv) => {
 
 ### Checking legend support
 
-Use `hasLegendSupport` to check whether a layer can have a legend before attempting to render one. It is a type guard: narrowing the layer to `MapContextLayerWms | MapContextLayerWmts`.
+Use `hasLegendSupport` to check whether a layer can have a legend before attempting to render one.
 
 ```typescript
 import {
@@ -46,7 +46,7 @@ if (hasLegendSupport(layer)) {
 }
 ```
 
-Note: `hasLegendSupport` is a type-level check only. A WMTS layer may still return `null` from `createLegendFromLayer` if no legend URL is declared in its capabilities.
+Note: `hasLegendSupport` is a type-level check only. Legend generation might still return `null` for other reasons.
 
 <!-- #endregion body -->
 
