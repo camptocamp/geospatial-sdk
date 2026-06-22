@@ -1,5 +1,9 @@
-import { createLegendFromLayer } from "./from-layer.js";
-import { MapContextLayerWms, MapContextLayerWmts } from "@geospatial-sdk/core";
+import { createLegendFromLayer, hasLegendSupport } from "./from-layer.js";
+import {
+  MapContextLayer,
+  MapContextLayerWms,
+  MapContextLayerWmts,
+} from "@geospatial-sdk/core";
 import { WmtsEndpoint } from "@camptocamp/ogc-client";
 
 // Mock dependencies
@@ -8,6 +12,76 @@ vi.mock("@camptocamp/ogc-client", () => ({
     isReady() {}
   },
 }));
+
+describe("hasLegendSupport", () => {
+  it("returns true for wms layer", () => {
+    const layer: MapContextLayer = {
+      type: "wms",
+      url: "https://example.com/wms",
+      name: "layer",
+    };
+    expect(hasLegendSupport(layer)).toBe(true);
+  });
+
+  it("returns true for wmts layer", () => {
+    const layer: MapContextLayer = {
+      type: "wmts",
+      url: "https://example.com/wmts",
+      name: "layer",
+    };
+    expect(hasLegendSupport(layer)).toBe(true);
+  });
+
+  it("returns false for wfs layer", () => {
+    const layer: MapContextLayer = {
+      type: "wfs",
+      url: "https://example.com/wfs",
+      featureType: "layer",
+    };
+    expect(hasLegendSupport(layer)).toBe(false);
+  });
+
+  it("returns false for xyz layer", () => {
+    const layer: MapContextLayer = {
+      type: "xyz",
+      url: "https://example.com/xyz/{z}/{x}/{y}.png",
+    };
+    expect(hasLegendSupport(layer)).toBe(false);
+  });
+
+  it("returns false for geojson layer", () => {
+    const layer: MapContextLayer = {
+      type: "geojson",
+      url: "https://example.com/data.geojson",
+    };
+    expect(hasLegendSupport(layer)).toBe(false);
+  });
+
+  it("returns false for ogcapi layer", () => {
+    const layer: MapContextLayer = {
+      type: "ogcapi",
+      url: "https://example.com/ogcapi",
+      collection: "col",
+    };
+    expect(hasLegendSupport(layer)).toBe(false);
+  });
+
+  it("returns false for maplibre-style layer", () => {
+    const layer: MapContextLayer = {
+      type: "maplibre-style",
+      styleUrl: "https://example.com/style.json",
+    };
+    expect(hasLegendSupport(layer)).toBe(false);
+  });
+
+  it("returns false for geotiff layer", () => {
+    const layer: MapContextLayer = {
+      type: "geotiff",
+      url: "https://example.com/raster.tif",
+    };
+    expect(hasLegendSupport(layer)).toBe(false);
+  });
+});
 
 describe("createLegendFromLayer", () => {
   const baseWmsLayer: MapContextLayerWms = {
