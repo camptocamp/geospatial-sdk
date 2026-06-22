@@ -28,7 +28,7 @@ interface LegendOptions {
 export function hasLegendSupport(
   layer: MapContextLayer,
 ): layer is MapContextLayerWms | MapContextLayerWmts {
-  return (layer.type === "wms" || layer.type === "wmts");
+  return layer.type === "wms" || layer.type === "wmts";
 }
 
 /**

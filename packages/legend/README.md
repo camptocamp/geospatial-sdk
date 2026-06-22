@@ -33,7 +33,10 @@ createLegendFromLayer(layer).then((legendDiv) => {
 Use `hasLegendSupport` to check whether a layer can have a legend before attempting to render one. It is a type guard: narrowing the layer to `MapContextLayerWms | MapContextLayerWmts`.
 
 ```typescript
-import { hasLegendSupport, createLegendFromLayer } from "@geospatial-sdk/legend";
+import {
+  hasLegendSupport,
+  createLegendFromLayer,
+} from "@geospatial-sdk/legend";
 
 if (hasLegendSupport(layer)) {
   // layer is narrowed to MapContextLayerWms | MapContextLayerWmts
