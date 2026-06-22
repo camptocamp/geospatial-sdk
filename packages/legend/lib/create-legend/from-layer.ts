@@ -124,7 +124,7 @@ export async function createLegendFromLayer(
   layer: MapContextLayer,
   options: LegendOptions = {},
 ): Promise<HTMLElement | null> {
-  if (!hasLegendSupport(layer)) {
+  if (!hasLegendSupport(layer) || !layer.url || !layer.name) {
     console.error("Invalid layer for legend creation");
     return null;
   }
