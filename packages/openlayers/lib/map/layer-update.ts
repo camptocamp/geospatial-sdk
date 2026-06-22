@@ -77,6 +77,9 @@ export function updateLayerProperties(
     // any other case: apply the property
     return true;
   }
+  if (!previousLayerModel && layerModel.id !== undefined) {
+    olLayer.set(`${GEOSPATIAL_SDK_PREFIX}layer-id`, layerModel.id);
+  }
   if (shouldApplyProperty("visibility")) {
     olLayer.setVisible(layerModel.visibility!);
   }

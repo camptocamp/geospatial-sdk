@@ -41,6 +41,7 @@ export interface MapLayerStateChangeEvent {
   type: typeof MapLayerStateChangeEventType;
   layerState: ResolvedMapLayerState;
   layerIndex: number;
+  layerId?: string | number;
 }
 
 export const MapStateChangeEventType = "map-state-change";
