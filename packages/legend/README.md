@@ -12,6 +12,8 @@ npm install @geospatial-sdk/legend
 
 ## Usage
 
+### Rendering a legend
+
 ```typescript
 import { createLegendFromLayer } from "@geospatial-sdk/legend";
 
@@ -25,6 +27,26 @@ createLegendFromLayer(layer).then((legendDiv) => {
   document.body.appendChild(legendDiv);
 });
 ```
+
+### Checking legend support
+
+Use `hasLegendSupport` to check whether a layer can have a legend before attempting to render one.
+
+```typescript
+import {
+  hasLegendSupport,
+  createLegendFromLayer,
+} from "@geospatial-sdk/legend";
+
+if (hasLegendSupport(layer)) {
+  // layer is narrowed to MapContextLayerWms | MapContextLayerWmts
+  createLegendFromLayer(layer).then((legendDiv) => {
+    if (legendDiv) document.body.appendChild(legendDiv);
+  });
+}
+```
+
+Note: `hasLegendSupport` is a type-level check only. Legend generation might still return `null` for other reasons.
 
 <!-- #endregion body -->
 
