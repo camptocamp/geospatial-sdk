@@ -20,14 +20,11 @@ interface LegendOptions {
  *
  * @param styles - The styles advertised for the layer.
  * @param requestedStyle - The style requested on the layer, if any.
- * @param fallbackToFirstStyle - Use the first style's legend when the requested
- *   style has none. Defaults to `true`.
  * @returns The advertised legend URL, or `null` if none is available.
  */
 function findStyleLegendUrl(
   styles: { name?: string; legendUrl?: string }[] | undefined,
   requestedStyle?: string,
-  fallbackToFirstStyle = true,
 ): string | null {
   if (!styles || styles.length === 0) {
     return null;
@@ -37,10 +34,6 @@ function findStyleLegendUrl(
     const matchingStyle = styles.find((s) => s.name === requestedStyle);
     if (matchingStyle?.legendUrl) {
       return matchingStyle.legendUrl;
-    }
-
-    if (!fallbackToFirstStyle) {
-      return null;
     }
   }
 
@@ -72,21 +65,27 @@ async function createWmsLegendUrl(
 ): Promise<string | null> {
   try {
     const endpoint = await new WmsEndpoint(layer.url).isReady();
-    const layerByName = endpoint.getLayerByName(layer.name);
+
+    // When the service advertises GetLegendGraphic, we use it to generate the legend URL.
+    if (endpoint.getOperationUrl("GetLegendGraphic", "Get")) {
+      return buildWmsGetLegendGraphicUrl(layer, options).toString();
+    }
+
+    // If GetLegendGraphic is not advertised, we check if the service advertises a legend URL for the requested style.
     const advertisedLegendUrl = findStyleLegendUrl(
-      layerByName?.styles,
+      endpoint.getLayerByName(layer.name)?.styles,
       layer.style,
-      false,
     );
 
     if (advertisedLegendUrl) {
       return advertisedLegendUrl;
     }
   } catch {
-    // Capabilities unavailable; fall back to a GetLegendGraphic request.
+    // Capabilities unavailable
   }
 
-  return buildWmsGetLegendGraphicUrl(layer, options).toString();
+  // No advertised legend and GetLegendGraphic not supported
+  return null;
 }
 
 /**
