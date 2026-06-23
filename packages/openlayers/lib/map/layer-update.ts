@@ -102,13 +102,19 @@ export function updateLayerProperties(
   if (shouldApplyProperty("clickable" as keyof MapContextLayer)) {
     olLayer.set(`${GEOSPATIAL_SDK_PREFIX}clickable`, layerModel.clickable);
   }
-  if (
-    shouldApplyProperty("style" as keyof MapContextLayer) &&
-    "setStyle" in olLayer
-  ) {
-    (olLayer as VectorLayer<VectorSource>).setStyle(
-      (layerModel as MapContextLayerVector).style,
-    );
+  if (shouldApplyProperty("style" as keyof MapContextLayer)) {
+    if (layerModel.type === "wms") {
+      const source = olLayer.getSource();
+      if (source && "updateParams" in source) {
+        (source as TileWMS | ImageWMS).updateParams({
+          STYLES: (layerModel as MapContextLayerWms).style,
+        });
+      }
+    } else if ("setStyle" in olLayer) {
+      (olLayer as VectorLayer<VectorSource>).setStyle(
+        (layerModel as MapContextLayerVector).style,
+      );
+    }
   }
   // only relevant on update: on creation the source is built with the correct
   // params already, so there is nothing to re-apply
