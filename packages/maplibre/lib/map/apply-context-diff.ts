@@ -6,7 +6,7 @@ import {
   getFirstLayerIdAtPosition,
   getLayersAtPosition,
   getLayersFromContextLayer,
-  updateLayerProperties
+  updateLayerProperties,
 } from "../helpers/map.helpers.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 

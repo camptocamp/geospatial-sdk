@@ -1,6 +1,10 @@
 import Map from "ol/Map.js";
 import { MapContextDiff } from "@geospatial-sdk/core";
-import { createView, getMapUpdatesPromise, updateLayerInMap } from "./create-map.js";
+import {
+  createView,
+  getMapUpdatesPromise,
+  updateLayerInMap,
+} from "./create-map.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";

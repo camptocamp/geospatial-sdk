@@ -1,14 +1,26 @@
-import { MapContext, MapContextLayer, removeSearchParams, ViewByZoomAndCenter } from "@geospatial-sdk/core";
+import {
+  MapContext,
+  MapContextLayer,
+  removeSearchParams,
+  ViewByZoomAndCenter,
+} from "@geospatial-sdk/core";
 
 import { LayerSpecification, Map, MapOptions } from "maplibre-gl";
 import { FeatureCollection, Geometry } from "geojson";
-import { OgcApiEndpoint, WfsEndpoint, WmsEndpoint } from "@camptocamp/ogc-client";
+import {
+  OgcApiEndpoint,
+  WfsEndpoint,
+  WmsEndpoint,
+} from "@camptocamp/ogc-client";
 import {
   createDatasetFromGeoJsonLayer,
   generateLayerHashWithoutUpdatableProps,
-  generateLayerId
+  generateLayerId,
 } from "../helpers/map.helpers.js";
-import { LayerMetadataSpecification, PartialStyleSpecification } from "../maplibre.models.js";
+import {
+  LayerMetadataSpecification,
+  PartialStyleSpecification,
+} from "../maplibre.models.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
