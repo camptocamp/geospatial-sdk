@@ -16,13 +16,7 @@ interface LegendOptions {
 }
 
 /**
- * Pick the legend URL advertised for a layer's styles in the service
- * capabilities, preferring the requested style.
- *
- * When a specific style is requested but no matching style advertises a legend,
- * `fallbackToFirstStyle` decides whether to use the first advertised legend
- * (the best a WMTS layer can do) or to give up so the caller can honour the
- * requested style another way (a WMS `GetLegendGraphic&STYLE=...` request).
+ * Pick the legend URL advertised for a layer's styles in the service capabilities, preferring the requested style.
  *
  * @param styles - The styles advertised for the layer.
  * @param requestedStyle - The style requested on the layer, if any.
@@ -38,24 +32,23 @@ function findStyleLegendUrl(
   if (!styles || styles.length === 0) {
     return null;
   }
+
   if (requestedStyle) {
     const matchingStyle = styles.find((s) => s.name === requestedStyle);
     if (matchingStyle?.legendUrl) {
       return matchingStyle.legendUrl;
     }
+
     if (!fallbackToFirstStyle) {
       return null;
     }
   }
+
   return styles[0].legendUrl ?? null;
 }
 
 /**
  * Whether a layer type can carry a legend.
- *
- * This is a cheap, type-level check; it does not guarantee that a legend actually
- * exists (a WMTS layer may declare no legend URL). Use it to gate UI, and use the
- * result of {@link createLegendFromLayer} to know whether a graphic is available.
  *
  * @param layer - The layer to check.
  * @returns `true` if the layer is a WMS or WMTS layer.
@@ -68,13 +61,6 @@ export function hasLegendSupport(
 
 /**
  * Create a legend URL for a WMS layer.
- *
- * Prefers the legend advertised in the service capabilities (the canonical,
- * styled graphic), the same way the WMTS path does. Falls back to building a
- * `GetLegendGraphic` request only when capabilities advertise no legend (e.g.
- * QGIS Server) or cannot be read. This matters for servers such as the IGN
- * Géoplateforme, which advertise a static `LegendURL` and reject
- * `GetLegendGraphic` requests outright.
  *
  * @param layer - The MapContextLayer to create a legend URL for
  * @param options - Optional configuration for legend generation
@@ -92,6 +78,7 @@ async function createWmsLegendUrl(
       layer.style,
       false,
     );
+
     if (advertisedLegendUrl) {
       return advertisedLegendUrl;
     }
@@ -99,7 +86,7 @@ async function createWmsLegendUrl(
     // Capabilities unavailable; fall back to a GetLegendGraphic request.
   }
 
-  return buildGetLegendGraphicUrl(layer, options).toString();
+  return buildWmsGetLegendGraphicUrl(layer, options).toString();
 }
 
 /**
@@ -109,7 +96,7 @@ async function createWmsLegendUrl(
  * @param options - Optional configuration for legend generation
  * @returns A URL for the WMS legend graphic
  */
-function buildGetLegendGraphicUrl(
+function buildWmsGetLegendGraphicUrl(
   layer: MapContextLayerWms,
   options: LegendOptions = {},
 ): URL {
