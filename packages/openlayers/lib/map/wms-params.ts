@@ -21,5 +21,6 @@ export function buildWmsParams(
           v instanceof Date ? v.toISOString() : v,
         ]),
       )),
+    ...(layerModel.customParams ?? {}),
   };
 }
