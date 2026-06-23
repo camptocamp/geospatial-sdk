@@ -38,15 +38,18 @@ function findStyleLegendUrl(
   if (!styles || styles.length === 0) {
     return null;
   }
+
   if (requestedStyle) {
     const matchingStyle = styles.find((s) => s.name === requestedStyle);
     if (matchingStyle?.legendUrl) {
       return matchingStyle.legendUrl;
     }
+
     if (!fallbackToFirstStyle) {
       return null;
     }
   }
+
   return styles[0].legendUrl ?? null;
 }
 
@@ -92,6 +95,7 @@ async function createWmsLegendUrl(
       layer.style,
       false,
     );
+
     if (advertisedLegendUrl) {
       return advertisedLegendUrl;
     }
@@ -99,7 +103,7 @@ async function createWmsLegendUrl(
     // Capabilities unavailable; fall back to a GetLegendGraphic request.
   }
 
-  return buildGetLegendGraphicUrl(layer, options).toString();
+  return buildWmsGetLegendGraphicUrl(layer, options).toString();
 }
 
 /**
@@ -109,7 +113,7 @@ async function createWmsLegendUrl(
  * @param options - Optional configuration for legend generation
  * @returns A URL for the WMS legend graphic
  */
-function buildGetLegendGraphicUrl(
+function buildWmsGetLegendGraphicUrl(
   layer: MapContextLayerWms,
   options: LegendOptions = {},
 ): URL {
