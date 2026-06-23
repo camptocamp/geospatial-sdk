@@ -178,6 +178,26 @@ describe("createLegendFromLayer", () => {
     expect(img?.src).toBe("https://example.com/night.png");
   });
 
+  it("falls back to GetLegendGraphic honouring STYLE when the requested WMS style has no advertised legend", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({
+        styles: [
+          { name: "default", legendUrl: "https://example.com/default.png" },
+        ],
+      }),
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer({
+      ...baseWmsLayer,
+      style: "night",
+    });
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toContain("REQUEST=GetLegendGraphic");
+    expect(img?.src).toContain("STYLE=night");
+    expect(img?.src).not.toContain("default.png");
+  });
+
   it("falls back to GetLegendGraphic when WMS capabilities advertise no legend", async () => {
     vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
       getLayerByName: () => ({ styles: [] }),

@@ -17,15 +17,23 @@ interface LegendOptions {
 
 /**
  * Pick the legend URL advertised for a layer's styles in the service
- * capabilities, preferring the requested style and falling back to the first.
+ * capabilities, preferring the requested style.
+ *
+ * When a specific style is requested but no matching style advertises a legend,
+ * `fallbackToFirstStyle` decides whether to use the first advertised legend
+ * (the best a WMTS layer can do) or to give up so the caller can honour the
+ * requested style another way (a WMS `GetLegendGraphic&STYLE=...` request).
  *
  * @param styles - The styles advertised for the layer.
  * @param requestedStyle - The style requested on the layer, if any.
+ * @param fallbackToFirstStyle - Use the first style's legend when the requested
+ *   style has none. Defaults to `true`.
  * @returns The advertised legend URL, or `null` if none is available.
  */
 function findStyleLegendUrl(
   styles: { name?: string; legendUrl?: string }[] | undefined,
   requestedStyle?: string,
+  fallbackToFirstStyle = true,
 ): string | null {
   if (!styles || styles.length === 0) {
     return null;
@@ -34,6 +42,9 @@ function findStyleLegendUrl(
     const matchingStyle = styles.find((s) => s.name === requestedStyle);
     if (matchingStyle?.legendUrl) {
       return matchingStyle.legendUrl;
+    }
+    if (!fallbackToFirstStyle) {
+      return null;
     }
   }
   return styles[0].legendUrl ?? null;
@@ -79,6 +90,7 @@ async function createWmsLegendUrl(
     const advertisedLegendUrl = findStyleLegendUrl(
       layerByName?.styles,
       layer.style,
+      false,
     );
     if (advertisedLegendUrl) {
       return advertisedLegendUrl;
