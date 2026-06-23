@@ -16,7 +16,8 @@ interface LegendOptions {
 }
 
 /**
- * Pick the legend URL advertised for a layer's styles in the service capabilities, preferring the requested style.
+ * Find the legend URL for a given style from the advertised styles of a layer.
+ *
  *
  * @param styles - The styles advertised for the layer.
  * @param requestedStyle - The style requested on the layer, if any.
@@ -32,9 +33,7 @@ function findStyleLegendUrl(
 
   if (requestedStyle) {
     const matchingStyle = styles.find((s) => s.name === requestedStyle);
-    if (matchingStyle?.legendUrl) {
-      return matchingStyle.legendUrl;
-    }
+    return matchingStyle?.legendUrl ?? null;
   }
 
   return styles[0].legendUrl ?? null;
