@@ -80,10 +80,10 @@ async function createWmsLegendUrl(
       return advertisedLegendUrl;
     }
   } catch {
-    // Capabilities unavailable
+    // Endpoint unreachable.
   }
 
-  // No advertised legend and GetLegendGraphic not supported
+  console.warn(`Failed to create legend for WMS layer: ${layer.name}`);
   return null;
 }
 
