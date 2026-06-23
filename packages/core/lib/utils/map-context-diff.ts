@@ -72,21 +72,25 @@ export function computeMapContextDiff(
     }
   }
 
-  // look for moved layers
-  const prevLayersFiltered = previousContext.layers.filter(
+  // look for moved layers (ignore removed and added ones)
+  const movedLayersInPrevious = previousContext.layers.filter(
     (l) => !layersRemoved.find(({ layer }) => l === layer),
   );
-  const nextLayersFiltered = nextContext.layers.filter(
+  const movedLayersInNext = nextContext.layers.filter(
     (l) => !layersAdded.find(({ layer }) => l === layer),
   );
-  for (let i = 0; i < nextLayersFiltered.length; i++) {
-    const layer = nextLayersFiltered[i];
-    const prevPosition = getLayerPosition(layer, prevLayersFiltered);
+  for (let i = 0; i < movedLayersInNext.length; i++) {
+    const layer = movedLayersInNext[i];
+    let prevPosition = getLayerPosition(layer, movedLayersInPrevious);
     if (i !== prevPosition) {
+      // shift prevPosition of a move layer when others layers were added before them
+      for (const { position: addedPos } of layersAdded) {
+        if (addedPos <= prevPosition) prevPosition++;
+      }
       layersReordered.push({
         layer,
         newPosition: getLayerPosition(layer, nextContext.layers),
-        previousPosition: getLayerPosition(layer, previousContext.layers),
+        previousPosition: prevPosition,
       });
     }
   }

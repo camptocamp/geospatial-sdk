@@ -8,7 +8,7 @@ import { get as getProjection, toLonLat } from "ol/proj.js";
 import { FeaturesHoverEventType } from "@geospatial-sdk/core";
 import BaseEvent from "ol/events/Event.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import { createLayer, resetMapFromContext } from "./create-map.js";
+import { resetMapFromContext } from "./create-map.js";
 import {
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_WFS_FIXTURE,
@@ -22,6 +22,7 @@ import MapBrowserEvent from "ol/MapBrowserEvent.js";
 import BaseObject from "ol/Object.js";
 import Layer from "ol/layer/Layer.js";
 import { EndpointError } from "@camptocamp/ogc-client";
+import { createLayer } from "./layer-creation.js";
 
 vi.mock("./get-features.js", () => ({
   readFeaturesAtPixel() {

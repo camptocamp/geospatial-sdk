@@ -14,7 +14,7 @@ import {
 } from "@geospatial-sdk/core/fixtures/map-context.fixtures.js";
 import { applyContextDiffToMap } from "./apply-context-diff.js";
 import { generateLayerHashWithoutUpdatableProps } from "../helpers/map.helpers.js";
-import { resetMapFromContext } from "./create-map.js";
+import { getMapUpdatesPromise, resetMapFromContext } from "./create-map.js";
 import { MockInstance } from "vitest";
 
 // Helper to create a fresh mock Map instance for each test
@@ -23,6 +23,7 @@ function createMockMap(): MapLibreMap {
     layers: [] as any[],
     source: {} as any,
   };
+  const globalState: Record<string, unknown> = {};
   return {
     addLayer: vi.fn((layer, beforeId) => {
       if (beforeId) {
@@ -77,6 +78,9 @@ function createMockMap(): MapLibreMap {
     }),
     setLayoutProperty: vi.fn(),
     setPaintProperty: vi.fn(),
+    getGlobalState: () => globalState,
+    setGlobalStateProperty: (name: string, value: unknown) =>
+      (globalState[name] = value),
   } as unknown as MapLibreMap;
 }
 
@@ -99,7 +103,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       layersRemoved: [],
       layersReordered: [],
     };
-    await applyContextDiffToMap(map, diff);
+    applyContextDiffToMap(map, diff);
+    await getMapUpdatesPromise(map);
     expect(map.addLayer).not.toHaveBeenCalled();
     expect(map.addSource).not.toHaveBeenCalled();
     expect(map.removeLayer).not.toHaveBeenCalled();
@@ -116,7 +121,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       layersRemoved: [],
       layersReordered: [],
     };
-    await applyContextDiffToMap(map, diff);
+    applyContextDiffToMap(map, diff);
+    await getMapUpdatesPromise(map);
     expect(map.addSource).toHaveBeenCalled();
     expect(map.addLayer).toHaveBeenCalled();
   });
@@ -126,7 +132,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       ...SAMPLE_CONTEXT,
       layers: [SAMPLE_LAYER2, SAMPLE_LAYER1],
     };
-    await resetMapFromContext(map, context);
+    resetMapFromContext(map, context);
+    await getMapUpdatesPromise(map);
     diff = {
       layersAdded: [],
       layersChanged: [],
@@ -140,7 +147,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       .layers[1] as RasterLayerSpecification;
     const layer2: RasterLayerSpecification = map.getStyle()
       .layers[0] as RasterLayerSpecification;
-    await applyContextDiffToMap(map, diff);
+    applyContextDiffToMap(map, diff);
+    await getMapUpdatesPromise(map);
     expect(map.removeLayer).toHaveBeenCalledWith(layer1.id);
     expect(map.removeLayer).toHaveBeenCalledWith(layer2.id);
     expect(map.removeSource).toHaveBeenCalledWith(layer1.source);
@@ -154,7 +162,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         ...SAMPLE_CONTEXT,
         layers: [SAMPLE_LAYER3, SAMPLE_LAYER1],
       };
-      await resetMapFromContext(map, context);
+      resetMapFromContext(map, context);
+      await getMapUpdatesPromise(map);
       vi.clearAllMocks();
 
       // this is to get reliable source ids
@@ -197,7 +206,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         layersRemoved: [],
         layersReordered: [],
       };
-      await applyContextDiffToMap(map, diff);
+      applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
 
       expect(map.addLayer).toHaveBeenCalledTimes(4); // 3 for vector layer, 1 for raster layer
       expect(map.removeLayer).toHaveBeenCalledTimes(4); // same as above
@@ -272,7 +282,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         layersRemoved: [],
         layersReordered: [],
       };
-      await applyContextDiffToMap(map, diff);
+      applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
 
       expect(map.setLayoutProperty).toHaveBeenCalledTimes(3); // 3 for vector layer
       expect(map.setPaintProperty).toHaveBeenCalledTimes(1);
@@ -315,7 +326,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       layersReordered: [],
       viewChanges: { extent: [-10, -10, 20, 20] },
     };
-    await applyContextDiffToMap(map, diff);
+    applyContextDiffToMap(map, diff);
+    await getMapUpdatesPromise(map);
     expect(map.fitBounds).toHaveBeenCalledWith(
       [
         [-10, -10],
@@ -333,7 +345,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       layersReordered: [],
       viewChanges: { center: [2.35, 48.86], zoom: 12 },
     };
-    await applyContextDiffToMap(map, diff);
+    applyContextDiffToMap(map, diff);
+    await getMapUpdatesPromise(map);
     expect(map.setCenter).toHaveBeenCalledWith([2.35, 48.86]);
     expect(map.setZoom).toHaveBeenCalledWith(12);
     expect(map.fitBounds).not.toHaveBeenCalled();
@@ -347,7 +360,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
       layersReordered: [],
       viewChanges: { center: [2.35, 48.86] },
     };
-    await applyContextDiffToMap(map, diff);
+    applyContextDiffToMap(map, diff);
+    await getMapUpdatesPromise(map);
     expect(map.setCenter).toHaveBeenCalledWith([2.35, 48.86]);
     expect(map.setZoom).not.toHaveBeenCalled();
     expect(map.fitBounds).not.toHaveBeenCalled();
@@ -360,7 +374,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
           ...SAMPLE_CONTEXT,
           layers: [SAMPLE_LAYER1, SAMPLE_LAYER3, SAMPLE_LAYER2],
         };
-        await resetMapFromContext(map, context);
+        resetMapFromContext(map, context);
+        await getMapUpdatesPromise(map);
         vi.clearAllMocks();
 
         diff = {
@@ -380,7 +395,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
             },
           ],
         };
-        await applyContextDiffToMap(map, diff);
+        applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
       });
       it("moves the layers accordingly", () => {
         expect(map.getStyle().layers.length).toBe(5);
@@ -433,7 +449,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
           ...SAMPLE_CONTEXT,
           layers: [layer1WithId, SAMPLE_LAYER3, layer4WithStyle, SAMPLE_LAYER2],
         };
-        await resetMapFromContext(map, context);
+        resetMapFromContext(map, context);
+        await getMapUpdatesPromise(map);
         vi.clearAllMocks();
 
         diff = {
@@ -463,7 +480,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
             },
           ],
         };
-        await applyContextDiffToMap(map, diff);
+        applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
       });
       it("moves the layers accordingly", () => {
         expect(map.getStyle().layers.length).toBe(8);
@@ -522,7 +540,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         ...SAMPLE_CONTEXT,
         layers: [SAMPLE_LAYER1, SAMPLE_LAYER5, SAMPLE_LAYER3, SAMPLE_LAYER4],
       };
-      await resetMapFromContext(map, context);
+      resetMapFromContext(map, context);
+      await getMapUpdatesPromise(map);
       vi.clearAllMocks();
 
       diff = {
@@ -562,7 +581,8 @@ describe("applyContextDiffToMap (mocked Map)", () => {
           },
         ],
       };
-      await applyContextDiffToMap(map, diff);
+      applyContextDiffToMap(map, diff);
+      await getMapUpdatesPromise(map);
     });
 
     it("moves the layers accordingly", () => {

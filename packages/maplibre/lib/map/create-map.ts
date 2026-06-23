@@ -21,6 +21,7 @@ import {
   LayerMetadataSpecification,
   PartialStyleSpecification,
 } from "../maplibre.models.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
@@ -165,45 +166,65 @@ export async function createLayer(
 }
 
 /**
- * Create a Maplibre map from a context; map options need to be provided
+ * Create a Maplibre map from a context; map options need to be provided.
+ * The function returns synchronously; all asynchronous modifications are stacked
+ * in a promise chain stored on the map.
  * @param context
  * @param mapOptions
  */
-export async function createMapFromContext(
+export function createMapFromContext(
   context: MapContext,
   mapOptions: MapOptions,
-): Promise<Map> {
+): Map {
   const map = new Map(mapOptions);
-  return await resetMapFromContext(map, context);
+  return resetMapFromContext(map, context);
 }
 
 /**
- * Resets a Maplibre map from a context; existing content will be cleared
+ * Resets a Maplibre map from a context; existing content will be cleared.
  * @param map
  * @param context
  */
-export async function resetMapFromContext(
-  map: Map,
-  context: MapContext,
-): Promise<Map> {
+export function resetMapFromContext(map: Map, context: MapContext): Map {
+  const existingChain: Promise<void> =
+    map.getGlobalState()[`${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`] ??
+    Promise.resolve();
   map.setZoom((context.view as ViewByZoomAndCenter).zoom);
   map.setCenter((context.view as ViewByZoomAndCenter).center);
 
-  for (let i = 0; i < context.layers.length; i++) {
-    const layerModel = context.layers[i];
-    const partialMLStyle = await createLayer(layerModel);
-    if (!partialMLStyle) continue;
+  const newChain = existingChain.then(async () => {
+    for (let i = 0; i < context.layers.length; i++) {
+      const layerModel = context.layers[i];
+      const partialMLStyle = await createLayer(layerModel);
+      if (!partialMLStyle) continue;
 
-    if (partialMLStyle.glyphs) {
-      map.setGlyphs(partialMLStyle.glyphs);
+      if (partialMLStyle.glyphs) {
+        map.setGlyphs(partialMLStyle.glyphs);
+      }
+      if (partialMLStyle.sprite) {
+        map.setSprite(partialMLStyle.sprite as string);
+      }
+      Object.keys(partialMLStyle.sources).forEach((sourceId) =>
+        map.addSource(sourceId, partialMLStyle.sources[sourceId]),
+      );
+      partialMLStyle.layers.map((layer) => map.addLayer(layer));
     }
-    if (partialMLStyle.sprite) {
-      map.setSprite(partialMLStyle.sprite as string);
-    }
-    Object.keys(partialMLStyle.sources).forEach((sourceId) =>
-      map.addSource(sourceId, partialMLStyle.sources[sourceId]),
-    );
-    partialMLStyle.layers.map((layer) => map.addLayer(layer));
-  }
+  });
+  map.setGlobalStateProperty(
+    `${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`,
+    newChain,
+  );
+
   return map;
+}
+
+/**
+ * This promise will resolve once all pending modifications are done on the map.
+ * @param map
+ */
+export function getMapUpdatesPromise(map: Map): Promise<void> {
+  return (
+    map.getGlobalState()[`${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`] ??
+    Promise.resolve()
+  );
 }

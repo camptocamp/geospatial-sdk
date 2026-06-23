@@ -1,6 +1,6 @@
 import { MapContextDiff, MapContextLayer } from "@geospatial-sdk/core";
 import type { Map } from "maplibre-gl";
-import { createLayer } from "./create-map.js";
+import { createLayer, getMapUpdatesPromise } from "./create-map.js";
 import {
   canDoIncrementalUpdate,
   getFirstLayerIdAtPosition,
@@ -8,6 +8,7 @@ import {
   getLayersFromContextLayer,
   updateLayerProperties,
 } from "../helpers/map.helpers.js";
+import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 /**
  * This will either update the layers in the map or recreate them;
@@ -56,111 +57,121 @@ export async function updateLayerInMap(
 }
 
 /**
- * Apply a context diff to an MapLibre map
+ * Apply a context diff to an MapLibre map.
+ * The function returns synchronously; all asynchronous modifications are stacked
+ * in a promise chain stored on the map.
  * @param map
  * @param contextDiff
  */
-export async function applyContextDiffToMap(
+export function applyContextDiffToMap(
   map: Map,
   contextDiff: MapContextDiff,
-): Promise<Map> {
-  // removed layers (sorted by descending position)
-  if (contextDiff.layersRemoved.length > 0) {
-    const removed = contextDiff.layersRemoved.sort(
-      (a, b) => b.position - a.position,
-    );
-    for (const layerRemoved of removed) {
-      const mlLayers = getLayersFromContextLayer(map, layerRemoved.layer);
-      if (mlLayers.length === 0) {
-        console.warn(
-          `[Warning] applyContextDiffToMap: no layer found at position ${layerRemoved.position} to remove.`,
-        );
-        continue;
+): Map {
+  const newChain = getMapUpdatesPromise(map).then(async () => {
+    // removed layers (sorted by descending position)
+    if (contextDiff.layersRemoved.length > 0) {
+      const removed = contextDiff.layersRemoved.sort(
+        (a, b) => b.position - a.position,
+      );
+      for (const layerRemoved of removed) {
+        const mlLayers = getLayersFromContextLayer(map, layerRemoved.layer);
+        if (mlLayers.length === 0) {
+          console.warn(
+            `[Warning] applyContextDiffToMap: no layer found at position ${layerRemoved.position} to remove.`,
+          );
+          continue;
+        }
+        const sourceId = mlLayers[0].source;
+        mlLayers.forEach((layer) => {
+          map.removeLayer(layer.id);
+        });
+        map.removeSource(sourceId);
       }
-      const sourceId = mlLayers[0].source;
-      mlLayers.forEach((layer) => {
-        map.removeLayer(layer.id);
+    }
+
+    // insert added layers
+    const newLayers = await Promise.all(
+      contextDiff.layersAdded.map((layerAdded) =>
+        createLayer(layerAdded.layer),
+      ),
+    );
+    newLayers.forEach((style, index) => {
+      if (!style) return;
+      const position = contextDiff.layersAdded[index].position;
+      const beforeId = getFirstLayerIdAtPosition(map, position);
+      Object.keys(style.sources).forEach((sourceId) =>
+        map.addSource(sourceId, style.sources[sourceId]),
+      );
+      style.layers.map((layer) => {
+        map.addLayer(layer, beforeId);
       });
-      map.removeSource(sourceId);
-    }
-  }
-
-  // insert added layers
-  const newLayers = await Promise.all(
-    contextDiff.layersAdded.map((layerAdded) => createLayer(layerAdded.layer)),
-  );
-  newLayers.forEach((style, index) => {
-    if (!style) return;
-    const position = contextDiff.layersAdded[index].position;
-    const beforeId = getFirstLayerIdAtPosition(map, position);
-    Object.keys(style.sources).forEach((sourceId) =>
-      map.addSource(sourceId, style.sources[sourceId]),
-    );
-    style.layers.map((layer) => {
-      map.addLayer(layer, beforeId);
     });
+
+    // handle reordered layers (sorted by ascending new position)
+    if (contextDiff.layersReordered.length > 0) {
+      const reordered = contextDiff.layersReordered.sort(
+        (a, b) => a.newPosition - b.newPosition,
+      );
+
+      // collect all layers to be moved
+      const mlLayersToMove = reordered.map((layerReordered) =>
+        getLayersFromContextLayer(map, layerReordered.layer),
+      );
+
+      // move layers
+      for (let i = 0; i < reordered.length; i++) {
+        const layerReordered = reordered[i];
+        const mlLayers = mlLayersToMove[i];
+        const beforeId = getFirstLayerIdAtPosition(
+          map,
+          layerReordered.newPosition + 1,
+        );
+
+        if (mlLayers[0].id === beforeId) {
+          // layer is already at the right position
+          continue;
+        }
+
+        // then we add the moved the layer to its new position
+        for (const layer of mlLayers) {
+          map.moveLayer(layer.id, beforeId);
+        }
+      }
+    }
+
+    // recreate changed layers
+    for (const layerChanged of contextDiff.layersChanged) {
+      const { layer, previousLayer, position } = layerChanged;
+      await updateLayerInMap(map, layer, previousLayer, position);
+    }
+
+    if (typeof contextDiff.viewChanges !== "undefined") {
+      const { viewChanges } = contextDiff;
+
+      if (viewChanges && "extent" in viewChanges) {
+        const { extent } = viewChanges;
+
+        map.fitBounds(
+          [
+            [extent[0], extent[1]],
+            [extent[2], extent[3]],
+          ],
+          {
+            padding: 20,
+            duration: 1000,
+          },
+        );
+      } else if (viewChanges && "center" in viewChanges) {
+        const { center, zoom } = viewChanges;
+        if (center) map.setCenter(center as [number, number]);
+        if (zoom !== undefined) map.setZoom(zoom);
+      }
+    }
   });
-
-  // handle reordered layers (sorted by ascending new position)
-  if (contextDiff.layersReordered.length > 0) {
-    const reordered = contextDiff.layersReordered.sort(
-      (a, b) => a.newPosition - b.newPosition,
-    );
-
-    // collect all layers to be moved
-    const mlLayersToMove = reordered.map((layerReordered) =>
-      getLayersFromContextLayer(map, layerReordered.layer),
-    );
-
-    // move layers
-    for (let i = 0; i < reordered.length; i++) {
-      const layerReordered = reordered[i];
-      const mlLayers = mlLayersToMove[i];
-      const beforeId = getFirstLayerIdAtPosition(
-        map,
-        layerReordered.newPosition + 1,
-      );
-
-      if (mlLayers[0].id === beforeId) {
-        // layer is already at the right position
-        continue;
-      }
-
-      // then we add the moved the layer to its new position
-      for (const layer of mlLayers) {
-        map.moveLayer(layer.id, beforeId);
-      }
-    }
-  }
-
-  // recreate changed layers
-  for (const layerChanged of contextDiff.layersChanged) {
-    const { layer, previousLayer, position } = layerChanged;
-    await updateLayerInMap(map, layer, previousLayer, position);
-  }
-
-  if (typeof contextDiff.viewChanges !== "undefined") {
-    const { viewChanges } = contextDiff;
-
-    if (viewChanges && "extent" in viewChanges) {
-      const { extent } = viewChanges;
-
-      map.fitBounds(
-        [
-          [extent[0], extent[1]],
-          [extent[2], extent[3]],
-        ],
-        {
-          padding: 20,
-          duration: 1000,
-        },
-      );
-    } else if (viewChanges && "center" in viewChanges) {
-      const { center, zoom } = viewChanges;
-      if (center) map.setCenter(center as [number, number]);
-      if (zoom !== undefined) map.setZoom(zoom);
-    }
-  }
+  map.setGlobalStateProperty(
+    `${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`,
+    newChain,
+  );
 
   return map;
 }
