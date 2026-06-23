@@ -1,6 +1,6 @@
 import Map from "ol/Map.js";
 import { MapContextDiff } from "@geospatial-sdk/core";
-import { createView, updateLayerInMap } from "./create-map.js";
+import { createView, getMapUpdatesPromise, updateLayerInMap } from "./create-map.js";
 import { fromLonLat, transformExtent } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import SimpleGeometry from "ol/geom/SimpleGeometry.js";
@@ -21,11 +21,7 @@ export function applyContextDiffToMap(
   map: Map,
   contextDiff: MapContextDiff,
 ): Map {
-  const existingChain: Promise<void> =
-    map.get(`${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`) ??
-    Promise.resolve();
-
-  const newChain = existingChain.then(async () => {
+  const newChain = getMapUpdatesPromise(map).then(async () => {
     const layers = map.getLayers();
 
     // removed layers (sorted by descending position)
