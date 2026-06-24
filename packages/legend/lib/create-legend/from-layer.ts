@@ -4,7 +4,7 @@ import {
   MapContextLayerWmts,
   removeSearchParams,
 } from "@geospatial-sdk/core";
-import { WmtsEndpoint } from "@camptocamp/ogc-client";
+import { WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 
 /**
  * Configuration options for legend generation
@@ -16,11 +16,31 @@ interface LegendOptions {
 }
 
 /**
- * Whether a layer type can carry a legend.
+ * Find the legend URL for a given style from the advertised styles of a layer.
  *
- * This is a cheap, type-level check; it does not guarantee that a legend actually
- * exists (a WMTS layer may declare no legend URL). Use it to gate UI, and use the
- * result of {@link createLegendFromLayer} to know whether a graphic is available.
+ *
+ * @param styles - The styles advertised for the layer.
+ * @param requestedStyle - The style requested on the layer, if any.
+ * @returns The advertised legend URL, or `null` if none is available.
+ */
+function findStyleLegendUrl(
+  styles: { name?: string; legendUrl?: string }[] | undefined,
+  requestedStyle?: string,
+): string | null {
+  if (!styles || styles.length === 0) {
+    return null;
+  }
+
+  if (requestedStyle) {
+    const matchingStyle = styles.find((s) => s.name === requestedStyle);
+    return matchingStyle?.legendUrl ?? null;
+  }
+
+  return styles[0].legendUrl ?? null;
+}
+
+/**
+ * Whether a layer type can carry a legend.
  *
  * @param layer - The layer to check.
  * @returns `true` if the layer is a WMS or WMTS layer.
@@ -32,13 +52,49 @@ export function hasLegendSupport(
 }
 
 /**
- * Create a legend URL for a WMS layer
+ * Create a legend URL for a WMS layer.
+ *
+ * @param layer - The MapContextLayer to create a legend URL for
+ * @param options - Optional configuration for legend generation
+ * @returns A URL for the WMS legend graphic, or `null` if none is available
+ */
+async function createWmsLegendUrl(
+  layer: MapContextLayerWms,
+  options: LegendOptions = {},
+): Promise<string | null> {
+  try {
+    const endpoint = await new WmsEndpoint(layer.url).isReady();
+
+    // When the service advertises GetLegendGraphic, we use it to generate the legend URL.
+    if (endpoint.getOperationUrl("GetLegendGraphic", "Get")) {
+      return buildWmsGetLegendGraphicUrl(layer, options).toString();
+    }
+
+    // If GetLegendGraphic is not advertised, we check if the service advertises a legend URL for the requested style.
+    const advertisedLegendUrl = findStyleLegendUrl(
+      endpoint.getLayerByName(layer.name)?.styles,
+      layer.style,
+    );
+
+    if (advertisedLegendUrl) {
+      return advertisedLegendUrl;
+    }
+  } catch {
+    // Endpoint unreachable.
+  }
+
+  console.warn(`Failed to create legend for WMS layer: ${layer.name}`);
+  return null;
+}
+
+/**
+ * Build a WMS `GetLegendGraphic` request URL from a layer's base URL.
  *
  * @param layer - The MapContextLayer to create a legend URL for
  * @param options - Optional configuration for legend generation
  * @returns A URL for the WMS legend graphic
  */
-function createWmsLegendUrl(
+function buildWmsGetLegendGraphicUrl(
   layer: MapContextLayerWms,
   options: LegendOptions = {},
 ): URL {
@@ -94,23 +150,7 @@ async function createWmtsLegendUrl(
     );
   }
 
-  if (layerByName.styles && layerByName.styles.length > 0) {
-    // If a specific style is requested, find its legend URL
-    if (layer.style) {
-      const matchingStyle = layerByName.styles.find(
-        (s: { name?: string }) => s.name === layer.style,
-      );
-      if (matchingStyle?.legendUrl) {
-        return matchingStyle.legendUrl;
-      }
-    }
-    // Fall back to the first style's legend URL
-    if (layerByName.styles[0].legendUrl) {
-      return layerByName.styles[0].legendUrl;
-    }
-  }
-
-  return null;
+  return findStyleLegendUrl(layerByName.styles, layer.style);
 }
 
 /**
@@ -161,7 +201,7 @@ export async function createLegendFromLayer(
 
     // Determine legend URL based on layer type
     if (layer.type === "wms") {
-      legendUrl = createWmsLegendUrl(layer, options).toString();
+      legendUrl = await createWmsLegendUrl(layer, options);
     } else if (layer.type === "wmts") {
       legendUrl = await createWmtsLegendUrl(layer);
     }

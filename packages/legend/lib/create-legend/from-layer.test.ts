@@ -4,10 +4,18 @@ import {
   MapContextLayerWms,
   MapContextLayerWmts,
 } from "@geospatial-sdk/core";
-import { WmtsEndpoint } from "@camptocamp/ogc-client";
+import { WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 
-// Mock dependencies
+// Mock dependencies.
 vi.mock("@camptocamp/ogc-client", () => ({
+  WmsEndpoint: class WmsMock {
+    isReady() {
+      return Promise.resolve({
+        getLayerByName: () => null,
+        getOperationUrl: () => "https://example.com/wms",
+      });
+    }
+  },
   WmtsEndpoint: class WmtsMock {
     isReady() {}
   },
@@ -139,6 +147,135 @@ describe("createLegendFromLayer", () => {
     const img = (result as HTMLElement).querySelector("img");
 
     expect(img?.src).toContain("STYLE=my_custom_style");
+  });
+
+  it("uses the advertised LegendURL when GetLegendGraphic is not supported", async () => {
+    const mockLegendUrl = "https://example.com/wms-legend.png";
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({ styles: [{ legendUrl: mockLegendUrl }] }),
+      getOperationUrl: () => undefined,
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer(baseWmsLayer);
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toBe(mockLegendUrl);
+  });
+
+  it("prefers GetLegendGraphic over an advertised LegendURL when supported", async () => {
+    const mockLegendUrl = "https://example.com/wms-legend.png";
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({ styles: [{ legendUrl: mockLegendUrl }] }),
+      getOperationUrl: () => "https://example.com/wms",
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer(baseWmsLayer);
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toContain("REQUEST=GetLegendGraphic");
+    expect(img?.src).not.toBe(mockLegendUrl);
+  });
+
+  it("includes STYLE in GetLegendGraphic when supported and layer.style is set", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({ styles: [] }),
+      getOperationUrl: () => "https://example.com/wms",
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer({
+      ...baseWmsLayer,
+      style: "night",
+    });
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toContain("REQUEST=GetLegendGraphic");
+    expect(img?.src).toContain("STYLE=night");
+  });
+
+  it("uses matching style LegendURL for WMS layer when layer.style is set", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({
+        styles: [
+          { name: "default", legendUrl: "https://example.com/default.png" },
+          { name: "night", legendUrl: "https://example.com/night.png" },
+        ],
+      }),
+      getOperationUrl: () => undefined,
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer({
+      ...baseWmsLayer,
+      style: "night",
+    });
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toBe("https://example.com/night.png");
+  });
+
+  it("returns no legend when the requested WMS style is not advertised", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({
+        styles: [
+          { name: "default", legendUrl: "https://example.com/default.png" },
+        ],
+      }),
+      getOperationUrl: () => undefined,
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer({
+      ...baseWmsLayer,
+      style: "night",
+    });
+    const legendDiv = result as HTMLElement;
+
+    expect(legendDiv.querySelector("img")).toBeNull();
+    expect(legendDiv.textContent).toContain("Legend not available");
+  });
+
+  it("uses GetLegendGraphic honouring STYLE over an advertised LegendURL when supported", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({
+        styles: [
+          { name: "default", legendUrl: "https://example.com/default.png" },
+        ],
+      }),
+      getOperationUrl: () => "https://example.com/wms",
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer({
+      ...baseWmsLayer,
+      style: "night",
+    });
+    const img = (result as HTMLElement).querySelector("img");
+
+    expect(img?.src).toContain("REQUEST=GetLegendGraphic");
+    expect(img?.src).toContain("STYLE=night");
+    expect(img?.src).not.toContain("default.png");
+  });
+
+  it("returns no legend when WMS capabilities advertise none and GetLegendGraphic is unsupported", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockResolvedValue({
+      getLayerByName: () => ({ styles: [] }),
+      getOperationUrl: () => undefined,
+    } as unknown as WmsEndpoint);
+
+    const result = await createLegendFromLayer(baseWmsLayer);
+    const legendDiv = result as HTMLElement;
+
+    expect(legendDiv.querySelector("img")).toBeNull();
+    expect(legendDiv.textContent).toContain("Legend not available");
+  });
+
+  it("returns no legend when WMS capabilities cannot be read", async () => {
+    vi.spyOn(WmsEndpoint.prototype, "isReady").mockRejectedValue(
+      new Error("network"),
+    );
+
+    const result = await createLegendFromLayer(baseWmsLayer);
+    const legendDiv = result as HTMLElement;
+
+    expect(legendDiv.querySelector("img")).toBeNull();
+    expect(legendDiv.textContent).toContain("Legend not available");
   });
 
   it("creates a legend for a valid WMTS layer with legend URL", async () => {
