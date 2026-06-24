@@ -117,6 +117,14 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
    * If not specified, the WMS server's default format will be used.
    */
   format?: string;
+
+  /**
+   * An OGC encoded filter (e.g. an OGC `<Filter>` document) applied verbatim to the WMS
+   * GetMap `FILTER` parameter. Use it to restrict the features rendered by the layer.
+   *
+   * The value is passed through as-is; the SDK does not validate or transform it.
+   */
+  filter?: string;
 }
 
 export interface MapContextLayerWmts extends MapContextBaseLayer {

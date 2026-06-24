@@ -347,6 +347,20 @@ describe("createLayer", () => {
           ELEVATION: 500,
         });
       });
+      it("sets the WMS FILTER param when provided", async () => {
+        const filter =
+          "<Filter><PropertyIsEqualTo></PropertyIsEqualTo></Filter>";
+        layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, filter };
+        layer = await createLayer(layerModel);
+        const source = layer.getSource() as TileWMS;
+        const params = source.getParams();
+        expect(params).toEqual({
+          LAYERS: (layerModel as MapContextLayerWms).name,
+          STYLES: (layerModel as MapContextLayerWms).style,
+          FILTER: filter,
+          TILED: true,
+        });
+      });
       it("set correct url without existing REQUEST and SERVICE params", () => {
         const source = layer.getSource() as ImageWMS;
         const url = source.getUrl();
