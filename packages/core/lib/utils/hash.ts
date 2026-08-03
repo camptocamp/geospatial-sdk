@@ -2,12 +2,15 @@ function isGeoJsonGeometry(object: object) {
   return "type" in object && ("coordinates" in object || "features" in object);
 }
 
+const bigintReplacer = (key: string, value: unknown) =>
+  typeof value === "bigint" ? value.toString() : value;
+
 export function getHash(input: unknown, ignoreKeys: string[] = []): string {
   if (input instanceof Date) {
     return input.toISOString();
   }
   if (input instanceof Object && isGeoJsonGeometry(input)) {
-    return JSON.stringify(input); // do not compute an actual hash as it will take too long
+    return JSON.stringify(input, bigintReplacer); // do not compute an actual hash as it will take too long
   } else if (input instanceof Object) {
     const obj: Record<string, string> = {};
     const keys = Object.keys(input).sort();
@@ -15,13 +18,11 @@ export function getHash(input: unknown, ignoreKeys: string[] = []): string {
       if (ignoreKeys.includes(key)) continue;
       obj[key] = getHash(input[key as keyof typeof input]);
     }
-    const hash = JSON.stringify(obj)
+    const hash = JSON.stringify(obj, bigintReplacer)
       .split("")
       .reduce((prev, curr) => (prev << 5) - prev + curr.charCodeAt(0), 0);
     return (hash >>> 0).toString();
-  } else if (typeof input === "bigint") {
-    return input.toString(10);
   } else {
-    return JSON.stringify(input);
+    return JSON.stringify(input, bigintReplacer);
   }
 }

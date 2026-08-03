@@ -129,7 +129,7 @@ describe("getHash", () => {
     });
     expect(hashB).not.toEqual(hashA);
   });
-  it("supports bigint values", () => {
+  it("stable with bigint values", () => {
     const hashA = getHash({
       aa: "bb",
       cc: 9007199254740991n,
@@ -139,5 +139,42 @@ describe("getHash", () => {
       cc: 9007199254740991n,
     });
     expect(hashB).toEqual(hashA);
+  });
+  it("supports bigint in geojson", () => {
+    const hash = getHash({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {
+            adresse: "Façade Esplanade",
+            code_insee: 59350n,
+            dtdate: 1785767040000,
+            etat: "OUVERT",
+            geom: "POINT (703523.791143476 7060856.34054855)",
+            latitude: 50.644637,
+            longitude: 3.049734,
+            nbr_libre: 138n,
+            nbr_total: 270n,
+            nom: "Petit Paradis",
+            txt_aff: "95",
+            ville: "LILLE",
+          },
+          geometry: {
+            coordinates: [
+              [
+                [2.789133, 50.49973],
+                [3.272498, 50.49973],
+                [3.272498, 50.794577],
+                [2.789133, 50.794577],
+                [2.789133, 50.49973],
+              ],
+            ],
+            type: "Polygon",
+          },
+        },
+      ],
+    });
+    expect(hash).toBeTruthy();
   });
 });
