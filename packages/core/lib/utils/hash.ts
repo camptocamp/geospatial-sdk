@@ -19,6 +19,8 @@ export function getHash(input: unknown, ignoreKeys: string[] = []): string {
       .split("")
       .reduce((prev, curr) => (prev << 5) - prev + curr.charCodeAt(0), 0);
     return (hash >>> 0).toString();
+  } else if (typeof input === "bigint") {
+    return input.toString(10);
   } else {
     return JSON.stringify(input);
   }

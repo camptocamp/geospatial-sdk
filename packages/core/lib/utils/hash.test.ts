@@ -129,4 +129,15 @@ describe("getHash", () => {
     });
     expect(hashB).not.toEqual(hashA);
   });
+  it("supports bigint values", () => {
+    const hashA = getHash({
+      aa: "bb",
+      cc: 9007199254740991n,
+    });
+    const hashB = getHash({
+      aa: "bb",
+      cc: 9007199254740991n,
+    });
+    expect(hashB).toEqual(hashA);
+  });
 });
