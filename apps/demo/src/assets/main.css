@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+:root {
+  --ui-primary: #ff680a;
+}
+
+button {
+  cursor: pointer;
+}
