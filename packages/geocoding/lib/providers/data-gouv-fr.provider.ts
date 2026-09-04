@@ -1,9 +1,9 @@
 import { GeocodingResult } from "../model/index.js";
-import { queryBaseAdresseNationale } from "./base-adresse-nationale-fr.provider.js";
+import { queryGeoplateforme } from "./geoplateforme.provider.js";
 
 /**
  * @deprecated The underlying BAN API is deprecated and will be decommissioned end of January 2026;
- * use {@link BaseAdresseNationaleOptions} instead.
+ * use {@link GeoplateformeOptions} instead.
  * @property type
  * @property postCode
  * @property cityCode
@@ -18,16 +18,16 @@ export interface DataGouvFrOptions {
 
 /**
  * @deprecated The underlying BAN API is deprecated and will be decommissioned end of January 2026;
- * use {@link queryBaseAdresseNationale} instead.
+ * use {@link queryGeoplateforme} instead.
  */
 export function queryDataGouvFr(
   input: string,
   options?: DataGouvFrOptions,
 ): Promise<GeocodingResult[]> {
   console.warn(
-    "queryDataGouvFr is deprecated and will be removed; use queryBaseAdresseNationale instead.",
+    "queryDataGouvFr is deprecated and will be removed; use queryGeoplateforme instead.",
   );
-  return queryBaseAdresseNationale(input, {
+  return queryGeoplateforme(input, {
     index: ["address"],
     type: options?.type ? [options.type] : undefined,
     postCode: options?.postCode ? [options.postCode] : undefined,

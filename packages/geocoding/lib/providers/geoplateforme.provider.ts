@@ -44,53 +44,35 @@ interface ParcelResponseItem extends ResponseItem {
   };
 }
 
-type DataGeopfFrResponseItem =
+type GeoplateformeResponseItem =
   | PoiResponseItem
   | AddressResponseItem
   | ParcelResponseItem;
 
-interface DataGeopfFrResponse {
+interface GeoplateformeResponse {
   type: "FeatureCollection";
-  features: DataGeopfFrResponseItem[];
+  features: GeoplateformeResponseItem[];
   query: string;
 }
 
 const baseUrl = "https://data.geopf.fr/geocodage/search";
 
-function resolveGeometry(
-  feature: { geometry: Geometry },
-  truegeometry: string | Geometry | undefined,
-  returnTrueGeometry: boolean,
-): Geometry {
-  if (!returnTrueGeometry || !truegeometry) {
-    return feature.geometry;
-  }
-  return typeof truegeometry === "string"
-    ? (JSON.parse(truegeometry) as Geometry)
-    : truegeometry;
-}
-
-function parseFeature(
-  feature: DataGeopfFrResponseItem,
-  returnTrueGeometry: boolean,
-): GeocodingResult {
+function parseFeature(feature: GeoplateformeResponseItem): GeocodingResult {
   switch (feature.properties._type) {
     case "poi": {
-      const { toponym, truegeometry, ...properties } = feature.properties;
-      const geom = resolveGeometry(feature, truegeometry, returnTrueGeometry);
-      return { label: toponym, properties, geom };
+      const { toponym, ...properties } = feature.properties;
+      return { label: toponym, properties, geom: feature.geometry };
     }
     case "address": {
       const { label, ...properties } = feature.properties;
       return { label, properties, geom: feature.geometry };
     }
     case "parcel": {
-      const { truegeometry, ...properties } = feature.properties;
-      const geom = resolveGeometry(feature, truegeometry, returnTrueGeometry);
+      const { section, number, city } = feature.properties;
       return {
-        label: `${properties.section} ${properties.number}, ${properties.city}`,
-        properties,
-        geom,
+        label: `${section} ${number}, ${city}`,
+        properties: feature.properties,
+        geom: feature.geometry,
       };
     }
     default:
@@ -109,9 +91,9 @@ function parseFeature(
  * @property {number} [limit] Maximum number of results
  * @property {string[]} [category] Poi category filter (up to 10 values); applies to the poi index only; searches all categories when omitted; see https://data.geopf.fr/geocodage/getCapabilities for the full list of values
  * @property {("housenumber" | "street" | "locality" | "municipality")[]} [type] Address result type filter; applies to the address index only
- * @property {boolean} [returnTrueGeometry=false] Return the true feature geometry instead of the point representation; has no effect on the address index (no true geometry available)
+ * @property {boolean} [returnTrueGeometry=false] Include the true feature geometry in `properties.truegeometry`; `geom` always stays the service's own (simplified) geometry. Has no effect on the address index (no true geometry available)
  */
-export interface BaseAdresseNationaleOptions {
+export interface GeoplateformeOptions {
   index?: ("poi" | "address" | "parcel")[];
   postCode?: string[];
   cityCode?: string[];
@@ -122,9 +104,9 @@ export interface BaseAdresseNationaleOptions {
   returnTrueGeometry?: boolean;
 }
 
-export function queryBaseAdresseNationale(
+export function queryGeoplateforme(
   input: string,
-  options?: BaseAdresseNationaleOptions,
+  options?: GeoplateformeOptions,
 ): Promise<GeocodingResult[]> {
   const finalOptions = options ?? {};
 
@@ -157,9 +139,7 @@ export function queryBaseAdresseNationale(
   }
   return fetch(url.toString())
     .then((response) => response.json())
-    .then((response: DataGeopfFrResponse) =>
-      response.features.map((feature) =>
-        parseFeature(feature, !!finalOptions.returnTrueGeometry),
-      ),
+    .then((response: GeoplateformeResponse) =>
+      response.features.map(parseFeature),
     );
 }

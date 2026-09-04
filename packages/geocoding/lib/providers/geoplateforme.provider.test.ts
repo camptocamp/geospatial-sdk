@@ -1,5 +1,5 @@
 import { GeocodingResult } from "../model/index.js";
-import { queryBaseAdresseNationale } from "./base-adresse-nationale-fr.provider.js";
+import { queryGeoplateforme } from "./geoplateforme.provider.js";
 
 interface FixtureFeature {
   type: "Feature";
@@ -7,7 +7,7 @@ interface FixtureFeature {
   properties: Record<string, unknown>;
 }
 
-interface DataGeopfFrFixtureResponse {
+interface GeoplateformeFixtureResponse {
   type: "FeatureCollection";
   query: string;
   features: FixtureFeature[];
@@ -24,7 +24,6 @@ function poiFeature(
       toponym: "Beaufort",
       category: ["administratif", "commune"],
       citycode: ["73034"],
-      truegeometry: '{"type":"Point","coordinates":[6.607922,45.688166]}',
       ...properties,
     },
   };
@@ -60,37 +59,27 @@ function parcelFeature(
       section: "0A",
       number: "0001",
       city: "Saint-Mandé",
-      truegeometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [2.4162, 48.8471],
-            [2.4163, 48.8472],
-            [2.4162, 48.8471],
-          ],
-        ],
-      },
       ...properties,
     },
   };
 }
 
-function mockFetch(response: DataGeopfFrFixtureResponse) {
+function mockFetch(response: GeoplateformeFixtureResponse) {
   globalThis.fetch = vi.fn(() =>
     Promise.resolve({ json: () => Promise.resolve(response) } as Response),
   );
 }
 
-describe("queryBaseAdresseNationale", () => {
+describe("queryGeoplateforme", () => {
   let results: GeocodingResult[];
 
-  it("parses a poi feature, excluding toponym/truegeometry (already exposed as label/geom)", async () => {
+  it("parses a poi feature, excluding toponym (already exposed as label)", async () => {
     mockFetch({
       type: "FeatureCollection",
       query: "beaufort",
       features: [poiFeature()],
     });
-    results = await queryBaseAdresseNationale("beaufort");
+    results = await queryGeoplateforme("beaufort");
     expect(results).toEqual([
       {
         label: "Beaufort",
@@ -104,30 +93,38 @@ describe("queryBaseAdresseNationale", () => {
     ]);
   });
 
-  it("parses the poi true geometry when returnTrueGeometry is enabled", async () => {
+  it("puts the poi true geometry in properties when returnTrueGeometry is enabled, geom stays the point", async () => {
     mockFetch({
       type: "FeatureCollection",
       query: "beaufort",
-      features: [poiFeature()],
+      features: [
+        poiFeature({
+          truegeometry: '{"type":"Point","coordinates":[6.607922,45.688166]}',
+        }),
+      ],
     });
-    results = await queryBaseAdresseNationale("beaufort", {
+    results = await queryGeoplateforme("beaufort", {
       returnTrueGeometry: true,
     });
+    expect(results[0].properties).toEqual(
+      expect.objectContaining({
+        truegeometry: '{"type":"Point","coordinates":[6.607922,45.688166]}',
+      }),
+    );
     expect(results[0].geom).toEqual({
       type: "Point",
       coordinates: [6.607922, 45.688166],
     });
   });
 
-  it("parses an address feature, excluding label (already exposed as label); ignores returnTrueGeometry (no true geometry available)", async () => {
+  it("parses an address feature, excluding label (already exposed as label)", async () => {
     mockFetch({
       type: "FeatureCollection",
       query: "73 avenue de paris",
       features: [addressFeature()],
     });
-    results = await queryBaseAdresseNationale("73 avenue de paris", {
+    results = await queryGeoplateforme("73 avenue de paris", {
       index: ["address"],
-      returnTrueGeometry: true,
     });
     expect(results).toEqual([
       {
@@ -151,7 +148,7 @@ describe("queryBaseAdresseNationale", () => {
       query: "0A 0001",
       features: [parcelFeature()],
     });
-    results = await queryBaseAdresseNationale("0A 0001", {
+    results = await queryGeoplateforme("0A 0001", {
       index: ["parcel"],
     });
     expect(results).toEqual([
@@ -168,17 +165,8 @@ describe("queryBaseAdresseNationale", () => {
     ]);
   });
 
-  it("parses the parcel true geometry when returnTrueGeometry is enabled", async () => {
-    mockFetch({
-      type: "FeatureCollection",
-      query: "0A 0001",
-      features: [parcelFeature()],
-    });
-    results = await queryBaseAdresseNationale("0A 0001", {
-      index: ["parcel"],
-      returnTrueGeometry: true,
-    });
-    expect(results[0].geom).toEqual({
+  it("puts the parcel true geometry in properties when returnTrueGeometry is enabled, geom stays the point", async () => {
+    const truegeometry = {
       type: "Polygon",
       coordinates: [
         [
@@ -187,6 +175,22 @@ describe("queryBaseAdresseNationale", () => {
           [2.4162, 48.8471],
         ],
       ],
+    };
+    mockFetch({
+      type: "FeatureCollection",
+      query: "0A 0001",
+      features: [parcelFeature({ truegeometry })],
+    });
+    results = await queryGeoplateforme("0A 0001", {
+      index: ["parcel"],
+      returnTrueGeometry: true,
+    });
+    expect(results[0].properties).toEqual(
+      expect.objectContaining({ truegeometry }),
+    );
+    expect(results[0].geom).toEqual({
+      type: "Point",
+      coordinates: [2.4162, 48.8471],
     });
   });
 
@@ -196,7 +200,7 @@ describe("queryBaseAdresseNationale", () => {
       query: "beaufort",
       features: [poiFeature(), addressFeature()],
     });
-    results = await queryBaseAdresseNationale("beaufort", {
+    results = await queryGeoplateforme("beaufort", {
       index: ["poi", "address"],
     });
     expect(results.map((r) => r.label)).toEqual([
@@ -211,7 +215,7 @@ describe("queryBaseAdresseNationale", () => {
       query: "beaufort",
       features: [poiFeature()],
     });
-    await queryBaseAdresseNationale("beaufort");
+    await queryGeoplateforme("beaufort");
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://data.geopf.fr/geocodage/search?q=beaufort&autocomplete=1",
     );
@@ -223,7 +227,7 @@ describe("queryBaseAdresseNationale", () => {
       query: "beaufort",
       features: [poiFeature(), addressFeature()],
     });
-    await queryBaseAdresseNationale("beaufort", {
+    await queryGeoplateforme("beaufort", {
       index: ["poi", "address"],
       category: ["hydrographie", "transport"],
       type: ["housenumber", "street"],

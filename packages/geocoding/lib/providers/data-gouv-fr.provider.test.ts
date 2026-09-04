@@ -1,9 +1,9 @@
 import { GeocodingResult } from "../model/index.js";
 import { queryDataGouvFr } from "./data-gouv-fr.provider.js";
-import { queryBaseAdresseNationale } from "./base-adresse-nationale-fr.provider.js";
+import { queryGeoplateforme } from "./geoplateforme.provider.js";
 
-vi.mock("./base-adresse-nationale-fr.provider.js", () => ({
-  queryBaseAdresseNationale: vi.fn(),
+vi.mock("./geoplateforme.provider.js", () => ({
+  queryGeoplateforme: vi.fn(),
 }));
 
 const RESULTS_FIXTURE: GeocodingResult[] = [
@@ -17,13 +17,13 @@ const RESULTS_FIXTURE: GeocodingResult[] = [
 describe("queryDataGouvFr", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(queryBaseAdresseNationale).mockResolvedValue(RESULTS_FIXTURE);
+    vi.mocked(queryGeoplateforme).mockResolvedValue(RESULTS_FIXTURE);
     vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
-  it("delegates to queryBaseAdresseNationale, querying the address index", async () => {
+  it("delegates to queryGeoplateforme, querying the address index", async () => {
     const results = await queryDataGouvFr("hello");
-    expect(queryBaseAdresseNationale).toHaveBeenCalledWith("hello", {
+    expect(queryGeoplateforme).toHaveBeenCalledWith("hello", {
       index: ["address"],
       type: undefined,
       postCode: undefined,
@@ -40,7 +40,7 @@ describe("queryDataGouvFr", () => {
       cityCode: "12345",
       postCode: "00000",
     });
-    expect(queryBaseAdresseNationale).toHaveBeenCalledWith("hello world", {
+    expect(queryGeoplateforme).toHaveBeenCalledWith("hello world", {
       index: ["address"],
       type: ["street"],
       postCode: ["00000"],
