@@ -2,7 +2,7 @@ import {
   canDoIncrementalUpdate,
   updateLayerProperties,
 } from "./layer-update.js";
-import { MapContextLayer, MapContextLayerWms } from "@geospatial-sdk/core";
+import { MapContextLayer } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
 import {
   SAMPLE_LAYER1,
@@ -51,36 +51,6 @@ describe("Layer update utils", () => {
         label: "Layer 1",
       } as MapContextLayer;
       expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(false);
-    });
-    it("returns true when only WMS dimension values change", () => {
-      const oldLayer = {
-        name: "layer1",
-        type: "wms",
-        url: "https://example.com/wms",
-        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
-      } as MapContextLayer;
-      const newLayer = {
-        name: "layer1",
-        type: "wms",
-        url: "https://example.com/wms",
-        dimensionValues: { time: new Date("2021-06-15T12:30:00.000Z") },
-      } as MapContextLayer;
-      expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(true);
-    });
-    it("returns true when only customParams change", () => {
-      const oldLayer = {
-        name: "layer1",
-        type: "wms",
-        url: "https://example.com/wms",
-        customParams: { COLORSCALERANGE: "-2,35" },
-      } as MapContextLayer;
-      const newLayer = {
-        name: "layer1",
-        type: "wms",
-        url: "https://example.com/wms",
-        customParams: { COLORSCALERANGE: "0,100", LOGSCALE: "true" },
-      } as MapContextLayer;
-      expect(canDoIncrementalUpdate(oldLayer, newLayer)).toBe(true);
     });
   });
 
@@ -162,6 +132,7 @@ describe("Layer update utils", () => {
       const prevLayerModel = { ...SAMPLE_LAYER1 } as MapContextLayer;
       updateLayerProperties(layerModel, wmsLayer, prevLayerModel);
       expect(wmsSource.updateParams).toHaveBeenCalledWith({
+        LAYERS: "myLayer",
         STYLES: "newStyle",
       });
     });
@@ -190,108 +161,6 @@ describe("Layer update utils", () => {
       expect(olLayer.set).toHaveBeenCalledWith(
         "--geospatial-sdk-clickable",
         false,
-      );
-    });
-  });
-
-  describe("updateLayerProperties (WMS source params)", () => {
-    let olLayer: Layer;
-    let olSource: TileWMS;
-
-    const baseModel = {
-      type: "wms",
-      url: "https://example.com/wms",
-      name: "myLayer",
-    } as MapContextLayerWms;
-
-    beforeEach(() => {
-      olSource = new TileWMS({
-        url: "https://example.com/wms",
-        params: { LAYERS: "myLayer", TILED: true },
-      });
-      olLayer = new TileLayer({ source: olSource });
-      vi.spyOn(olSource, "updateParams");
-    });
-
-    it("applies changed dimension values to the source with uppercased keys and ISO dates", () => {
-      const prev = {
-        ...baseModel,
-        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
-      };
-      const next = {
-        ...baseModel,
-        dimensionValues: {
-          time: new Date("2021-06-15T12:30:00.000Z"),
-          elevation: 500,
-        },
-      };
-      updateLayerProperties(next, olLayer, prev);
-      expect(olSource.updateParams).toHaveBeenCalledWith({
-        LAYERS: "myLayer",
-        TIME: "2021-06-15T12:30:00.000Z",
-        ELEVATION: 500,
-      });
-    });
-
-    it("resets dimension params that no longer exist to undefined", () => {
-      const prev = {
-        ...baseModel,
-        dimensionValues: {
-          time: new Date("2020-01-01T00:00:00.000Z"),
-          elevation: 500,
-        },
-      };
-      const next = {
-        ...baseModel,
-        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
-      };
-      updateLayerProperties(next, olLayer, prev);
-      expect(olSource.updateParams).toHaveBeenCalledWith({
-        LAYERS: "myLayer",
-        TIME: "2020-01-01T00:00:00.000Z",
-        ELEVATION: undefined,
-      });
-    });
-
-    it("does not touch the source on creation (no previous model)", () => {
-      const next = {
-        ...baseModel,
-        dimensionValues: { time: new Date("2020-01-01T00:00:00.000Z") },
-      };
-      updateLayerProperties(next, olLayer);
-      expect(olSource.updateParams).not.toHaveBeenCalled();
-    });
-
-    it("applies changed customParams to the source via updateParams", () => {
-      const prev = {
-        ...baseModel,
-        customParams: { COLORSCALERANGE: "-2,35" },
-      };
-      const next = {
-        ...baseModel,
-        customParams: { COLORSCALERANGE: "0,100", LOGSCALE: "true" },
-      };
-      updateLayerProperties(next, olLayer, prev);
-      expect(olSource.updateParams).toHaveBeenCalledWith(
-        expect.objectContaining({ COLORSCALERANGE: "0,100", LOGSCALE: "true" }),
-      );
-    });
-
-    it("resets customParams that were removed to undefined", () => {
-      const prev = {
-        ...baseModel,
-        customParams: { COLORSCALERANGE: "-2,35", LOGSCALE: "false" },
-      };
-      const next = {
-        ...baseModel,
-        customParams: { COLORSCALERANGE: "0,100" },
-      };
-      updateLayerProperties(next, olLayer, prev);
-      expect(olSource.updateParams).toHaveBeenCalledWith(
-        expect.objectContaining({
-          COLORSCALERANGE: "0,100",
-          LOGSCALE: undefined,
-        }),
       );
     });
   });

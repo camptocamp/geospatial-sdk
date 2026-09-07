@@ -1,8 +1,4 @@
-import {
-  MapContextLayer,
-  MapContextLayerGeojson,
-  MapContextLayerWms,
-} from "@geospatial-sdk/core";
+import { MapContextLayer, MapContextLayerGeojson } from "@geospatial-sdk/core";
 import {
   MAP_CTX_LAYER_GEOJSON_FIXTURE,
   MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE,
@@ -32,11 +28,9 @@ import VectorSource from "ol/source/Vector.js";
 import WMTS from "ol/source/WMTS.js";
 import XYZ from "ol/source/XYZ.js";
 import TileState from "ol/TileState.js";
-import { beforeEach } from "vitest";
+import { beforeEach, expect, it } from "vitest";
 import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import ImageLayer from "ol/layer/Image.js";
-import ImageWMS from "ol/source/ImageWMS.js";
 import { OgcApiEndpoint } from "@camptocamp/ogc-client";
 import { createLayer } from "./layer-creation.js";
 
@@ -192,182 +186,12 @@ describe("createLayer", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_WMS_FIXTURE;
       layer = await createLayer(layerModel);
-      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
-      layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
-    it("create a tile layer", () => {
+    it("create a tile layer with a WMS source", () => {
       expect(layer).toBeTruthy();
       expect(layer).toBeInstanceOf(TileLayer);
-    });
-    it("set correct layer properties", () => {
-      expect(layer.getVisible()).toBe(false);
-      expect(layer.getOpacity()).toBe(0.5);
-      expect(layer.get("label")).toBe("Communes");
-      // @ts-expect-error TS2554 we're not providing a view extent here
-      expect(layer.getSource()?.getAttributions()!()).toEqual(["camptocamp"]);
-    });
-    it("create a TileWMS source", () => {
       const source = layer.getSource();
       expect(source).toBeInstanceOf(TileWMS);
-    });
-    it("set correct WMS params", () => {
-      const source = layer.getSource() as TileWMS;
-      const params = source.getParams();
-      expect(params).toEqual({
-        LAYERS: (layerModel as MapContextLayerWms).name,
-        STYLES: (layerModel as MapContextLayerWms).style,
-        TILED: true,
-      });
-    });
-    it("sets custom WMS FORMAT param when provided", async () => {
-      layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, format: "image/jpeg" };
-      layer = await createLayer(layerModel);
-      const source = layer.getSource() as TileWMS;
-      const params = source.getParams();
-      expect(params).toEqual({
-        LAYERS: (layerModel as MapContextLayerWms).name,
-        FORMAT: "image/jpeg",
-        STYLES: (layerModel as MapContextLayerWms).style,
-        TILED: true,
-      });
-    });
-    it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
-      layerModel = {
-        ...MAP_CTX_LAYER_WMS_FIXTURE,
-        dimensionValues: {
-          time: new Date("2020-01-01T00:00:00.000Z"),
-          elevation: 500,
-        },
-      };
-      layer = await createLayer(layerModel);
-      const source = layer.getSource() as TileWMS;
-      const params = source.getParams();
-      expect(params).toEqual({
-        LAYERS: (layerModel as MapContextLayerWms).name,
-        STYLES: (layerModel as MapContextLayerWms).style,
-        TILED: true,
-        TIME: "2020-01-01T00:00:00.000Z",
-        ELEVATION: 500,
-      });
-    });
-    it("set correct url without existing REQUEST and SERVICE params", () => {
-      const source = layer.getSource() as TileWMS;
-      const urls = source.getUrls() || [];
-      expect(urls.length).toBe(1);
-      expect(urls[0]).toBe(
-        "https://www.datagrandest.fr/geoserver/region-grand-est/ows",
-      );
-    });
-    it("set WMS gutter of 20px", () => {
-      const source = layer.getSource() as TileWMS;
-      const gutter = source["gutter_"];
-      expect(gutter).toBe(20);
-    });
-    it("should set tileLoadErrorCatchFunction to handle errors", () => {
-      const source = layer.getSource() as TileWMS;
-      const tileLoadFunction = source.getTileLoadFunction();
-      expect(tileLoadFunction).toBeInstanceOf(Function);
-      const tile = new ImageTile([0, 0, 0], TileState.IDLE, "", null, () => {});
-      tileLoadFunction(tile, "http://example.com/tile");
-      expect(tileLoadErrorCatchFunction).toHaveBeenCalled();
-    });
-
-    it("emits a loaded event initially", async () => {
-      await vi.runAllTimersAsync();
-      expect(eventCallback).toHaveBeenCalledWith({
-        layerState: {
-          loaded: true,
-        },
-        target: layer,
-        type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-status`,
-      });
-    });
-
-    describe("not using tiles", () => {
-      beforeEach(async () => {
-        layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, useTiles: false };
-        layer = await createLayer(layerModel);
-        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
-        layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
-      });
-      it("create an image layer", () => {
-        expect(layer).toBeTruthy();
-        expect(layer).toBeInstanceOf(ImageLayer);
-      });
-      it("set correct layer properties", () => {
-        expect(layer.getVisible()).toBe(false);
-        expect(layer.getOpacity()).toBe(0.5);
-        expect(layer.get("label")).toBe("Communes");
-        // @ts-expect-error TS2554 we're not providing a view extent here
-        expect(layer.getSource()?.getAttributions()!()).toEqual(["camptocamp"]);
-      });
-      it("create an ImageWMS source", () => {
-        const source = layer.getSource();
-        expect(source).toBeInstanceOf(ImageWMS);
-      });
-      it("set correct WMS params", () => {
-        const source = layer.getSource() as ImageWMS;
-        const params = source.getParams();
-        expect(params).toEqual({
-          LAYERS: (layerModel as MapContextLayerWms).name,
-          STYLES: (layerModel as MapContextLayerWms).style,
-        });
-      });
-      it("sets custom WMS FORMAT param when provided", async () => {
-        layerModel = {
-          ...MAP_CTX_LAYER_WMS_FIXTURE,
-          useTiles: false,
-          format: "image/jpeg",
-        };
-        layer = await createLayer(layerModel);
-        const source = layer.getSource() as ImageWMS;
-        const params = source.getParams();
-        expect(params).toEqual({
-          LAYERS: (layerModel as MapContextLayerWms).name,
-          FORMAT: "image/jpeg",
-          STYLES: (layerModel as MapContextLayerWms).style,
-        });
-      });
-      it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
-        layerModel = {
-          ...MAP_CTX_LAYER_WMS_FIXTURE,
-          useTiles: false,
-          dimensionValues: {
-            time: new Date("2020-01-01T00:00:00.000Z"),
-            elevation: 500,
-          },
-        };
-        layer = await createLayer(layerModel);
-        const source = layer.getSource() as ImageWMS;
-        const params = source.getParams();
-        expect(params).toEqual({
-          LAYERS: (layerModel as MapContextLayerWms).name,
-          STYLES: (layerModel as MapContextLayerWms).style,
-          TIME: "2020-01-01T00:00:00.000Z",
-          ELEVATION: 500,
-        });
-      });
-      it("sets the WMS FILTER param when provided", async () => {
-        const filter =
-          "<Filter><PropertyIsEqualTo></PropertyIsEqualTo></Filter>";
-        layerModel = { ...MAP_CTX_LAYER_WMS_FIXTURE, filter };
-        layer = await createLayer(layerModel);
-        const source = layer.getSource() as TileWMS;
-        const params = source.getParams();
-        expect(params).toEqual({
-          LAYERS: (layerModel as MapContextLayerWms).name,
-          STYLES: (layerModel as MapContextLayerWms).style,
-          FILTER: filter,
-          TILED: true,
-        });
-      });
-      it("set correct url without existing REQUEST and SERVICE params", () => {
-        const source = layer.getSource() as ImageWMS;
-        const url = source.getUrl();
-        expect(url).toBe(
-          "https://www.datagrandest.fr/geoserver/region-grand-est/ows",
-        );
-      });
     });
   });
 

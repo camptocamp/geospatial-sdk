@@ -8,10 +8,8 @@ import {
 import Layer from "ol/layer/Layer.js";
 import VectorLayer from "ol/layer/Vector.js";
 import type VectorSource from "ol/source/Vector.js";
-import type TileWMS from "ol/source/TileWMS.js";
-import type ImageWMS from "ol/source/ImageWMS.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import { buildWmsParams } from "./wms-params.js";
+import { updateWmsLayerParams } from "./layers/wms.js";
 
 const UPDATABLE_PROPERTIES: (
   | keyof MapContextBaseLayer
@@ -28,10 +26,12 @@ const UPDATABLE_PROPERTIES: (
   "clickable",
   "style",
   "hoverStyle",
-  "dimensionValues",
   "customParams",
   "filter",
   // TODO (when available) "zIndex"
+  "timeValue",
+  "elevationValue",
+  "otherDimensionValues",
 ];
 
 /**
@@ -106,62 +106,22 @@ export function updateLayerProperties(
   if (shouldApplyProperty("clickable" as keyof MapContextLayer)) {
     olLayer.set(`${GEOSPATIAL_SDK_PREFIX}clickable`, layerModel.clickable);
   }
-  if (shouldApplyProperty("style" as keyof MapContextLayer)) {
-    if (layerModel.type === "wms") {
-      const source = olLayer.getSource();
-      if (source && "updateParams" in source) {
-        (source as TileWMS | ImageWMS).updateParams({
-          STYLES: (layerModel as MapContextLayerWms).style,
-        });
-      }
-    } else if ("setStyle" in olLayer) {
-      (olLayer as VectorLayer<VectorSource>).setStyle(
-        (layerModel as MapContextLayerVector).style,
-      );
-    }
-  }
-  // only relevant on update: on creation the source is built with the correct
-  // params already, so there is nothing to re-apply
-  if (previousLayerModel && layerModel.type === "wms") {
-    updateWmsSourceParams(
-      layerModel,
-      olLayer,
-      previousLayerModel as MapContextLayerWms,
+  if (
+    shouldApplyProperty("style" as keyof MapContextLayer) &&
+    "setStyle" in olLayer
+  ) {
+    (olLayer as VectorLayer<VectorSource>).setStyle(
+      (layerModel as MapContextLayerVector).style,
     );
   }
   // TODO: z-index
-}
 
-/**
- * Applies WMS request params (LAYERS, STYLES, FORMAT, dimension values) to the
- * layer's source via `updateParams`, which triggers a single re-render instead
- * of recreating the layer.
- *
- * `updateParams` merges, so params present in the previous model but absent from
- * the new one are explicitly reset to `undefined` (OpenLayers omits undefined
- * params from the request URL).
- */
-function updateWmsSourceParams(
-  layerModel: MapContextLayerWms,
-  olLayer: Layer,
-  previousLayerModel: MapContextLayerWms,
-) {
-  const source = olLayer.getSource() as TileWMS | ImageWMS | null;
-  if (!source) return;
-
-  const params = buildWmsParams(layerModel);
-  const previousParams = buildWmsParams(previousLayerModel);
-
-  // nothing WMS-relevant changed: skip updateParams to avoid a needless re-render
-  if (getHash(params) === getHash(previousParams)) return;
-
-  // reset params that existed before but no longer do, so stale dimensions
-  // (e.g. a removed TIME) don't linger after the merge performed by updateParams
-  for (const key of Object.keys(previousParams)) {
-    if (!(key in params)) {
-      params[key] = undefined;
-    }
+  // specific update logic for WMS layers
+  if (layerModel.type === "wms" && previousLayerModel) {
+    updateWmsLayerParams(
+      layerModel,
+      previousLayerModel as MapContextLayerWms,
+      olLayer,
+    );
   }
-
-  source.updateParams(params);
 }
