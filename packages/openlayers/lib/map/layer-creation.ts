@@ -1,12 +1,7 @@
-import {
-  defaultStyle,
-  MapContextLayer,
-  removeSearchParams,
-} from "@geospatial-sdk/core";
+import { defaultStyle, MapContextLayer } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
 import TileLayer from "ol/layer/Tile.js";
 import XYZ from "ol/source/XYZ.js";
-import TileWMS from "ol/source/TileWMS.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import GeoJSON from "ol/format/GeoJSON.js";
@@ -37,9 +32,7 @@ import {
   emitLayerLoadingStatusSuccess,
 } from "./register-events.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import { buildWmsParams } from "./wms-params.js";
-import ImageLayer from "ol/layer/Image.js";
-import ImageWMS from "ol/source/ImageWMS.js";
+import { createWmsLayer } from "./layers/wms.js";
 
 const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
@@ -85,38 +78,7 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
       break;
 
     case "wms":
-      {
-        const url = removeSearchParams(layerModel.url, ["request", "service"]);
-        const params = buildWmsParams(layerModel);
-        if (layerModel.useTiles === false) {
-          layer = new ImageLayer({
-            source: new ImageWMS({
-              url,
-              params,
-              referrerPolicy: layerModel.referrerPolicy,
-              attributions: layerModel.attributions,
-            }),
-          });
-        } else {
-          layer = new TileLayer({
-            source: new TileWMS({
-              url,
-              params: { ...params, TILED: true },
-              gutter: 20,
-              attributions: layerModel.attributions,
-              tileLoadFunction: function (tile: Tile, src: string) {
-                return tileLoadErrorCatchFunction(
-                  layer as TileLayer<TileWMS>,
-                  tile,
-                  src,
-                );
-              },
-            }),
-          });
-        }
-        defer().then(() => emitLayerLoadingStatusSuccess(layer));
-      }
-      break;
+      return createWmsLayer(layerModel);
 
     case "wmts": {
       const olLayer = new TileLayer({});

@@ -1,19 +1,6 @@
 import { FeatureCollection, Geometry } from "geojson";
 import { VectorStyle } from "./style.js";
-
-export type LayerDimensionValueSingle = string | number | Date;
-export type LayerDimensionValueRange = {
-  start: LayerDimensionValueSingle | null;
-  end: LayerDimensionValueSingle | null;
-};
-
-/**
- * @private
- * @inline
- */
-// TODO: support `LayerDimensionValueRange` values (formatted as `start/end` per
-// the WMS spec) in the map implementations; only single values are handled today.
-export type LayerDimensionValues = Record<string, LayerDimensionValueSingle>;
+import { WmsLayerDimensionValue } from "@camptocamp/ogc-client";
 
 /**
  * @private
@@ -85,11 +72,46 @@ export interface MapContextBaseLayer {
   referrerPolicy?: ReferrerPolicy;
 }
 
+export interface TimeInterval {
+  begin: Date;
+  end: Date;
+}
+export interface ValueInterval {
+  begin: WmsLayerDimensionValue;
+  end: WmsLayerDimensionValue;
+}
+export type LayerDimensionValue =
+  | WmsLayerDimensionValue
+  | WmsLayerDimensionValue[]
+  | ValueInterval;
+export type LayerTimeDimensionValue = Date | Date[] | TimeInterval | "current";
+
 export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
   url: string;
   name: string;
-  dimensionValues?: LayerDimensionValues;
+
+  /**
+   * value of the built-in TIME dimension to request; can be a single date, a list of dates, a temporal interval, or a list of intervals
+   */
+  timeValue?: LayerTimeDimensionValue;
+
+  /**
+   * value of the built-in ELEVATION dimension to request; can be a single value, a list of discrete values, an interval, or a list of intervals
+   */
+  elevationValue?: LayerDimensionValue;
+
+  /**
+   * value of any other dimension to request (either scalar or temporal); key is the dimension name, it will be prefixed by DIM_ in the request
+   */
+  otherDimensionValues?: Record<
+    string,
+    LayerDimensionValue | LayerTimeDimensionValue
+  >;
+
+  /**
+   * If unspecified, will use the default one
+   */
   style?: string;
 
   /**
@@ -127,12 +149,18 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
   filter?: string;
 }
 
+/**
+ * @private
+ * @inline
+ */
+export type LayerDimensionSimpleValue = string | number | Date | "current";
+
 export interface MapContextLayerWmts extends MapContextBaseLayer {
   type: "wmts";
   url: string;
   name: string;
   // TODO: add support for these
-  dimensionValues?: LayerDimensionValues;
+  dimensionValues?: Record<string, LayerDimensionSimpleValue>;
   style?: string;
 }
 
