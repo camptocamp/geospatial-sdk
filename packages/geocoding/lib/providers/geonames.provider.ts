@@ -52,15 +52,20 @@ export function queryGeonames(
   const url = new URL(baseUrl);
   url.searchParams.set("q", input.trim());
   url.searchParams.set("username", finalOptions.username);
-  finalOptions.maxRows &&
+  if (finalOptions.maxRows) {
     url.searchParams.set("maxRows", finalOptions.maxRows.toString());
+  }
   if (typeof finalOptions.country === "string") {
     url.searchParams.set("country", finalOptions.country);
   } else if (Array.isArray(finalOptions.country)) {
     finalOptions.country.forEach((c) => url.searchParams.append("country", c));
   }
-  finalOptions.lang && url.searchParams.set("lang", finalOptions.lang);
-  finalOptions.style && url.searchParams.set("style", finalOptions.style);
+  if (finalOptions.lang) {
+    url.searchParams.set("lang", finalOptions.lang);
+  }
+  if (finalOptions.style) {
+    url.searchParams.set("style", finalOptions.style);
+  }
   url.searchParams.set("type", "json");
 
   if (

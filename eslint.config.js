@@ -28,8 +28,8 @@ export default defineConfig([
     "**/mocks",
     "**/dist/**",
     "apps",
+    "docs",
   ]),
-  EslintPluginImport.flatConfigs.recommended,
   js.configs.recommended,
   {
     extends: fixupConfigRules(
@@ -41,6 +41,7 @@ export default defineConfig([
     plugins: {
       "@typescript-eslint": fixupPluginRules(TypescriptEslint),
       vue: fixupPluginRules(Vue),
+      import: EslintPluginImport,
     },
     languageOptions: {
       globals: {
