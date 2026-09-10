@@ -1,8 +1,7 @@
 import type { FlatStyleLike } from "ol/style/flat.js";
-import chroma from "chroma-js";
 
 const color = "rgb(0, 0, 255)";
-const fillColor = chroma(color).alpha(0.25).css();
+const fillColor = "rgba(0, 0, 255, 0.25)";
 export const defaultStyle: FlatStyleLike = [
   {
     filter: ["==", ["geometry-type"], "LineString"],
@@ -37,7 +36,7 @@ export const defaultStyle: FlatStyleLike = [
 ];
 
 const hlColor = "rgb(0, 0, 255)";
-const hlFillColor = chroma(hlColor).alpha(0.25).css();
+const hlFillColor = "rgba(0, 0, 255, 0.25)";
 export const defaultHighlightStyle: FlatStyleLike = [
   {
     filter: ["==", ["geometry-type"], "LineString"],

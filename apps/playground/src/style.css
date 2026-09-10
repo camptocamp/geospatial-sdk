@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+body {
+    --ui-container: 100vw;
+}

@@ -325,7 +325,7 @@ describe("openLayersStyleToMapLibreLayers", () => {
         },
         {
           paint: {
-            "fill-color": "rgba(0,0,255,0.25)",
+            "fill-color": "rgba(0, 0, 255, 0.25)",
           },
           type: "fill",
           filter: ["==", ["geometry-type"], "Polygon"],
