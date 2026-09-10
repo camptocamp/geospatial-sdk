@@ -40,15 +40,19 @@ jobs:
       - name: Install project dependencies
         run: npm ci
 
-      - name: Install application dependencies
-        run: npm ci
-        working-directory: apps/examples
-
-      - name: Build examples
+      - name: Build examples app
         run: |
+          npm ci
           npm run build -- --base=/geospatial-sdk/ && \
           mv dist ../../pages
         working-directory: apps/examples
+
+      - name: Build playground app
+        run: |
+          npm ci
+          npm run build -- --base=/geospatial-sdk/playground/ && \
+          mv dist ../../pages/playground
+        working-directory: apps/playground
 
       - name: Build docs
         run: |
