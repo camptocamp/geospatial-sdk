@@ -45,9 +45,7 @@ interface ParcelResponseItem extends ResponseItem {
 }
 
 type GeoplateformeResponseItem =
-  | PoiResponseItem
-  | AddressResponseItem
-  | ParcelResponseItem;
+  PoiResponseItem | AddressResponseItem | ParcelResponseItem;
 
 interface GeoplateformeResponse {
   type: "FeatureCollection";

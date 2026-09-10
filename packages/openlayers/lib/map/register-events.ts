@@ -108,9 +108,7 @@ export function propagateLayerStateChangeEventToMap(
     }
     const layerIndex = map.getLayers().getArray().indexOf(layer);
     const layerId = layer.get(`${GEOSPATIAL_SDK_PREFIX}layer-id`) as
-      | string
-      | number
-      | undefined;
+      string | number | undefined;
     map.dispatchEvent({
       type: `${GEOSPATIAL_SDK_PREFIX}${MapLayerStateChangeEventType}`,
       layerState: {

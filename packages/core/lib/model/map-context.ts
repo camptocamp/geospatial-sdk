@@ -81,9 +81,7 @@ export interface ValueInterval {
   end: WmsLayerDimensionValue;
 }
 export type LayerDimensionValue =
-  | WmsLayerDimensionValue
-  | WmsLayerDimensionValue[]
-  | ValueInterval;
+  WmsLayerDimensionValue | WmsLayerDimensionValue[] | ValueInterval;
 export type LayerTimeDimensionValue = Date | Date[] | TimeInterval | "current";
 
 export interface MapContextLayerWms extends MapContextBaseLayer {
@@ -270,9 +268,7 @@ export interface ViewByGeometry {
  * Also allows specifying constraints for zoom and extent.
  */
 export type MapContextView = (
-  | ViewByZoomAndCenter
-  | ViewByExtent
-  | ViewByGeometry
+  ViewByZoomAndCenter | ViewByExtent | ViewByGeometry
 ) & {
   maxZoom?: number;
   maxExtent?: Extent;
