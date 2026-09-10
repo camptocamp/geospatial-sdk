@@ -4,7 +4,7 @@ import ButtonToggle from '@/components/ButtonToggle.vue'
 import { ref } from 'vue'
 import {
   type GeocodingResult,
-  queryDataGouvFr,
+  queryGeoplateforme,
   queryGeoadmin,
   queryGeonames
 } from '@geospatial-sdk/geocoding'
@@ -18,25 +18,22 @@ function selectProvider(value: string) {
   queryResults(searchText.value)
 }
 
-function getQueryFunction() {
-  switch (provider.value) {
-    case 'Geoadmin':
-      return queryGeoadmin
-    case 'adresse.data.gouv.fr':
-      return queryDataGouvFr
-    case 'Geonames':
-    default:
-      return queryGeonames
-  }
-}
-
 async function queryResults(newText: string) {
   if (newText.length < 3) {
     return
   }
   searchText.value = newText
-  const queryFn = getQueryFunction()
-  results.value = await queryFn(newText)
+  switch (provider.value) {
+    case 'Geoadmin':
+      results.value = await queryGeoadmin(newText)
+      break
+    case 'Géoplateforme (FR)':
+      results.value = await queryGeoplateforme(newText)
+      break
+    case 'Geonames':
+    default:
+      results.value = await queryGeonames(newText)
+  }
 }
 </script>
 
@@ -47,7 +44,7 @@ async function queryResults(newText: string) {
   <div class="flex flex-row my-3 gap-3">
     <TextInput placeholder="Type something here" @value-change="queryResults" />
     <ButtonToggle
-      :choices="['Geonames', 'Geoadmin', 'adresse.data.gouv.fr']"
+      :choices="['Geonames', 'Geoadmin', 'Géoplateforme (FR)']"
       :initialValue="provider"
       @select="selectProvider"
     />
