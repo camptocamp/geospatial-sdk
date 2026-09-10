@@ -1,1 +1,4 @@
+apps/**/dist/*
+apps/**/public/geospatial-sdk/*
 apps/examples
+docs

@@ -20,9 +20,7 @@ export interface LayerMetadataSpecification {
 }
 
 export type LayerContextWithStyle =
-  | MapContextLayerWfs
-  | MapContextLayerOgcApi
-  | MapContextLayerGeojson;
+  MapContextLayerWfs | MapContextLayerOgcApi | MapContextLayerGeojson;
 
 export type Dataset = Pick<StyleSpecification, "sources" | "layers">;
 
