@@ -7,6 +7,7 @@ import TileWMS from "ol/source/TileWMS.js";
 import Tile from "ol/Tile.js";
 import { tileLoadErrorCatchFunction } from "../handle-errors.js";
 import {
+  DateString,
   MapContextLayerWms,
   TimeInterval,
   ValueInterval,
@@ -20,8 +21,8 @@ const defer = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 function formatDimensionValues(
   values:
-    | Date
-    | Date[]
+    | DateString
+    | DateString[]
     | TimeInterval
     | "current"
     | WmsLayerDimensionValue
@@ -33,9 +34,6 @@ function formatDimensionValues(
   }
   if (values instanceof Object && "begin" in values && "end" in values) {
     return `${formatDimensionValues(values.begin)}/${formatDimensionValues(values.end)}`;
-  }
-  if (values instanceof Date) {
-    return values.toISOString();
   }
   return values.toString();
 }
