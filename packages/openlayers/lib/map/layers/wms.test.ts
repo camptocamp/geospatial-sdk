@@ -78,12 +78,12 @@ describe("createWmsLayer", () => {
   it("sets WMS dimension params with uppercased keys and ISO Date values", async () => {
     layerModel = {
       ...MAP_CTX_LAYER_WMS_FIXTURE,
-      timeValue: new Date("2020-01-01T00:00:00.000Z"),
+      timeValue: "2020-01-01T00:00:00Z",
       elevationValue: 500,
       otherDimensionValues: {
         temperature: ["200K", "250K"],
         otherTime1: "current",
-        otherTime2: new Date("2024-01-04"),
+        otherTime2: "2024-01-04",
       },
     };
     layer = await createLayer(layerModel);
@@ -93,11 +93,11 @@ describe("createWmsLayer", () => {
       LAYERS: (layerModel as MapContextLayerWms).name,
       STYLES: (layerModel as MapContextLayerWms).style,
       TILED: true,
-      TIME: "2020-01-01T00:00:00.000Z",
+      TIME: "2020-01-01T00:00:00Z",
       ELEVATION: "500",
       DIM_TEMPERATURE: "200K,250K",
       DIM_OTHERTIME1: "current",
-      DIM_OTHERTIME2: "2024-01-04T00:00:00.000Z",
+      DIM_OTHERTIME2: "2024-01-04",
     });
   });
   it("set correct url without existing REQUEST and SERVICE params", () => {
@@ -246,8 +246,8 @@ describe("buildWmsParams", () => {
         buildWmsParams({
           ...MAP_CTX_LAYER_WMS_FIXTURE,
           timeValue: {
-            begin: new Date("2023-01-01"),
-            end: new Date("2023-01-31"),
+            begin: "2023-01-01",
+            end: "2023-01-31",
           },
           elevationValue: -10,
           otherDimensionValues: {
@@ -262,7 +262,7 @@ describe("buildWmsParams", () => {
         LAYERS: "commune_actuelle_3857",
         STYLES: "default",
         ELEVATION: "-10",
-        TIME: "2023-01-01T00:00:00.000Z/2023-01-31T00:00:00.000Z",
+        TIME: "2023-01-01/2023-01-31",
         DIM_TEMPERATURE: "123/456",
         DIM_MYDIMENSION: "abc,def",
       });
@@ -320,7 +320,7 @@ describe("updateWmsLayerParams", () => {
   it("applies changed dimension values to the source (setting removed ones to undefined)", () => {
     const prev = {
       ...baseModel,
-      timeValue: new Date("2020-01-01T00:00:00.000Z"),
+      timeValue: "2020-01-01T00:00:00.000Z",
       otherDimensionValues: {
         temperature: ["123", "456"],
       },
@@ -328,7 +328,7 @@ describe("updateWmsLayerParams", () => {
     };
     const next = {
       ...baseModel,
-      timeValue: new Date("2021-06-15T12:30:00.000Z"),
+      timeValue: "2021-06-15T12:30:00.000Z",
       elevationValue: 500,
       customParams: { Hello: "world" },
     };

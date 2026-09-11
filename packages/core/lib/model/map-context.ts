@@ -72,9 +72,14 @@ export interface MapContextBaseLayer {
   referrerPolicy?: ReferrerPolicy;
 }
 
+/**
+ * Dates are expressed as ISO8601 strings, e.g. "2023-01-01T00:00:00Z" or "2023-01-01"
+ */
+export type DateString = string;
+
 export interface TimeInterval {
-  begin: Date;
-  end: Date;
+  begin: DateString;
+  end: DateString;
 }
 export interface ValueInterval {
   begin: WmsLayerDimensionValue;
@@ -82,7 +87,9 @@ export interface ValueInterval {
 }
 export type LayerDimensionValue =
   WmsLayerDimensionValue | WmsLayerDimensionValue[] | ValueInterval;
-export type LayerTimeDimensionValue = Date | Date[] | TimeInterval | "current";
+
+export type LayerTimeDimensionValue =
+  DateString | DateString[] | TimeInterval | "current";
 
 export interface MapContextLayerWms extends MapContextBaseLayer {
   type: "wms";
@@ -151,7 +158,8 @@ export interface MapContextLayerWms extends MapContextBaseLayer {
  * @private
  * @inline
  */
-export type LayerDimensionSimpleValue = string | number | Date | "current";
+export type LayerDimensionSimpleValue =
+  string | number | DateString | "current";
 
 export interface MapContextLayerWmts extends MapContextBaseLayer {
   type: "wmts";
