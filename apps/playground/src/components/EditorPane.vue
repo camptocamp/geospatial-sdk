@@ -39,13 +39,11 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <div class="h-full min-w-0 overflow-hidden">
-    <Codemirror
-      v-model="model"
-      :extensions="extensions"
-      :style="{ height: '100%' }"
-    />
-  </div>
+  <Codemirror
+    v-model="model"
+    :extensions="extensions"
+    :style="{ height: '100%', width: '100%' }"
+  />
 </template>
 
 <style scoped></style>

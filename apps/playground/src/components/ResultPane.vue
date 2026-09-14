@@ -135,15 +135,13 @@ defineExpose({
 </script>
 
 <template>
-  <div class="h-full min-w-0">
-    <iframe
-      ref="iframeRef"
-      class="h-full"
-      title="Playground result"
-      referrerpolicy="origin"
-      sandbox="allow-scripts allow-same-origin"
-    />
-  </div>
+  <iframe
+    ref="iframeRef"
+    class="w-auto"
+    title="Playground result"
+    referrerpolicy="origin"
+    sandbox="allow-scripts allow-same-origin"
+  />
 </template>
 
 <style scoped>
