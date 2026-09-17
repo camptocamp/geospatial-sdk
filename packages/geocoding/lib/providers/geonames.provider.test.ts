@@ -44,6 +44,37 @@ const MOCK_DATA = {
   ],
 };
 
+const GEONAME_0_PROPERTIES = {
+  adminCode1: "ZH",
+  geonameId: 2657896,
+  toponymName: "Zürich",
+  countryId: "2658434",
+  fcl: "P",
+  population: 341730,
+  countryCode: "CH",
+  fclName: "city, village...",
+  adminCodes1: { ISO3166_2: "ZH" },
+  countryName: "Switzerland",
+  fcodeName: "seat of a first-order administrative division",
+  adminName1: "Zurich",
+  fcode: "PPLA",
+};
+const GEONAME_1_PROPERTIES = {
+  adminCode1: "ZH",
+  geonameId: 2657895,
+  toponymName: "Kanton Zürich",
+  countryId: "2658434",
+  fcl: "A",
+  population: 1553423,
+  countryCode: "CH",
+  fclName: "country, state, region...",
+  adminCodes1: { ISO3166_2: "ZH" },
+  countryName: "Switzerland",
+  fcodeName: "first-order administrative division",
+  adminName1: "Zurich",
+  fcode: "ADM1",
+};
+
 vi.stubGlobal(
   "fetch",
   vi.fn(
@@ -74,6 +105,7 @@ describe("queryGeonames", () => {
             type: "Point",
             coordinates: [8.55, 47.36667],
           },
+          properties: GEONAME_0_PROPERTIES,
         },
         {
           label: "Zurich",
@@ -81,6 +113,7 @@ describe("queryGeonames", () => {
             type: "Point",
             coordinates: [8.66667, 47.41667],
           },
+          properties: GEONAME_1_PROPERTIES,
         },
       ]);
     });

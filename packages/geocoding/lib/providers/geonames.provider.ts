@@ -97,12 +97,16 @@ export function queryGeonames(
           "Invalid response from Geonames API: no geonames property",
         );
       }
-      return data.geonames.map((geoname) => ({
-        label: geoname.name,
-        geom: {
-          type: "Point",
-          coordinates: [parseFloat(geoname.lng), parseFloat(geoname.lat)],
-        } as Geometry,
-      }));
+      return data.geonames.map((geoname) => {
+        const { name, lng, lat, ...properties } = geoname;
+        return {
+          label: name,
+          geom: {
+            type: "Point",
+            coordinates: [parseFloat(lng), parseFloat(lat)],
+          } as Geometry,
+          properties,
+        };
+      });
     });
 }

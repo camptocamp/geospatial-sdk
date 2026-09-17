@@ -68,11 +68,13 @@ export function queryGeoadmin(
     .then((response) => response.json())
     .then((response: GeoadminResponse) =>
       response.features.map((feature) => {
-        const label = feature.properties?.label.replace(/<[^>]*>?/gm, "");
+        const { label: rawLabel, ...properties } = feature.properties ?? {};
+        const label = rawLabel.replace(/<[^>]*>?/gm, "");
         const geom = feature.bbox ? bboxToGeometry(feature.bbox) : null;
         return {
           label,
           geom,
+          properties,
         };
       }),
     );
