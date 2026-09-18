@@ -3,4 +3,9 @@
 
 body {
     --ui-container: 100vw;
+    background: linear-gradient(200deg,#E0FFFF 20%, #DADD98 70%);
+}
+
+html.dark body {
+    background: linear-gradient(200deg, #182848 20%, #00A693 70%);
 }

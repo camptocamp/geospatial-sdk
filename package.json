@@ -45,6 +45,6 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@camptocamp/ogc-client": "2.0.1"
+    "@camptocamp/ogc-client": "2.0.2"
   }
 }
