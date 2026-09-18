@@ -1,23 +1,5 @@
-// export const DEFAULT_SNIPPET = `import { createMapFromContext } from '@geospatial-sdk/openlayers'
-//
-// const context = {
-//   view: {
-//     center: [6.6323, 46.5197], // lon/lat — Lausanne
-//     zoom: 12,
-//   },
-//   layers: [
-//     {
-//       type: 'xyz',
-//       url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-//       attributions: '© OpenStreetMap contributors',
-//     },
-//   ],
-// }
-//
-// createMapFromContext(context, 'map')
-// `;
-
-export const DEFAULT_SNIPPET = `/**
+const name = "Adding and removing layers on a map";
+const js = `/**
  * - ADDING AND REMOVING LAYERS IN A MAP -
  * 
  * This example demonstrates how layers can be easily removed from a map
@@ -95,3 +77,14 @@ document.querySelectorAll('.toggle-layer').forEach((btn, index) => {
   });
 });
 `;
+
+const html = `<div id="map"></div>
+<div style="position: absolute; bottom: 4px; left: 4px">
+  <button type="button" class="toggle-layer"></button>
+  <button type="button" class="toggle-layer"></button>
+  <button type="button" class="toggle-layer"></button>
+  <button type="button" class="toggle-layer"></button>
+</div>
+`;
+
+export const example = { name, js, html };

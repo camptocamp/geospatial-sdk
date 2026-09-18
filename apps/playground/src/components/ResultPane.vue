@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import { useToast } from "@nuxt/ui/runtime/composables/useToast.js";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import type { PlaygroundCode } from "../model.js";
 
 const toast = useToast();
 
 const iframeRef = ref<HTMLIFrameElement | null>(null);
-const code = ref<string>();
+const code = ref<PlaygroundCode | null>(null);
 
-const run = async (input: string) => {
+const run = async (input: PlaygroundCode) => {
   // we're clearing and setting the code to force the iframe to reload
-  code.value = "";
+  code.value = null;
   await nextTick();
   code.value = input;
 };
 
-const packagesRoot = new URL("./geospatial-sdk", window.location.href);
-
 const fullHtml = computed(() => {
+  if (!code.value) {
+    return "";
+  }
   return `<html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -32,28 +34,9 @@ const fullHtml = computed(() => {
     </style>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/ol@10.10.0/ol.css" />
     <script type="importmap">
-{
-  "imports": {
-    "ol/": "https://unpkg.com/ol@10.10.0/",
-    "maplibre-gl": "https://unpkg.com/maplibre-gl@^5.19.0/dist/maplibre-gl.js",
-    "earcut": "https://unpkg.com/earcut@^3.0.0",
-    "geotiff": "https://unpkg.com/geotiff@^3.1.0-beta.0",
-    "pbf": "https://unpkg.com/pbf@5.1.2",
-    "rbush": "https://unpkg.com/rbush@^4.0.0/index.js",
-    "quickselect": "https://unpkg.com/quickselect@^3.0.0/index.js",
-    "zarrita": "https://unpkg.com/zarrita@^0.7.1",
-    "@geospatial-sdk/core": "${packagesRoot}/core.js",
-    "@geospatial-sdk/legend": "${packagesRoot}/legend.js",
-    "@geospatial-sdk/openlayers": "${packagesRoot}/openlayers.js",
-    "@geospatial-sdk/maplibre": "${packagesRoot}/maplibre.js",
-    "@geospatial-sdk/geocoding": "${packagesRoot}/geocoding.js",
-    "@geospatial-sdk/style": "${packagesRoot}/style.js",
-    "@geospatial-sdk/elements": "${packagesRoot}/elements.js"
-  }
-}
+${code.value.importMap}
     <\/script>
     <script>
-
 // override console calls
 const originalLog = console.log;
 console.log = (...args) => {
@@ -70,20 +53,28 @@ console.error = (...args) => {
   parent.postMessage({ type: 'console.error', args }, '${window.location.href}');
   originalError(...args);
 };
+window.addEventListener('error', (event) => {
+  parent.postMessage({ type: 'console.error', args: [event.message] }, '${window.location.href}');
+});
+window.addEventListener('unhandledrejection', (event) => {
+  parent.postMessage({ type: 'console.error', args: [event.reason?.message ?? event.reason] }, '${window.location.href}');
+});
+
+// trying to import this module to make sure we managed to load the library fully
+import('ol/Map.js')
+.then(() => {
+    // do nothing: it worked
+})
+.catch((error) => {
+  parent.postMessage({ type: 'console.error', args: ['Failed to load OpenLayers, the following error happened', error.message] }, '${window.location.href}');
+})
   <\/script>
   </head>
   <body>
-    <div id="map"></div>
     <script type="module">
-${code.value}
+${code.value.js}
     <\/script>
-
-    <div style="position: absolute; bottom: 4px; left: 4px">
-      <button type="button" class="toggle-layer"></button>
-      <button type="button" class="toggle-layer"></button>
-      <button type="button" class="toggle-layer"></button>
-      <button type="button" class="toggle-layer"></button>
-    </div>
+${code.value.html ?? ""}
 </body>
 </html>`;
 });
@@ -114,6 +105,7 @@ onMounted(() => {
         description: args.join(" "),
         icon: "i-lucide-siren",
         color: "error",
+        duration: 10000,
       });
     }
   });
