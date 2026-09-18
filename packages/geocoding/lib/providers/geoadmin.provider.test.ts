@@ -57,6 +57,36 @@ const RESULTS_FIXTURE: GeoadminResponse = {
   ],
 };
 
+const FEATURE_0_PROPERTIES = {
+  origin: "gazetteer",
+  geom_quadindex: "021300220330313020221",
+  weight: 1,
+  zoomlevel: 10,
+  lon: 7.459799289703369,
+  detail: "wabern koeniz",
+  rank: 5,
+  lat: 46.925777435302734,
+  num: 1,
+  y: 601612.0625,
+  x: 197186.8125,
+  id: 215754,
+};
+const FEATURE_1_PROPERTIES = {
+  origin: "gg25",
+  geom_quadindex: "030003",
+  weight: 6,
+  zoomlevel: 4294967295,
+  lon: 8.527311325073242,
+  detail: "zurigo zh",
+  rank: 2,
+  lat: 47.37721252441406,
+  num: 1,
+  x: 8.527311325073242,
+  y: 47.37721252441406,
+  id: 153,
+  featureId: "261",
+};
+
 globalThis.fetch = vi.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve(RESULTS_FIXTURE),
@@ -90,6 +120,7 @@ describe("queryGeoadmin", () => {
             type: "Polygon",
           },
           label: "Populated Place Wabern (BE) - Köniz",
+          properties: FEATURE_0_PROPERTIES,
         },
         {
           geom: {
@@ -105,6 +136,7 @@ describe("queryGeoadmin", () => {
             type: "Polygon",
           },
           label: "Zurigo (ZH)",
+          properties: FEATURE_1_PROPERTIES,
         },
       ]);
     });
