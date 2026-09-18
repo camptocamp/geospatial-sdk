@@ -52,10 +52,19 @@ document.getElementById('search-input').addEventListener('input', (event) => {
   queryResults().then(updateResults)
 });
 
-document.querySelectorAll('.provider-btn').forEach((button) => {
+const buttons = document.querySelectorAll('.provider-btn')
+buttons.forEach((button) => {
   button.addEventListener('click', (event) => {
     provider = event.target.dataset.provider;
     queryResults().then(updateResults);
+    
+    // update button text
+    buttons.forEach((b) => {
+      b.textContent = b.textContent.replace('✅ ', '');
+      if (b === event.target) {
+        b.textContent = '✅ ' + b.textContent
+      }
+    });
   });
 });
 `;
@@ -65,7 +74,7 @@ const html = `<div style="padding: 12px">
   </p>
   <div style="display: flex; flex-direction: row; gap: 10px; margin-bottom: 12px;">
     <input type="text" placeholder="Type something here!" id="search-input" />
-    <button type="button" class="provider-btn" data-provider="geonames">Geonames</button>
+    <button type="button" class="provider-btn" data-provider="geonames">✅ Geonames</button>
     <button type="button" class="provider-btn" data-provider="geoadmin">Geoadmin (CH)</button>
     <button type="button" class="provider-btn" data-provider="geoplateforme">Géoplateforme (FR)</button>
   </div>
