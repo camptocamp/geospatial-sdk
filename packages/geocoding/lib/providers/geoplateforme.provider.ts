@@ -53,6 +53,8 @@ interface GeoplateformeResponse {
   query: string;
 }
 
+type OneOrMany<T> = T | T[];
+
 const baseUrl = "https://data.geopf.fr/geocodage/search";
 
 function parseFeature(feature: GeoplateformeResponseItem): GeocodingResult {
@@ -82,23 +84,23 @@ function parseFeature(feature: GeoplateformeResponseItem): GeocodingResult {
 
 /**
  * Reference documentation: https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/geocodage/
- * @property {("poi" | "address" | "parcel")[]} [index] Indexes to search; the service defaults to "address" when omitted
- * @property {string[]} [postCode] Filter by postal code(s); applies to the poi/address indexes
- * @property {string[]} [cityCode] Filter by INSEE city code(s); applies to the poi/address indexes
- * @property {string[]} [depCode] Filter by department code(s); applies to the poi/address indexes
+ * @property {OneOrMany<"poi" | "address" | "parcel">} [index] Indexes to search; the service defaults to "address" when omitted
+ * @property {OneOrMany<string>} [postCode] Filter by postal code(s); applies to the poi/address indexes
+ * @property {OneOrMany<string>} [cityCode] Filter by INSEE city code(s); applies to the poi/address indexes
+ * @property {OneOrMany<string>} [depCode] Filter by department code(s); applies to the poi/address indexes
  * @property {number} [limit] Maximum number of results
- * @property {string[]} [category] Poi category filter (up to 10 values); applies to the poi index only; searches all categories when omitted; see https://data.geopf.fr/geocodage/getCapabilities for the full list of values
- * @property {("housenumber" | "street" | "locality" | "municipality")[]} [type] Address result type filter; applies to the address index only
+ * @property {OneOrMany<string>} [category] Poi category filter (up to 10 values); applies to the poi index only; searches all categories when omitted; see https://data.geopf.fr/geocodage/getCapabilities for the full list of values
+ * @property {OneOrMany<"housenumber" | "street" | "locality" | "municipality">} [type] Address result type filter; applies to the address index only
  * @property {boolean} [returnTrueGeometry=false] Include the true feature geometry in `properties.truegeometry`; `geom` always stays the service's own (simplified) geometry. Has no effect on the address index (no true geometry available)
  */
 export interface GeoplateformeOptions {
-  index?: ("poi" | "address" | "parcel")[];
-  postCode?: string[];
-  cityCode?: string[];
-  depCode?: string[];
+  index?: OneOrMany<"poi" | "address" | "parcel">;
+  postCode?: OneOrMany<string>;
+  cityCode?: OneOrMany<string>;
+  depCode?: OneOrMany<string>;
   limit?: number;
-  category?: string[];
-  type?: ("housenumber" | "street" | "locality" | "municipality")[];
+  category?: OneOrMany<string>;
+  type?: OneOrMany<"housenumber" | "street" | "locality" | "municipality">;
   returnTrueGeometry?: boolean;
 }
 
@@ -112,28 +114,28 @@ export function queryGeoplateforme(
   url.searchParams.set("q", input);
   url.searchParams.set("autocomplete", "1");
   if (finalOptions.index) {
-    url.searchParams.set("index", finalOptions.index.join(","));
+    url.searchParams.set("index", finalOptions.index.toString());
   }
   if (finalOptions.returnTrueGeometry) {
     url.searchParams.set("returntruegeometry", "true");
   }
   if (finalOptions.category) {
-    url.searchParams.set("category", finalOptions.category.join(","));
+    url.searchParams.set("category", finalOptions.category.toString());
   }
   if (finalOptions.type) {
-    url.searchParams.set("type", finalOptions.type.join(","));
+    url.searchParams.set("type", finalOptions.type.toString());
   }
   if (finalOptions.limit) {
     url.searchParams.set("limit", finalOptions.limit.toString());
   }
   if (finalOptions.postCode) {
-    url.searchParams.set("postcode", finalOptions.postCode.join(","));
+    url.searchParams.set("postcode", finalOptions.postCode.toString());
   }
   if (finalOptions.cityCode) {
-    url.searchParams.set("citycode", finalOptions.cityCode.join(","));
+    url.searchParams.set("citycode", finalOptions.cityCode.toString());
   }
   if (finalOptions.depCode) {
-    url.searchParams.set("depcode", finalOptions.depCode.join(","));
+    url.searchParams.set("depcode", finalOptions.depCode.toString());
   }
   return fetch(url.toString())
     .then((response) => response.json())

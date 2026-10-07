@@ -1,6 +1,8 @@
 import { GeocodingResult } from "../model/index.js";
 import { BBox, FeatureCollection, Geometry } from "geojson";
 
+type OneOrMany<T> = T | T[];
+
 // from https://github.com/geoblocks/ga-search
 const baseUrl = "https://api3.geo.admin.ch/rest/services/api/SearchServer";
 
@@ -18,7 +20,7 @@ export type GeoadminResponse = FeatureCollection;
 export interface GeoadminOptions {
   type?: "locations" | "featuresearch" | "layers";
   sr?: "21781" | "2056" | "4326" | "3857";
-  origins?: Array<
+  origins?: OneOrMany<
     | "zipcode"
     | "gg25"
     | "district"
@@ -29,7 +31,7 @@ export interface GeoadminOptions {
   >;
   limit?: number;
   lang?: "de" | "fr" | "it" | "rm" | "en";
-  features?: string[];
+  features?: OneOrMany<string>;
 }
 
 export function queryGeoadmin(
@@ -57,10 +59,10 @@ export function queryGeoadmin(
 
   switch (finalOptions.type!) {
     case "locations":
-      url.searchParams.set("origins", finalOptions.origins!.join(","));
+      url.searchParams.set("origins", finalOptions.origins!.toString());
       break;
     case "featuresearch":
-      url.searchParams.set("features", finalOptions.features!.join(","));
+      url.searchParams.set("features", finalOptions.features!.toString());
       break;
   }
 

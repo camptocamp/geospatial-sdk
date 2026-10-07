@@ -167,6 +167,16 @@ describe("queryGeoadmin", () => {
       );
     });
   });
+  describe("locations search with a single origin", () => {
+    beforeEach(async () => {
+      results = await queryGeoadmin("hello world", { origins: "district" });
+    });
+    it("accepts a single value in place of an array", () => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "https://api3.geo.admin.ch/rest/services/api/SearchServer?geometryFormat=geojson&type=locations&searchText=hello+world&lang=en&sr=4326&origins=district",
+      );
+    });
+  });
   describe("feature search", () => {
     beforeEach(async () => {
       results = await queryGeoadmin("hello world", {

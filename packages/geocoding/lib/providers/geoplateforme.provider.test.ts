@@ -241,4 +241,23 @@ describe("queryGeoplateforme", () => {
       "https://data.geopf.fr/geocodage/search?q=beaufort&autocomplete=1&index=poi%2Caddress&returntruegeometry=true&category=hydrographie%2Ctransport&type=housenumber%2Cstreet&limit=5&postcode=73270%2C73000&citycode=73034&depcode=73%2C74",
     );
   });
+
+  it("accepts single values in place of arrays", async () => {
+    mockFetch({
+      type: "FeatureCollection",
+      query: "beaufort",
+      features: [poiFeature()],
+    });
+    await queryGeoplateforme("beaufort", {
+      index: "poi",
+      category: "administratif",
+      type: "street",
+      postCode: "73270",
+      cityCode: "73034",
+      depCode: "73",
+    });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://data.geopf.fr/geocodage/search?q=beaufort&autocomplete=1&index=poi&category=administratif&type=street&postcode=73270&citycode=73034&depcode=73",
+    );
+  });
 });
