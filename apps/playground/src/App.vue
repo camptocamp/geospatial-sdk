@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, toRaw } from "vue";
 import EditorPane from "./components/EditorPane.vue";
 import ResultPane from "./components/ResultPane.vue";
 import App from "@nuxt/ui/components/App.vue";
@@ -13,11 +13,9 @@ import SelectMenu, {
 } from "@nuxt/ui/components/SelectMenu.vue";
 import Main from "@nuxt/ui/components/Main.vue";
 import Splitter, { type SplitterItem } from "@nuxt/ui/components/Splitter.vue";
-import { format } from "prettier";
-import * as prettierPluginBabel from "prettier/parser-babel";
-import * as prettierPluginJs from "prettier/plugins/estree";
-import { DEFAULT_IMPORT_MAP, EXAMPLES } from "./examples/index.js";
+import { EXAMPLES } from "./examples/index.js";
 import type { PlaygroundCode } from "./model.js";
+import { usePlaygroundCode } from "./composables/usePlaygroundCode.js";
 
 const navigationItems: NavigationMenuItem[] = [
   {
@@ -47,22 +45,18 @@ const splitterItems: SplitterItem[] = [
   },
 ];
 
-async function formatCodeCompact() {
-  return await format(currentCode.value.js, {
-    parser: "babel",
-    plugins: [prettierPluginBabel, prettierPluginJs],
-    tabWidth: 0,
-    bracketSpacing: false,
-    semi: false,
-    objectWrap: "collapse",
-    printWidth: 300,
-  });
-}
+const {
+  editorCode,
+  currentExample,
+  runCode,
+  updateCode,
+  loadExample,
+  run,
+  getShareUrl,
+} = usePlaygroundCode();
 
 async function share() {
-  const url = new URL(window.location.href);
-  url.hash = btoa(await formatCodeCompact());
-  console.log(url.toString());
+  console.log(await getShareUrl());
 }
 
 type ExampleItem = SelectMenuItem & { value: PlaygroundCode };
@@ -71,31 +65,17 @@ const examplesList: ExampleItem[] = EXAMPLES.map((example) => ({
   label: example.name,
   value: example,
 }));
-const currentExample = ref<ExampleItem | undefined>(undefined);
-const currentCode = ref<PlaygroundCode>({
-  importMap: DEFAULT_IMPORT_MAP,
-  ...EXAMPLES[0],
-});
+const currentExampleItem = computed(() =>
+  examplesList.find((item) => item.value === toRaw(currentExample.value)),
+);
 
 function selectExample(item: ExampleItem) {
   if (!item) return;
-  currentExample.value = item;
-  currentCode.value = { importMap: DEFAULT_IMPORT_MAP, ...item.value };
-  run();
-}
-function updateCode(newCode: PlaygroundCode) {
-  currentExample.value = undefined;
-  currentCode.value = { importMap: DEFAULT_IMPORT_MAP, ...newCode };
-}
-
-const resultPane = ref<InstanceType<typeof ResultPane> | null>(null);
-
-function run() {
-  resultPane.value?.run({ ...currentCode.value });
+  loadExample(item.value);
 }
 
 onMounted(() => {
-  selectExample(examplesList[0]);
+  loadExample(EXAMPLES[0]);
 });
 </script>
 
@@ -122,7 +102,7 @@ onMounted(() => {
             :items="examplesList"
             class="w-[270px] shrink"
             placeholder="Select a predefined example below"
-            :modelValue="currentExample"
+            :modelValue="currentExampleItem"
             @update:modelValue="selectExample($event)"
           />
           <Button @click="run" icon="i-codicon-run-compact" color="primary">
@@ -145,7 +125,7 @@ onMounted(() => {
             :items="examplesList"
             class="min-w-40 grow"
             placeholder="Select a predefined example below"
-            :modelValue="currentExample"
+            :modelValue="currentExampleItem"
             @update:modelValue="selectExample($event)"
           />
           <Button @click="run" icon="i-codicon-run-compact" color="primary">
@@ -170,11 +150,11 @@ onMounted(() => {
       <Splitter :items="splitterItems">
         <template #left
           ><EditorPane
-            :modelValue="currentCode"
+            :modelValue="editorCode"
             @update:modelValue="updateCode($event)"
             @run="run"
         /></template>
-        <template #right><ResultPane ref="resultPane" /></template>
+        <template #right><ResultPane :code="runCode" /></template>
       </Splitter>
     </Main>
   </App>

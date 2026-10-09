@@ -9,9 +9,9 @@ All commands run from the repo root unless noted.
 ```shell
 npm run test          # vitest across all packages (vitest.config.ts uses projects: packages/*)
 npm run build         # lerna run build — compiles each package with tsc to dist/
-npm run lint          # eslint **/*.{js,ts,vue}
+npm run lint          # eslint .
 npm run typecheck     # tsc --noEmit
-npm run format:check  # prettier check; format:write to fix
+npm run format:check  # prettier check (js/ts/md/json/vue); format:write to fix
 npm run docs:dev      # run the VitePress docs site locally
 ```
 
@@ -23,11 +23,16 @@ npx vitest -t "name of test"          # by test name
 npx vitest --project core             # one package's project
 ```
 
-Interactive examples (Vue app): `cd apps/examples && npm run dev`.
+CI (`.github/workflows/qa.yml`) runs `format:check`, `typecheck`, `lint` and `test` — run all four before considering a change done.
+
+Apps under `apps/` are **not** npm workspaces; each has its own `package.json`/lockfile and needs its own `npm install`:
+
+- `apps/examples` (Vue): `cd apps/examples && npm run dev`. Imports `@geospatial-sdk/*` through the root `node_modules` symlinks, whose `main` points at `dist/` — run `npm run build` at the root first, and rebuild after changing package code.
+- `apps/playground` (Vue + CodeMirror): `cd apps/playground && npm run dev`. Its Vite config bundles every package straight from `packages/*/lib/index.ts` into `public/geospatial-sdk/<pkg>.js` (rebuilt on change), and user code runs in an iframe whose import map points `@geospatial-sdk/*` at those bundles and third-party deps at unpkg. Built-in examples live in `src/examples/` (each a `PlaygroundCode`: `js`, optional `html`, `importMap`) and are registered in `src/examples/index.ts`; the default import map is there too — add a new third-party dep of a package to it.
 
 ## Architecture
 
-Lerna/npm-workspaces monorepo. The published packages live in `packages/*`; `apps/examples` (Vue) and `docs` (VitePress + TypeDoc) are workspaces but not published. Each package builds independently via `tsc` and exposes its public API from `lib/index.ts`.
+Lerna/npm-workspaces monorepo. The published packages live in `packages/*` (lockstep version in `lerna.json`); the npm workspaces are `packages/*` and `docs` (VitePress + TypeDoc). `apps/examples` and `apps/playground` are standalone apps, deployed with the docs to GitHub Pages (`gh-pages.yml`). Each package builds independently via `tsc` and exposes its public API from `lib/index.ts`.
 
 ### Map Context: the central abstraction
 

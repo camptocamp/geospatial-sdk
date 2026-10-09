@@ -6,24 +6,15 @@ import { json } from "@codemirror/lang-json";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { keymap } from "@codemirror/view";
 import { Prec } from "@codemirror/state";
-import { format } from "prettier";
-import * as prettierPluginJs from "prettier/plugins/estree";
-import * as prettierPluginBabel from "prettier/plugins/babel";
-import { onBeforeMount, ref } from "vue";
+import { ref } from "vue";
 import type { PlaygroundCode } from "../model.js";
 import Tabs, { type TabsItem } from "@nuxt/ui/components/Tabs.vue";
 
 const model = defineModel<PlaygroundCode>({ required: true });
 const emit = defineEmits<{ run: [] }>();
 
-async function formatCode() {
-  model.value = {
-    ...model.value,
-    js: await format(model.value.js, {
-      parser: "babel",
-      plugins: [prettierPluginBabel, prettierPluginJs],
-    }),
-  };
+function updateField(field: keyof PlaygroundCode, value: string) {
+  model.value = { ...model.value, [field]: value };
 }
 
 const runKeymap = Prec.high(
@@ -31,7 +22,7 @@ const runKeymap = Prec.high(
     {
       key: "Mod-Enter",
       run: () => {
-        formatCode().then(() => emit("run"));
+        emit("run");
         return true;
       },
     },
@@ -57,10 +48,6 @@ const tabItems = ref<TabsItem[]>([
   },
 ]);
 const activatedTab = ref("js");
-
-onBeforeMount(() => {
-  formatCode();
-});
 </script>
 
 <template>
@@ -75,19 +62,22 @@ onBeforeMount(() => {
     />
     <Codemirror
       v-if="activatedTab === 'js'"
-      v-model="model.js"
+      :modelValue="model.js"
+      @update:modelValue="updateField('js', $event)"
       :extensions="jsExtensions"
       :style="{ flexGrow: 1, flexShrink: 1, height: '400px' }"
     />
     <Codemirror
       v-if="activatedTab === 'html'"
-      v-model="model.html"
+      :modelValue="model.html"
+      @update:modelValue="updateField('html', $event)"
       :extensions="htmlExtensions"
       :style="{ flexGrow: 1, flexShrink: 1, height: '400px' }"
     />
     <Codemirror
       v-if="activatedTab === 'importMap'"
-      v-model="model.importMap"
+      :modelValue="model.importMap"
+      @update:modelValue="updateField('importMap', $event)"
       :extensions="jsonExtensions"
       :style="{ flexGrow: 1, flexShrink: 1, height: '400px' }"
     />
