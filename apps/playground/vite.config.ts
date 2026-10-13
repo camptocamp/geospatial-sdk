@@ -30,7 +30,7 @@ async function buildSdkBundles() {
     await build({
       configFile: false,
       root: projectRoot,
-      logLevel: "silent",
+      logLevel: "info",
       build: {
         emptyOutDir: false,
         outDir: sdkBundleDir,
@@ -51,10 +51,46 @@ async function buildSdkBundles() {
           output: {
             codeSplitting: false, // we want all dynamic imports to be inlined into the bundle
           },
+          transform: {
+            decorator: {
+              legacy: true,
+            },
+          },
+          external: [/^ol\//, /^maplibre-gl/],
         },
       },
     });
   }
+}
+
+async function buildGeotiffBundle() {
+  await build({
+    configFile: false,
+    root: projectRoot,
+    logLevel: "info",
+    build: {
+      emptyOutDir: false,
+      outDir: resolve(__dirname, "public"),
+      sourcemap: true,
+      minify: false,
+      lib: {
+        entry: resolve(
+          projectRoot,
+          "node_modules",
+          "geotiff",
+          "dist-module",
+          "geotiff.js",
+        ),
+        formats: ["es"],
+        fileName: () => "geotiff.esm.js",
+      },
+      rolldownOptions: {
+        output: {
+          codeSplitting: false,
+        },
+      },
+    },
+  });
 }
 
 export default defineConfig({
@@ -73,13 +109,15 @@ export default defineConfig({
     }),
     tailwindcss(),
     {
-      name: "geospatial-sdk-bundles",
+      name: "library-bundles",
       async buildStart() {
         await buildSdkBundles();
+        await buildGeotiffBundle();
       },
       configureServer(server) {
         server.watcher.add(resolve(projectRoot, "packages"));
         server.watcher.on("all", (_event, file) => {
+          // this will recompute this file if the geospatial-sdk packages are modified while the dev app is running
           if (
             file.startsWith(projectRoot) &&
             file.includes("/packages/") &&
