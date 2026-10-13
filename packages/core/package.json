@@ -22,6 +22,10 @@
     "lib",
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camptocamp/geospatial-sdk.git"
+  },
   "scripts": {
     "test": "vitest",
     "build": "tsc"
