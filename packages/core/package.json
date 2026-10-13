@@ -2,8 +2,12 @@
   "name": "@geospatial-sdk/core",
   "version": "0.0.5-alpha.2",
   "description": "Core functions and models for the SDK",
+  "keywords": [
+    "geospatial",
+    "sdk"
+  ],
   "author": "Olivia <olivia.guyot@camptocamp.com>",
-  "homepage": "",
+  "homepage": "https://github.com/camptocamp/geospatial-sdk#readme",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -22,7 +26,6 @@
     "test": "vitest",
     "build": "tsc"
   },
-  "gitHead": "99dbb945a303b96e576a02a02bc0590785456bd3",
   "dependencies": {
     "proj4": "^2.9.2"
   },
@@ -31,5 +34,6 @@
   },
   "peerDependencies": {
     "ol": ">9.x"
-  }
+  },
+  "gitHead": "99dbb945a303b96e576a02a02bc0590785456bd3"
 }

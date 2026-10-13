@@ -5,10 +5,12 @@
   "keywords": [
     "ol",
     "openlayers",
-    "map"
+    "map",
+    "geospatial",
+    "sdk"
   ],
   "author": "Olivia <olivia.guyot@camptocamp.com>",
-  "homepage": "",
+  "homepage": "https://github.com/camptocamp/geospatial-sdk#readme",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -23,9 +25,18 @@
     "lib",
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camptocamp/geospatial-sdk.git"
+  },
   "scripts": {
     "test": "vitest",
     "build": "tsc"
+  },
+  "dependencies": {
+    "@geospatial-sdk/core": "^0.0.5-alpha.2",
+    "lodash.throttle": "^4.1.1",
+    "ol-mapbox-style": "12.4.0"
   },
   "devDependencies": {
     "@types/chroma-js": "^2.4.3",
@@ -36,10 +47,8 @@
   "peerDependencies": {
     "ol": ">9.x"
   },
-  "dependencies": {
-    "@geospatial-sdk/core": "^0.0.5-alpha.2",
-    "lodash.throttle": "^4.1.1",
-    "ol-mapbox-style": "12.4.0"
+  "bugs": {
+    "url": "https://github.com/camptocamp/geospatial-sdk/issues"
   },
   "gitHead": "99dbb945a303b96e576a02a02bc0590785456bd3"
 }
