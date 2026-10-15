@@ -49,6 +49,7 @@ jobs:
 
       - name: Add root redirect to /docs
         run: |
+          mkdir -p pages
           cat > pages/index.html <<'EOF'
           <html lang="en">
             <head>
