@@ -12,8 +12,8 @@ export default defineConfig({
       { text: "Guides", link: "/guides/introduction" },
       { text: "API Reference", link: "/api/" },
       {
-        text: "Examples",
-        link: "https://camptocamp.github.io/geospatial-sdk/",
+        text: "Playground & Examples",
+        link: "https://camptocamp.github.io/geospatial-sdk/playground/",
       },
     ],
 

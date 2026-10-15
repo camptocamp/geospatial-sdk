@@ -1,24 +1,15 @@
 <script setup lang="ts">
 import { useToast } from "@nuxt/ui/runtime/composables/useToast.js";
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import type { PlaygroundCode } from "../model.js";
+
+const props = defineProps<{ code: PlaygroundCode | null }>();
 
 const toast = useToast();
 
 const iframeRef = ref<HTMLIFrameElement | null>(null);
-const code = ref<PlaygroundCode | null>(null);
 
-const run = async (input: PlaygroundCode) => {
-  // we're clearing and setting the code to force the iframe to reload
-  code.value = null;
-  await nextTick();
-  code.value = input;
-};
-
-const fullHtml = computed(() => {
-  if (!code.value) {
-    return "";
-  }
+function buildHtml(code: PlaygroundCode) {
   return `<html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -34,7 +25,7 @@ const fullHtml = computed(() => {
     </style>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/ol@10.10.0/ol.css" />
     <script type="importmap">
-${code.value.importMap}
+${code.importMap}
     <\/script>
     <script>
 // override console calls
@@ -72,48 +63,52 @@ import('ol/Map.js')
   </head>
   <body>
     <script type="module">
-${code.value.js}
+${code.js}
     <\/script>
-${code.value.html ?? ""}
+${code.html ?? ""}
 </body>
 </html>`;
-});
+}
+
+function onMessage({ data }: MessageEvent) {
+  if (!data.type?.startsWith("console.")) return;
+
+  // catch console logs from the iframe and show them as toasts
+  const args = data.args;
+  if (data.type === "console.log") {
+    toast.add({
+      description: args.join(" "),
+      icon: "i-lucide-message-circle",
+      color: "info",
+    });
+  } else if (data.type === "console.warn") {
+    toast.add({
+      description: args.join(" "),
+      icon: "i-lucide-message-circle-warning",
+      color: "warning",
+    });
+  } else if (data.type === "console.error") {
+    toast.add({
+      description: args.join(" "),
+      icon: "i-lucide-siren",
+      color: "error",
+      duration: 10000,
+    });
+  }
+}
 
 onMounted(() => {
   const iframe = iframeRef.value;
   if (!iframe) return;
 
-  window.addEventListener("message", ({ data }) => {
-    if (!data.type?.startsWith("console.")) return;
+  window.addEventListener("message", onMessage);
 
-    // catch console logs from the iframe and show them as toasts
-    const args = data.args;
-    if (data.type === "console.log") {
-      toast.add({
-        description: args.join(" "),
-        icon: "i-lucide-message-circle",
-        color: "info",
-      });
-    } else if (data.type === "console.warn") {
-      toast.add({
-        description: args.join(" "),
-        icon: "i-lucide-message-circle-warning",
-        color: "warning",
-      });
-    } else if (data.type === "console.error") {
-      toast.add({
-        description: args.join(" "),
-        icon: "i-lucide-siren",
-        color: "error",
-        duration: 10000,
-      });
-    }
-  });
-
+  // a new code object is received on each run: setting srcdoc reloads the iframe
+  // even if the html is identical
   watch(
-    fullHtml,
-    (newHtml) => {
-      iframe.srcdoc = newHtml;
+    () => props.code,
+    (code) => {
+      iframe.srcdoc = code ? buildHtml(code) : "";
     },
     {
       immediate: true,
@@ -121,8 +116,8 @@ onMounted(() => {
   );
 });
 
-defineExpose({
-  run,
+onUnmounted(() => {
+  window.removeEventListener("message", onMessage);
 });
 </script>
 

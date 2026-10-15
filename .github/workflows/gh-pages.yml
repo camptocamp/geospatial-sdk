@@ -40,12 +40,28 @@ jobs:
       - name: Install project dependencies
         run: npm ci
 
-      - name: Build examples app
+#      - name: Build examples app
+#        run: |
+#          npm ci
+#          npm run build -- --base=/geospatial-sdk/ && \
+#          mv dist ../../pages
+#        working-directory: apps/examples
+
+      - name: Add root redirect to /docs
         run: |
-          npm ci
-          npm run build -- --base=/geospatial-sdk/ && \
-          mv dist ../../pages
-        working-directory: apps/examples
+          cat > pages/index.html <<'EOF'
+          <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <title>Redirecting…</title>
+              <meta http-equiv="refresh" content="0; url=/geospatial-sdk/docs/" />
+              <link rel="canonical" href="/geospatial-sdk/docs/" />
+            </head>
+            <body>
+              <p>Redirecting to <a href="/geospatial-sdk/docs/">the documentation</a>…</p>
+            </body>
+          </html>
+          EOF
 
       - name: Build playground app
         run: |

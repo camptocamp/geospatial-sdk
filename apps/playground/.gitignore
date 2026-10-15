@@ -25,3 +25,4 @@ dist-ssr
 
 # bundles
 public/geospatial-sdk
+public/geotiff.*
