@@ -43,7 +43,7 @@ export interface ResolvedMapViewState {
   /** View center in longitude/latitude */
   center: Coordinate;
 
-  /** Actual view extent in longitude/latitude */
+  /** Actual view extent in the current view projection */
   extent: Extent;
 
   /** Map units per pixel */

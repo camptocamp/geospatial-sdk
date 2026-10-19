@@ -81,6 +81,29 @@ describe("view", () => {
       });
     });
 
+    it("should preserve the CRS when only a projected WMS bounding box is available", async () => {
+      const layer = {
+        type: "wms",
+        name: "mock_2154",
+        url: "http://mock/wms",
+      } as MapContextLayerWms;
+      const view = await createViewFromLayer(layer);
+
+      expect(view).toEqual({
+        extent: [650796.4, 7060330.6, 690891.3, 7090402.2, "EPSG:2154"],
+      });
+    });
+
+    it("should return null when the WMS layer has no bounding boxes", async () => {
+      const layer = {
+        type: "wms",
+        name: "mock_nobbox",
+        url: "http://mock/wms",
+      } as MapContextLayerWms;
+
+      await expect(createViewFromLayer(layer)).resolves.toBeNull();
+    });
+
     it("should return view for WMTS layer", async () => {
       const layer = {
         type: "wmts",

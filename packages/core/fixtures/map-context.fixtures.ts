@@ -126,7 +126,7 @@ export const SAMPLE_LAYER2: MapContextLayerXyz = deepFreeze({
 });
 export const SAMPLE_LAYER3: MapContextLayerGeojson = deepFreeze({
   type: "geojson",
-  data: '{ "type": "Feature", "properties": {}}',
+  data: '{ "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [2, 48] }}',
   extras: { myField3: "000" },
   style: [
     {
