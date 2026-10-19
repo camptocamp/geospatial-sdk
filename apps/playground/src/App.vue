@@ -100,10 +100,11 @@ onMounted(() => {
         <div class="flex flex-row gap-3 w-[30vw] justify-center">
           <SelectMenu
             :items="examplesList"
-            class="w-[270px] shrink"
+            class="w-[300px] shrink-0"
             placeholder="Select a predefined example below"
             :modelValue="currentExampleItem"
             @update:modelValue="selectExample($event)"
+            :ui="{ content: 'min-w-fit' }"
           />
           <Button @click="run" icon="i-codicon-run-compact" color="primary">
             Run <small>(Ctrl/Cmd+Enter)</small>
@@ -116,17 +117,18 @@ onMounted(() => {
           >
             Share
           </Button>
-          <div class="w-[170px] shrink-0" aria-hidden="true"></div>
+          <div class="w-[220px] shrink-0" aria-hidden="true"></div>
         </div>
       </template>
       <template #body>
         <div class="flex flex-col gap-4 items-start">
           <SelectMenu
             :items="examplesList"
-            class="min-w-40 grow"
+            class="min-w-[270px] grow"
             placeholder="Select a predefined example below"
             :modelValue="currentExampleItem"
             @update:modelValue="selectExample($event)"
+            :ui="{ content: 'min-w-fit' }"
           />
           <Button @click="run" icon="i-codicon-run-compact" color="primary">
             Run <small>(Ctrl/Cmd+Enter)</small>
