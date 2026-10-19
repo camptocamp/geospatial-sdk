@@ -1,10 +1,5 @@
-import { transformExtent } from "ol/proj.js";
 import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 import { LONLAT_CRS_CODES } from "../constant/projections.js";
-import { fromEPSGCode } from "ol/proj/proj4.js";
-import GeoJSON from "ol/format/GeoJSON.js";
-import { extend } from "ol/extent.js";
-import type Feature from "ol/Feature.js";
 import GeoTIFF from "ol/source/GeoTIFF.js";
 import {
   Extent,
@@ -16,13 +11,12 @@ import {
   MapContextView,
   ViewByExtent,
 } from "../model/index.js";
-import { FeatureCollection, Geometry } from "geojson";
-
-const GEOJSON = new GeoJSON();
+import { ensureGeojson, getExtentFromGeojson } from "./geojson.js";
+import { setCrs, transform } from "./coordinates.js";
 
 /**
- * Creates a view from a layer by extracting its geographic extent. The returned extent is
- * always expressed in EPSG:4326 (longitude/latitude) coordinates.
+ * Creates a view from a layer by extracting its extent. The returned extent is preferably
+ * returned in EPSG:4326; if not available, it will be returned in a CRS available for this layer
  *
  * @param layer - The map context layer to extract the extent from
  * @returns A Promise resolving to a `ViewByExtent` object, or `null` if the extent cannot be determined
@@ -50,7 +44,9 @@ export async function createViewFromLayer(
   } else if (layer.type === "wmts") {
     return await getWmtsLayerExtent(layer);
   } else if (layer.type === "geojson" && layer.data) {
-    return computeExtentFromGeojson(layer.data);
+    return {
+      extent: getExtentFromGeojson(ensureGeojson(layer.data)),
+    };
   } else if (layer.type === "wfs") {
     return await getWfsLayerExtent(layer);
   } else if (layer.type === "geotiff") {
@@ -58,24 +54,6 @@ export async function createViewFromLayer(
   } else {
     throw new Error(`Unsupported layer type: ${layer.type}`);
   }
-}
-
-function computeExtentFromGeojson(
-  data: FeatureCollection<Geometry | null> | string,
-): ViewByExtent {
-  const geojson = typeof data === "string" ? JSON.parse(data) : data;
-  const features = GEOJSON.readFeatures(geojson) as Feature[];
-  const extent = features.reduce(
-    (prev, curr) => {
-      const geom = curr.getGeometry();
-      if (!geom) return prev;
-      return extend(prev, geom.getExtent()) as Extent;
-    },
-    [Infinity, Infinity, -Infinity, -Infinity] as Extent,
-  ) as Extent;
-  return {
-    extent,
-  };
 }
 
 async function getWmsLayerExtent(
@@ -89,21 +67,17 @@ async function getWmsLayerExtent(
   const lonLatCRS = Object.keys(boundingBoxes).find((crs) =>
     LONLAT_CRS_CODES.includes(crs),
   );
+  // give priority to lon/lat bounding boxes
   if (lonLatCRS) {
     return {
-      extent: boundingBoxes[lonLatCRS] as Extent,
-    };
-  } else {
-    const availableEPSGCode = Object.keys(boundingBoxes)[0];
-    const proj = await fromEPSGCode(availableEPSGCode);
-    return {
-      extent: transformExtent(
-        boundingBoxes[availableEPSGCode],
-        proj,
-        "EPSG:4326",
-      ) as Extent,
+      extent: boundingBoxes[lonLatCRS],
     };
   }
+  // otherwise take the first extent and apply its CRS
+  const availableEPSGCode = Object.keys(boundingBoxes)[0];
+  return {
+    extent: [...boundingBoxes[availableEPSGCode], availableEPSGCode],
+  };
 }
 
 async function getWmtsLayerExtent(
@@ -133,6 +107,7 @@ async function getWfsLayerExtent(
   };
 }
 
+// TODO: DO NOT RELY ON OL FOR THIS!
 async function getGeotiffLayerExtent(
   layer: MapContextLayerGeotiff,
 ): Promise<ViewByExtent | null> {
@@ -149,11 +124,11 @@ async function getGeotiffLayerExtent(
           resolve(null);
           return;
         }
-        const extent = transformExtent(
-          tileGrid.getExtent(),
-          projection,
+        const projectionCode = projection.getCode();
+        const extent = transform(
+          setCrs(tileGrid.getExtent() as Extent, projectionCode),
           "EPSG:4326",
-        ) as Extent;
+        );
         resolve({ extent });
       } else if (source.getState() === "error") {
         resolve(null);
