@@ -31,3 +31,4 @@ export {
   getExtentFromGeojson,
   getExtentFromGeometry,
 } from "./geojson.js";
+export { ensureContextCrsReady, ensureDiffCrsReady } from "./crs.js";

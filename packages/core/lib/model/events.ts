@@ -78,10 +78,11 @@ export interface MapExtentChangeEvent {
  */
 export const SourceLoadErrorType = "source-load-error";
 export class SourceLoadErrorEvent {
+  type: typeof SourceLoadErrorType;
   message: string;
   httpStatus?: number;
   constructor(error: EndpointError | Error | Response) {
-    // super(SourceLoadErrorType);
+    this.type = SourceLoadErrorType;
     if (error instanceof Response) {
       this.message = error.statusText;
       this.httpStatus = error.status;
