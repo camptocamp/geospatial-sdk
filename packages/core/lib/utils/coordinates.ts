@@ -1,4 +1,4 @@
-import { DEFAULT_VIEW_CRS } from "../constant/projections.js";
+import { DEFAULT_CRS } from "../constant/projections.js";
 import { Coordinate, CrsIdentifier, Extent } from "../model/map-context.js";
 import proj4 from "proj4";
 
@@ -11,7 +11,7 @@ function isCoordinate(value: Coordinate | Extent): value is Coordinate {
  */
 export function getCrs(value: Coordinate | Extent): string {
   const last = value[value.length - 1];
-  return typeof last === "string" ? last : DEFAULT_VIEW_CRS;
+  return typeof last === "string" ? last : DEFAULT_CRS;
 }
 
 /**
