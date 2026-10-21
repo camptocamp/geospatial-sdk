@@ -2,6 +2,7 @@ import {
   MapContext,
   MapContextLayer,
   removeSearchParams,
+  toGeographic,
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
 
@@ -190,7 +191,7 @@ export function resetMapFromContext(map: Map, context: MapContext): Map {
     map.getGlobalState()[`${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`] ??
     Promise.resolve();
   map.setZoom((context.view as ViewByZoomAndCenter).zoom);
-  map.setCenter((context.view as ViewByZoomAndCenter).center);
+  map.setCenter(toGeographic((context.view as ViewByZoomAndCenter).center));
 
   const newChain = existingChain.then(async () => {
     for (let i = 0; i < context.layers.length; i++) {

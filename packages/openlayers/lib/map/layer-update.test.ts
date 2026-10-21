@@ -1,4 +1,5 @@
 import {
+  canChangeViewProjection,
   canDoIncrementalUpdate,
   updateLayerProperties,
 } from "./layer-update.js";
@@ -13,6 +14,23 @@ import TileLayer from "ol/layer/Tile.js";
 import TileWMS from "ol/source/TileWMS.js";
 
 describe("Layer update utils", () => {
+  describe("canChangeViewProjection", () => {
+    it("returns false for GeoJSON and WFS layers", () => {
+      expect(canChangeViewProjection(SAMPLE_LAYER3)).toBe(false);
+      expect(
+        canChangeViewProjection({
+          type: "wfs",
+          url: "https://example.com/wfs",
+          featureType: "features",
+        }),
+      ).toBe(false);
+    });
+
+    it("returns true for layers that do not need reprojected features", () => {
+      expect(canChangeViewProjection(SAMPLE_LAYER1)).toBe(true);
+    });
+  });
+
   describe("canDoIncrementalUpdate", () => {
     it("returns true if only updatable properties are changed", () => {
       const oldLayer = {
@@ -81,6 +99,31 @@ describe("Layer update utils", () => {
       expect(olLayer.setOpacity).toHaveBeenCalledWith(0.7);
       expect(olLayer.set).toHaveBeenCalledWith("label", "Test Layer");
       expect(olSource.setAttributions).toHaveBeenCalledWith("hello world");
+    });
+
+    it("stores the layer model and ID for later projection changes", () => {
+      const layerModel = {
+        ...SAMPLE_LAYER1,
+        id: "layer-1",
+      };
+
+      updateLayerProperties(layerModel, olLayer);
+
+      expect(olLayer.get("--geospatial-sdk-layer-model")).toEqual(layerModel);
+      expect(olLayer.get("--geospatial-sdk-layer-id")).toBe("layer-1");
+    });
+
+    it("updates the stored layer model when applying an incremental change", () => {
+      const updatedLayerModel = {
+        ...SAMPLE_LAYER1,
+        attributions: "updated attribution",
+      };
+
+      updateLayerProperties(updatedLayerModel, olLayer, SAMPLE_LAYER1);
+
+      expect(olLayer.get("--geospatial-sdk-layer-model")).toEqual(
+        updatedLayerModel,
+      );
     });
 
     it("does not apply properties not defined in the layer model", () => {
