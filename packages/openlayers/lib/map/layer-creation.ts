@@ -1,4 +1,8 @@
-import { defaultStyle, MapContextLayer } from "@geospatial-sdk/core";
+import {
+  CrsIdentifier,
+  defaultStyle,
+  MapContextLayer,
+} from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
 import TileLayer from "ol/layer/Tile.js";
 import XYZ from "ol/source/XYZ.js";
@@ -34,7 +38,6 @@ import {
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { createWmsLayer } from "./layers/wms.js";
 
-const GEOJSON = new GeoJSON();
 const WFS_MAX_FEATURES = 10000;
 
 // We need to defer some events being dispatched to make sure they are caught by the map
@@ -42,7 +45,14 @@ const WFS_MAX_FEATURES = 10000;
 // FIXME: this should be better handled in a separate module!
 const defer = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
+/**
+ * @param layerModel
+ * @param mapProjection CRS code of the map the layer will be added to
+ */
+export async function createLayer(
+  layerModel: MapContextLayer,
+  mapProjection: CrsIdentifier,
+): Promise<Layer> {
   const { type } = layerModel;
   let layer: Layer;
 
@@ -138,9 +148,9 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
                 return endpoint.getFeatureUrl(featureType, {
                   maxFeatures: WFS_MAX_FEATURES,
                   asJson: true,
-                  outputCrs: "EPSG:3857",
+                  outputCrs: mapProjection,
                   extent: extent as [number, number, number, number],
-                  extentCrs: "EPSG:3857",
+                  extentCrs: mapProjection,
                 });
               },
               strategy: bboxStrategy,
@@ -172,9 +182,13 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
         style: layerModel.style ?? defaultStyle,
       });
       let source: VectorSource;
+      const geojsonFormat = new GeoJSON({
+        featureProjection: mapProjection,
+        dataProjection: "EPSG:4326",
+      });
       if (layerModel.url !== undefined) {
         source = new VectorSource({
-          format: new GeoJSON(),
+          format: geojsonFormat,
           url: layerModel.url,
           attributions: layerModel.attributions,
         });
@@ -195,10 +209,9 @@ export async function createLayer(layerModel: MapContextLayer): Promise<Layer> {
           if (typeof geojson === "string") {
             geojson = JSON.parse(geojson);
           }
-          const features = GEOJSON.readFeatures(geojson, {
-            featureProjection: "EPSG:3857",
-            dataProjection: "EPSG:4326",
-          }) as Feature<Geometry>[];
+          const features = geojsonFormat.readFeatures(
+            geojson,
+          ) as Feature<Geometry>[];
           source = new VectorSource({
             features,
             attributions: layerModel.attributions,

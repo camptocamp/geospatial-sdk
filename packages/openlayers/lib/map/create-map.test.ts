@@ -11,10 +11,10 @@ import View from "ol/View.js";
 import { beforeEach } from "vitest";
 import {
   createMapFromContext,
-  createView,
   getMapUpdatesPromise,
   resetMapFromContext,
 } from "./create-map.js";
+import { createView } from "./view.js";
 
 vi.mock("./handle-errors", async (importOriginal) => {
   const actual =
@@ -47,7 +47,8 @@ describe("createView", () => {
     });
     it("set center", () => {
       const center = view.getCenter();
-      expect(center).toEqual([862726.0536478702, 6207260.308175252]);
+      expect(center?.[0]).toBeCloseTo(862726.0536478702, 8);
+      expect(center?.[1]).toBeCloseTo(6207260.308175252, 8);
     });
     it("set zoom", () => {
       const zoom = view.getZoom();
@@ -70,7 +71,8 @@ describe("createView", () => {
     });
     it("set center", () => {
       const center = view.getCenter();
-      expect(center).toEqual([317260.5487608297, 6623200.647707232]);
+      expect(center?.[0]).toBeCloseTo(317260.5487608297, 8);
+      expect(center?.[1]).toBeCloseTo(6623200.647707232, 8);
     });
     it("set zoom", () => {
       const zoom = view.getZoom();

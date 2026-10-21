@@ -1,5 +1,7 @@
 import Map from "ol/Map.js";
 import {
+  equals,
+  Extent,
   FeaturesClickEventType,
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
@@ -20,7 +22,6 @@ import BaseEvent from "ol/events/Event.js";
 import type BaseLayer from "ol/layer/Base.js";
 import { readFeaturesAtPixel } from "./get-features.js";
 import MapBrowserEvent from "ol/MapBrowserEvent.js";
-import { equals } from "ol/extent.js";
 import { readMapViewState } from "./resolved-map-state.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
@@ -257,7 +258,7 @@ export function registerLayerLoadingErrorEvent(map: Map) {
 export function registerMapViewStateChangeEvent(map: Map) {
   if (map.get(MapViewStateChangeEventType)) return;
 
-  let lastExtent: number[] | null = null;
+  let lastExtent: Extent | null = null;
 
   const handleViewChange = () => {
     const viewState = readMapViewState(map);
