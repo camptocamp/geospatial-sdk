@@ -18,9 +18,10 @@ import { applyContextDiffToMap } from "./apply-context-diff.js";
 import { beforeEach } from "vitest";
 import BaseLayer from "ol/layer/Base.js";
 import { createLayer } from "./layer-creation.js";
+import VectorLayer from "ol/layer/Vector.js";
 
 async function assertEqualsToModel(layer: any, layerModel: MapContextLayer) {
-  const reference = (await createLayer(layerModel)) as any;
+  const reference = (await createLayer(layerModel, "EPSG:3857")) as any;
   expect(reference).toBeInstanceOf(layer.constructor);
   const refSource = reference.getSource() as any;
   const layerSource = layer.getSource() as any;
@@ -287,6 +288,95 @@ describe("applyContextDiffToMap", () => {
         const view = map.getView();
         expect(view.getCenter()).toEqual([0, 0]);
         expect(view.getZoom()).toEqual(0);
+      });
+    });
+
+    describe("set to view with another projection", () => {
+      beforeEach(async () => {
+        map = createMapFromContext(SAMPLE_CONTEXT);
+        diff = {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [],
+          viewChanges: {
+            center: [700000, 6600000, "EPSG:2154"],
+            zoom: 4,
+            projection: "EPSG:2154",
+          },
+        };
+        applyContextDiffToMap(map, diff);
+        await getMapUpdatesPromise(map);
+      });
+      it("recreates the view in the new projection", () => {
+        const view = map.getView();
+        expect(view.getProjection().getCode()).toBe("EPSG:2154");
+        expect(view.getCenter()).toEqual([700000, 6600000]);
+        expect(view.getZoom()).toEqual(4);
+      });
+
+      it("recreates GeoJSON and WFS layers while retaining projection-compatible layers", async () => {
+        const geojsonLayer = SAMPLE_LAYER3;
+        map = createMapFromContext({
+          ...SAMPLE_CONTEXT,
+          layers: [geojsonLayer, SAMPLE_LAYER4, SAMPLE_LAYER2],
+        });
+        await getMapUpdatesPromise(map);
+        const [previousGeojson, previousWfs, compatibleLayer] = map
+          .getLayers()
+          .getArray();
+
+        applyContextDiffToMap(map, {
+          layersAdded: [],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [],
+          viewChanges: {
+            center: [700000, 6600000, "EPSG:2154"],
+            zoom: 4,
+            projection: "EPSG:2154",
+          },
+        });
+        await getMapUpdatesPromise(map);
+
+        const [geojson, wfs, compatible] = map.getLayers().getArray();
+        expect(geojson).not.toBe(previousGeojson);
+        expect(wfs).not.toBe(previousWfs);
+        expect(compatible).toBe(compatibleLayer);
+        expect(
+          (geojson as VectorLayer)
+            .getSource()
+            ?.getFeatures()[0]
+            .getGeometry()
+            ?.getCoordinates(),
+        ).toEqual([625422.4046271729, 6767095.930771305]);
+      });
+
+      it("creates newly added vector layers in the projection changed by the same diff", async () => {
+        map = createMapFromContext(SAMPLE_CONTEXT);
+        const geojsonLayer = SAMPLE_LAYER3;
+
+        applyContextDiffToMap(map, {
+          layersAdded: [{ layer: geojsonLayer, position: 0 }],
+          layersChanged: [],
+          layersRemoved: [],
+          layersReordered: [],
+          viewChanges: {
+            center: [700000, 6600000, "EPSG:2154"],
+            zoom: 4,
+            projection: "EPSG:2154",
+          },
+        });
+        await getMapUpdatesPromise(map);
+
+        const layer = map.getLayers().item(0);
+        expect(
+          (layer as VectorLayer)
+            .getSource()
+            ?.getFeatures()[0]
+            .getGeometry()
+            ?.getCoordinates(),
+        ).toEqual([625422.4046271729, 6767095.930771305]);
       });
     });
 

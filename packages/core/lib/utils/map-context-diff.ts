@@ -7,6 +7,7 @@ import {
   MapContextLayerReordered,
 } from "../model/index.js";
 import { isLayerSame, isLayerSameAndUnchanged } from "./map-context-layer.js";
+import { DEFAULT_MAP_VIEW_CRS } from "../constant/projections.js";
 
 /**
  * The following logic is produced by identifying layers in both context
@@ -99,6 +100,14 @@ export function computeMapContextDiff(
     nextContext.view !== previousContext.view ? nextContext.view : undefined;
   if (viewChanges !== null && viewChanges !== undefined) {
     viewChanges = { ...viewChanges }; // copy the view to avoid unexpected mutations
+
+    // only keep the projection if it changed between the two contexts
+    const prevProjection =
+      previousContext.view?.projection ?? DEFAULT_MAP_VIEW_CRS;
+    const nextProjection = nextContext.view?.projection ?? DEFAULT_MAP_VIEW_CRS;
+    if (nextProjection === prevProjection) {
+      delete viewChanges.projection;
+    }
   }
 
   return {

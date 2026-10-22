@@ -237,15 +237,24 @@ export type MapContextLayer =
   | MapContextLayerMapLibreStyle
   | MapContextLayerGeotiff;
 
-export type Coordinate = [number, number];
+export type CrsIdentifier = string;
 
 /**
- * Array components are respectively: minX, minY, maxX, maxY
+ * Array components are respectively: x, y and optionally a CRS identifier
+ * (e.g. `"EPSG:2154"`). Without a CRS, coordinates are expressed in longitude/latitude.
  */
-export type Extent = [number, number, number, number];
+export type Coordinate = [number, number] | [number, number, CrsIdentifier];
 
 /**
- * @property center Expressed in longitude/latitude
+ * Array components are respectively: minX, minY, maxX, maxY and optionally a CRS identifier
+ * (e.g. `"EPSG:2154"`). Without a CRS, the extent is expressed in longitude/latitude.
+ */
+export type Extent =
+  | [number, number, number, number]
+  | [number, number, number, number, CrsIdentifier];
+
+/**
+ * @property center Expressed in longitude/latitude unless a CRS identifier is given as third element
  * @property zoom
  */
 export interface ViewByZoomAndCenter {
@@ -254,7 +263,7 @@ export interface ViewByZoomAndCenter {
 }
 
 /**
- * @property extent Expressed in longitude/latitude
+ * @property extent Expressed in longitude/latitude unless a CRS identifier is given as fifth element
  */
 export interface ViewByExtent {
   extent: Extent;
@@ -280,6 +289,11 @@ export type MapContextView = (
 ) & {
   maxZoom?: number;
   maxExtent?: Extent;
+
+  /**
+   * CRS in which the map is displayed (e.g. `"EPSG:2154"`); defaults to `"EPSG:3857"`.
+   */
+  projection?: CrsIdentifier;
 };
 
 /**

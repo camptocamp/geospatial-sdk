@@ -1,12 +1,11 @@
 import { EndpointError } from "@camptocamp/ogc-client";
 import { Feature } from "geojson";
-import BaseEvent from "ol/events/Event.js";
-import type { Extent } from "ol/extent.js";
 import {
   ResolvedMapLayerState,
   ResolvedMapState,
   ResolvedMapViewState,
 } from "./resolved-map-state.js";
+import { Extent } from "./map-context.js";
 
 export type FeaturesByLayerIndex = Map<number, Feature[]>;
 
@@ -78,11 +77,12 @@ export interface MapExtentChangeEvent {
  * Use the MapLayerStateChangeEvent and LayerLoadingErrorEvent instead
  */
 export const SourceLoadErrorType = "source-load-error";
-export class SourceLoadErrorEvent extends BaseEvent {
+export class SourceLoadErrorEvent {
+  type: typeof SourceLoadErrorType;
   message: string;
   httpStatus?: number;
   constructor(error: EndpointError | Error | Response) {
-    super(SourceLoadErrorType);
+    this.type = SourceLoadErrorType;
     if (error instanceof Response) {
       this.message = error.statusText;
       this.httpStatus = error.status;

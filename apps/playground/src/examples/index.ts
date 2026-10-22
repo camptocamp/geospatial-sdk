@@ -6,6 +6,7 @@ import { example as mapEventsExample } from "./map-events.ts";
 import { example as mapLibreExample } from "./map-libre.ts";
 import { example as simpleMapExample } from "./simple-map.ts";
 import { example as zoomToLayerExample } from "./zoom-to-layer.ts";
+import { example as switchProjectionExample } from "./switch-projection.ts";
 import { example as customElementExample } from "./custom-element.ts";
 import type { PlaygroundCode } from "../model.js";
 
@@ -19,6 +20,7 @@ export const EXAMPLES: PlaygroundCode[] = [
   zoomToLayerExample,
   legendExample,
   customElementExample,
+  switchProjectionExample,
 ];
 
 const packagesRoot = new URL("./geospatial-sdk", window.location.href);
