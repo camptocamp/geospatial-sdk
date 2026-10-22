@@ -4,3 +4,4 @@ node_modules/
 packages/*/dist
 .idea
 .claude/settings.local.json
+packages/*/coverage
