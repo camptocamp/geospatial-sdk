@@ -141,9 +141,13 @@ export async function createLayer(
         .then((endpoint) => {
           const featureType =
             endpoint.getSingleFeatureTypeName() ?? layerModel.featureType;
+          const geojsonFormat = new GeoJSON({
+            featureProjection: mapProjection,
+            dataProjection: "EPSG:4326",
+          });
           olLayer.setSource(
             new VectorSource({
-              format: new GeoJSON(),
+              format: geojsonFormat,
               url: function (extent) {
                 return endpoint.getFeatureUrl(featureType, {
                   maxFeatures: WFS_MAX_FEATURES,
@@ -269,9 +273,13 @@ export async function createLayer(
             layerModel.collection,
             layerModel.options,
           );
+          const geojsonFormat = new GeoJSON({
+            featureProjection: mapProjection,
+            dataProjection: "EPSG:4326",
+          });
           layer = new VectorLayer({
             source: new VectorSource({
-              format: new GeoJSON(),
+              format: geojsonFormat,
               url: layerUrl,
               attributions: layerModel.attributions,
             }),

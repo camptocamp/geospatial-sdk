@@ -59,7 +59,11 @@ export function canDoIncrementalUpdate(
  */
 export function canChangeViewProjection(layer: MapContextLayer): boolean {
   // geojson data needs to be redownloaded and reprojected
-  if (layer.type === "geojson" || layer.type === "wfs") {
+  if (
+    layer.type === "geojson" ||
+    layer.type === "wfs" ||
+    (layer.type === "ogcapi" && !layer.useTiles)
+  ) {
     return false;
   }
   return true;

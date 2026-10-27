@@ -56,7 +56,7 @@ describe("createLayer", () => {
   describe("XYZ", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_XYZ_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -115,7 +115,7 @@ describe("createLayer", () => {
   describe("OGCAPI (as geojson items)", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -130,8 +130,15 @@ describe("createLayer", () => {
       expect(layer.getSource()?.getAttributions()).toBeNull();
     });
     it("create a vector source", () => {
-      const source = layer.getSource();
+      const source = layer.getSource() as VectorSource;
       expect(source).toBeInstanceOf(VectorSource);
+      expect(source.getFormat()).toBeInstanceOf(GeoJSON);
+      expect(source.getFormat()?.["dataProjection"].getCode()).toBe(
+        "EPSG:4326",
+      );
+      expect(source.getFormat()?.["defaultFeatureProjection"].getCode()).toBe(
+        "EPSG:3857",
+      );
     });
     it("set correct url", () => {
       const source = layer.getSource() as VectorSource;
@@ -158,7 +165,7 @@ describe("createLayer", () => {
         "getCollectionItemsUrl",
       ).mockRejectedValue(new Error("Failed to load collection"));
       layerModel = MAP_CTX_LAYER_OGCAPI_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
     });
 
@@ -185,7 +192,7 @@ describe("createLayer", () => {
   describe("WMS", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_WMS_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
     });
     it("create a tile layer with a WMS source", () => {
       expect(layer).toBeTruthy();
@@ -198,7 +205,7 @@ describe("createLayer", () => {
   describe("WFS", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_WFS_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -219,8 +226,15 @@ describe("createLayer", () => {
       expect(attributions!()).toEqual(["camptocamp"]);
     });
     it("create a Vector source", () => {
-      const source = layer.getSource();
+      const source = layer.getSource() as VectorSource;
       expect(source).toBeInstanceOf(VectorSource);
+      expect(source.getFormat()).toBeInstanceOf(GeoJSON);
+      expect(source.getFormat()?.["dataProjection"].getCode()).toBe(
+        "EPSG:4326",
+      );
+      expect(source.getFormat()?.["defaultFeatureProjection"].getCode()).toBe(
+        "EPSG:3857",
+      );
     });
     it("set correct url load function", () => {
       const source = layer.getSource() as VectorSource;
@@ -246,7 +260,7 @@ describe("createLayer", () => {
     describe("with inline data", () => {
       beforeEach(async () => {
         layerModel = MAP_CTX_LAYER_GEOJSON_FIXTURE;
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, "EPSG:3857");
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
       });
@@ -285,7 +299,7 @@ describe("createLayer", () => {
       beforeEach(async () => {
         layerModel = { ...MAP_CTX_LAYER_GEOJSON_FIXTURE };
         layerModel.data = JSON.stringify(layerModel.data);
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, "EPSG:3857");
       });
       it("create a VectorLayer", () => {
         expect(layer).toBeTruthy();
@@ -313,7 +327,7 @@ describe("createLayer", () => {
           url: undefined,
           data: "blargz",
         };
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, "EPSG:3857");
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
       });
       it("create a VectorLayer", () => {
@@ -342,7 +356,7 @@ describe("createLayer", () => {
     describe("with remote file url", () => {
       beforeEach(async () => {
         layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, "EPSG:3857");
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
       });
@@ -377,7 +391,7 @@ describe("createLayer", () => {
     describe("with remote file url (failing to load)", () => {
       beforeEach(async () => {
         layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
-        layer = await createLayer(layerModel);
+        layer = await createLayer(layerModel, "EPSG:3857");
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
       });
       it("creates a vector layer with an empty source", () => {
@@ -403,7 +417,7 @@ describe("createLayer", () => {
   describe("WMTS", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_WMTS_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -447,7 +461,7 @@ describe("createLayer", () => {
         ...MAP_CTX_LAYER_WMTS_FIXTURE,
         url: "https://wmts/no-default-style",
       };
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -460,7 +474,7 @@ describe("createLayer", () => {
   describe("Maplibre Style", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_MAPBLIBRE_STYLE_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -492,7 +506,7 @@ describe("createLayer", () => {
   describe("MVT", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_MVT_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
       layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-data-info`, eventCallback);
     });
@@ -524,7 +538,7 @@ describe("createLayer", () => {
   describe("GeoTIFF", () => {
     beforeEach(async () => {
       layerModel = MAP_CTX_LAYER_GEOTIFF_FIXTURE;
-      layer = await createLayer(layerModel);
+      layer = await createLayer(layerModel, "EPSG:3857");
     });
     it("create a WebGLTile layer", () => {
       expect(layer).toBeTruthy();
