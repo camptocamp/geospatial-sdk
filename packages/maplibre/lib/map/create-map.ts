@@ -1,4 +1,5 @@
 import {
+  ensureContextCrsReady,
   MapContext,
   MapContextLayer,
   removeSearchParams,
@@ -193,24 +194,26 @@ export function resetMapFromContext(map: Map, context: MapContext): Map {
   map.setZoom((context.view as ViewByZoomAndCenter).zoom);
   map.setCenter(toGeographic((context.view as ViewByZoomAndCenter).center));
 
-  const newChain = existingChain.then(async () => {
-    for (let i = 0; i < context.layers.length; i++) {
-      const layerModel = context.layers[i];
-      const partialMLStyle = await createLayer(layerModel);
-      if (!partialMLStyle) continue;
+  const newChain = existingChain
+    .then(() => ensureContextCrsReady(context))
+    .then(async () => {
+      for (let i = 0; i < context.layers.length; i++) {
+        const layerModel = context.layers[i];
+        const partialMLStyle = await createLayer(layerModel);
+        if (!partialMLStyle) continue;
 
-      if (partialMLStyle.glyphs) {
-        map.setGlyphs(partialMLStyle.glyphs);
+        if (partialMLStyle.glyphs) {
+          map.setGlyphs(partialMLStyle.glyphs);
+        }
+        if (partialMLStyle.sprite) {
+          map.setSprite(partialMLStyle.sprite as string);
+        }
+        Object.keys(partialMLStyle.sources).forEach((sourceId) =>
+          map.addSource(sourceId, partialMLStyle.sources[sourceId]),
+        );
+        partialMLStyle.layers.map((layer) => map.addLayer(layer));
       }
-      if (partialMLStyle.sprite) {
-        map.setSprite(partialMLStyle.sprite as string);
-      }
-      Object.keys(partialMLStyle.sources).forEach((sourceId) =>
-        map.addSource(sourceId, partialMLStyle.sources[sourceId]),
-      );
-      partialMLStyle.layers.map((layer) => map.addLayer(layer));
-    }
-  });
+    });
   map.setGlobalStateProperty(
     `${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`,
     newChain,
