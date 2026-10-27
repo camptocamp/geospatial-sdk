@@ -1,6 +1,7 @@
 import Map from "ol/Map.js";
 import {
   CrsIdentifier,
+  ensureDiffCrsReady,
   MapContextDiff,
   MapContextLayer,
 } from "@geospatial-sdk/core";
@@ -8,13 +9,12 @@ import { getMapUpdatesPromise } from "./create-map.js";
 import { propagateLayerStateChangeEventToMap } from "./register-events.js";
 import { createLayer } from "./layer-creation.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
-import { ensureDiffCrsReady } from "@geospatial-sdk/core/lib/utils/crs.js";
 import {
   canChangeViewProjection,
   canDoIncrementalUpdate,
   updateLayerProperties,
 } from "./layer-update.js";
-import { applyViewProperties, createView } from "./view.js";
+import { updateView } from "./view.js";
 import Layer from "ol/layer/Layer.js";
 import { register } from "ol/proj/proj4.js";
 import proj4 from "proj4";
@@ -84,7 +84,10 @@ export function applyContextDiffToMap(
       register(proj4);
 
       // let's see if the map projection changed, because this has big implications for layers
-      const newProjection = contextDiff.viewChanges?.projection;
+      const newProjection =
+        contextDiff.viewChanges === null
+          ? "EPSG:3857"
+          : contextDiff.viewChanges?.projection;
       const viewProjection =
         newProjection ?? map.getView().getProjection().getCode();
       const viewProjectionChanged = newProjection !== undefined;
@@ -164,12 +167,7 @@ export function applyContextDiffToMap(
       );
 
       if (typeof contextDiff.viewChanges !== "undefined") {
-        const { viewChanges } = contextDiff;
-        if (viewChanges === null || viewProjectionChanged) {
-          map.setView(createView(viewChanges, map));
-        } else {
-          applyViewProperties(viewChanges, map, map.getView());
-        }
+        updateView(contextDiff.viewChanges, map);
       }
       return map;
     });

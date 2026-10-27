@@ -107,6 +107,8 @@ export function computeMapContextDiff(
     const nextProjection = nextContext.view?.projection ?? DEFAULT_MAP_VIEW_CRS;
     if (nextProjection === prevProjection) {
       delete viewChanges.projection;
+    } else {
+      viewChanges.projection = nextProjection;
     }
   }
 

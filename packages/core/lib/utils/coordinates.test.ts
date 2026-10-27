@@ -89,6 +89,7 @@ describe("crs utils", () => {
 
       expect(result[0]).toBeCloseTo(111319.4908);
       expect(result[1]).toBeCloseTo(111325.1429);
+      expect(result[2]).toBe("EPSG:3857");
     });
 
     it("transforms an extent to the target CRS", () => {
@@ -98,6 +99,7 @@ describe("crs utils", () => {
       expect(result[1]).toBeCloseTo(0);
       expect(result[2]).toBeCloseTo(111319.4908);
       expect(result[3]).toBeCloseTo(111325.1429);
+      expect(result[4]).toBe("EPSG:3857");
     });
 
     it("throws an error when the CRS cannot be converted", () => {

@@ -113,7 +113,7 @@ export function transform(
   try {
     if (isCoordinate(value)) {
       const coordinate = value.slice(0, 2) as [number, number];
-      return proj4(crs, toCrs, coordinate);
+      return setCrs(proj4(crs, toCrs, coordinate), toCrs);
     } else {
       const [minX, minY, maxX, maxY] = value.slice(0, 4) as [
         number,
@@ -121,9 +121,10 @@ export function transform(
         number,
         number,
       ];
+      // TODO: use finer logic for transforming extents, currently this can lead very often to wrong results
       const [lonMin, latMin] = proj4(crs, toCrs, [minX, minY]);
       const [lonMax, latMax] = proj4(crs, toCrs, [maxX, maxY]);
-      return [lonMin, latMin, lonMax, latMax];
+      return setCrs([lonMin, latMin, lonMax, latMax], toCrs);
     }
   } catch (e) {
     throw new Error(

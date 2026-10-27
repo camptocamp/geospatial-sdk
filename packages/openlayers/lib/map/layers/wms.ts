@@ -1,4 +1,11 @@
-import { getHash, removeSearchParams } from "@geospatial-sdk/core";
+import {
+  DateString,
+  getHash,
+  MapContextLayerWms,
+  removeSearchParams,
+  TimeInterval,
+  ValueInterval,
+} from "@geospatial-sdk/core";
 import ImageLayer from "ol/layer/Image.js";
 import ImageWMS from "ol/source/ImageWMS.js";
 import TileLayer from "ol/layer/Tile.js";
@@ -6,12 +13,6 @@ import Layer from "ol/layer/Layer.js";
 import TileWMS from "ol/source/TileWMS.js";
 import Tile from "ol/Tile.js";
 import { tileLoadErrorCatchFunction } from "../handle-errors.js";
-import {
-  DateString,
-  MapContextLayerWms,
-  TimeInterval,
-  ValueInterval,
-} from "@geospatial-sdk/core/lib/model/map-context.js";
 import { WmsLayerDimensionValue } from "@camptocamp/ogc-client";
 import { emitLayerLoadingStatusSuccess } from "../register-events.js";
 import { updateLayerProperties } from "../layer-update.js";
