@@ -1,4 +1,5 @@
 import "vitest-canvas-mock";
+import "../core/test-setup-crs.js";
 
 class ResizeObserverMock {
   observe = vi.fn();
