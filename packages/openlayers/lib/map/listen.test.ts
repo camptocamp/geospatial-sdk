@@ -80,19 +80,26 @@ const EXPECTED_MAP_EXTENT_EPSG4326 = [
 ];
 
 async function createMap() {
-  const view = new View({
-    projection: "EPSG:3857",
-    resolution: 1,
-    center: [0, 0],
-  });
-  const layer1 = await createLayer(MAP_CTX_LAYER_WMS_FIXTURE);
-  const layer2 = await createLayer(MAP_CTX_LAYER_WMS_FIXTURE);
-  const layer3 = await createLayer(MAP_CTX_LAYER_GEOJSON_FIXTURE);
+  const layer1 = await createLayer(MAP_CTX_LAYER_WMS_FIXTURE, "EPSG:4326");
+  const layer2 = await createLayer(MAP_CTX_LAYER_WMS_FIXTURE, "EPSG:4326");
+  const layer3 = await createLayer(MAP_CTX_LAYER_GEOJSON_FIXTURE, "EPSG:4326");
   const layers = new Collection([layer1, layer2, layer3]);
   const map = new BaseObject() as OlMap;
+  map.set(
+    "view",
+    new View({
+      projection: "EPSG:3857",
+      resolution: 1,
+      center: [0, 0],
+    }),
+  );
   Object.defineProperties(map, {
-    getView: { value: vi.fn(() => view) },
-    setView: { value: vi.fn() },
+    getView: { value: vi.fn(() => map.get("view")) },
+    setView: {
+      value: vi.fn((newView) => {
+        map.set("view", newView);
+      }),
+    },
     getEventPixel: { value: vi.fn(() => [10, 10]) },
     getCoordinateFromPixel: { value: vi.fn(() => [123, 123]) },
     getSize: { value: vi.fn(() => [800, 600]) },
@@ -222,6 +229,41 @@ describe("event listener registration", () => {
           scaleDenominator: (100 * 1000) / 0.28, // metersPerUnit * resolution * (1000 / mmPerPixel)
         },
       });
+    });
+
+    it("tracks change even when the view projection changes", () => {
+      const newView = new View({
+        projection: "EPSG:4326",
+        resolution: 0.001,
+        center: [0, 0],
+      });
+      map.setView(newView);
+
+      newView.setCenter([1, 1]);
+
+      expect(callback).toHaveBeenCalledOnce();
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "map-view-state-change",
+          viewState: expect.objectContaining({
+            center: [1, 1],
+            resolution: 0.001,
+          }),
+        }),
+      );
+    });
+
+    it("stops tracking to change to old view after the view was replaced", () => {
+      const oldView = map.getView();
+      const newView = new View({
+        projection: "EPSG:4326",
+        resolution: 0.001,
+        center: [0, 0],
+      });
+      map.setView(newView);
+      oldView.setCenter([1, 1]);
+
+      expect(callback).not.toHaveBeenCalled();
     });
   });
   describe("map layer state change", () => {
@@ -599,11 +641,14 @@ describe("event listener registration", () => {
 
     describe("WMTS endpoint error", () => {
       beforeEach(async () => {
-        layer = await createLayer({
-          type: "wmts",
-          url: "http://give.me/error",
-          name: "abcd",
-        });
+        layer = await createLayer(
+          {
+            type: "wmts",
+            url: "http://give.me/error",
+            name: "abcd",
+          },
+          "EPSG:3857",
+        );
         map.getLayers().setAt(0, layer);
         propagateLayerStateChangeEventToMap(map, layer);
         await vi.runAllTimersAsync();
@@ -648,11 +693,14 @@ describe("event listener registration", () => {
 
     describe("WFS endpoint error", () => {
       beforeEach(async () => {
-        layer = await createLayer({
-          type: "wfs",
-          url: "http://give.me/error",
-          featureType: "abcd",
-        });
+        layer = await createLayer(
+          {
+            type: "wfs",
+            url: "http://give.me/error",
+            featureType: "abcd",
+          },
+          "EPSG:3857",
+        );
         map.getLayers().setAt(0, layer);
         propagateLayerStateChangeEventToMap(map, layer);
         await vi.runAllTimersAsync();
@@ -697,10 +745,13 @@ describe("event listener registration", () => {
 
     describe("Tile loading HTTP error", () => {
       beforeEach(async () => {
-        layer = await createLayer({
-          type: "xyz",
-          url: "http://give.me/http/error",
-        });
+        layer = await createLayer(
+          {
+            type: "xyz",
+            url: "http://give.me/http/error",
+          },
+          "EPSG:3857",
+        );
         map.getLayers().setAt(0, layer);
         propagateLayerStateChangeEventToMap(map, layer);
         await vi.runAllTimersAsync();
@@ -753,10 +804,13 @@ describe("event listener registration", () => {
 
     describe("Tile loading network error", () => {
       beforeEach(async () => {
-        layer = await createLayer({
-          type: "xyz",
-          url: "http://give.me/network/error",
-        });
+        layer = await createLayer(
+          {
+            type: "xyz",
+            url: "http://give.me/network/error",
+          },
+          "EPSG:3857",
+        );
         map.getLayers().setAt(0, layer);
         propagateLayerStateChangeEventToMap(map, layer);
         await vi.runAllTimersAsync();
