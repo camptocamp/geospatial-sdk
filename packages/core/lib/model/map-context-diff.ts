@@ -28,6 +28,13 @@ export interface MapContextLayerChanged {
 }
 
 /**
+ * If the `projection` field is omitted, it means that the view projection should not be changed.
+ * A return to the default map view projection should be explicitly stated in the `projection` property.
+ * `null` means reset to the default view.
+ */
+export type MapContextViewDiff = MapContextView | null;
+
+/**
  * Describes a delta between two contexts, in order to be
  * applied to an existing map.
  *
@@ -42,5 +49,5 @@ export interface MapContextDiff {
   layersReordered: MapContextLayerReordered[];
   layersRemoved: MapContextLayerPositioned[];
   layersAdded: MapContextLayerPositioned[];
-  viewChanges?: MapContextView | null; // this is both optional (meaning no view change) and nullable (meaning reset to default view)
+  viewChanges?: MapContextViewDiff; // if this property is omitted, the view hasn't changed
 }

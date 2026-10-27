@@ -1,5 +1,7 @@
 import Map from "ol/Map.js";
 import {
+  equals,
+  Extent,
   FeaturesClickEventType,
   FeaturesHoverEventType,
   LayerCreationErrorEventType,
@@ -20,9 +22,10 @@ import BaseEvent from "ol/events/Event.js";
 import type BaseLayer from "ol/layer/Base.js";
 import { readFeaturesAtPixel } from "./get-features.js";
 import MapBrowserEvent from "ol/MapBrowserEvent.js";
-import { equals } from "ol/extent.js";
 import { readMapViewState } from "./resolved-map-state.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
+import View from "ol/View.js";
+import { ObjectEvent } from "ol/Object.js";
 
 export function registerFeatureClickEvent(map: Map) {
   if (map.get(FeaturesClickEventType)) return;
@@ -257,7 +260,7 @@ export function registerLayerLoadingErrorEvent(map: Map) {
 export function registerMapViewStateChangeEvent(map: Map) {
   if (map.get(MapViewStateChangeEventType)) return;
 
-  let lastExtent: number[] | null = null;
+  let lastExtent: Extent | null = null;
 
   const handleViewChange = () => {
     const viewState = readMapViewState(map);
@@ -271,11 +274,26 @@ export function registerMapViewStateChangeEvent(map: Map) {
       viewState,
     } as unknown as BaseEvent);
   };
+  const handleViewReferenceChange = (event: ObjectEvent) => {
+    const newView = event.target.getView() as View;
+    const oldView = event.oldValue as View;
+
+    // unlisten on preview view
+    oldView.un("change:center", handleViewChange);
+    oldView.un("change:resolution", handleViewChange);
+    oldView.un("change:rotation", handleViewChange);
+
+    // listen to new view events
+    newView.on("change:center", handleViewChange);
+    newView.on("change:resolution", handleViewChange);
+    newView.on("change:rotation", handleViewChange);
+  };
 
   map.getView().on("change:center", handleViewChange);
   map.getView().on("change:resolution", handleViewChange);
   map.getView().on("change:rotation", handleViewChange);
   map.on("change:size", handleViewChange);
+  map.on("change:view", handleViewReferenceChange);
 
   map.set(MapViewStateChangeEventType, true);
 }

@@ -10,7 +10,7 @@ import {
   SAMPLE_LAYER6,
   SAMPLE_LAYER7,
 } from "../../fixtures/map-context.fixtures.js";
-import { beforeEach, describe, expect, it } from "vitest";
+import { DEFAULT_MAP_VIEW_CRS } from "../constant/projections.js";
 
 describe("Context diff utils", () => {
   describe("computeMapContextDiff", () => {
@@ -326,6 +326,73 @@ describe("Context diff utils", () => {
             viewChanges: {
               center: [5, 10],
               zoom: 3,
+            },
+          });
+        });
+      });
+
+      describe("changing projection from default to custom", () => {
+        beforeEach(() => {
+          contextOld = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [5, 10],
+              zoom: 3,
+            },
+          };
+          contextNew = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [5, 10],
+              zoom: 3,
+              projection: "EPSG:1234",
+            },
+          };
+        });
+        it("output the correct diff", () => {
+          diff = computeMapContextDiff(contextNew, contextOld);
+          expect(diff).toEqual({
+            layersAdded: [],
+            layersChanged: [],
+            layersRemoved: [],
+            layersReordered: [],
+            viewChanges: {
+              center: [5, 10],
+              zoom: 3,
+              projection: "EPSG:1234",
+            },
+          });
+        });
+      });
+      describe("changing projection from custom to default", () => {
+        beforeEach(() => {
+          contextOld = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [5, 10],
+              zoom: 3,
+              projection: "EPSG:1234",
+            },
+          };
+          contextNew = {
+            ...SAMPLE_CONTEXT,
+            view: {
+              center: [5, 10],
+              zoom: 3,
+            },
+          };
+        });
+        it("output the correct diff", () => {
+          diff = computeMapContextDiff(contextNew, contextOld);
+          expect(diff).toEqual({
+            layersAdded: [],
+            layersChanged: [],
+            layersRemoved: [],
+            layersReordered: [],
+            viewChanges: {
+              center: [5, 10],
+              zoom: 3,
+              projection: DEFAULT_MAP_VIEW_CRS,
             },
           });
         });

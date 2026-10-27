@@ -54,6 +54,22 @@ export function canDoIncrementalUpdate(
 }
 
 /**
+ * @param layer
+ * @return Returns `true` if the only properties changed are the updatable ones
+ */
+export function canChangeViewProjection(layer: MapContextLayer): boolean {
+  // geojson data needs to be redownloaded and reprojected
+  if (
+    layer.type === "geojson" ||
+    layer.type === "wfs" ||
+    (layer.type === "ogcapi" && !layer.useTiles)
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Will apply generic properties to the layer; if a previous layer model is provided,
  * only changed properties will be updated (to avoid costly change events in OpenLayers)
  * @param layerModel
@@ -79,6 +95,10 @@ export function updateLayerProperties(
     // any other case: apply the property
     return true;
   }
+
+  // kept so that the layer can be recreated, e.g. when the map projection changes
+  olLayer.set(`${GEOSPATIAL_SDK_PREFIX}layer-model`, layerModel);
+
   if (!previousLayerModel && layerModel.id !== undefined) {
     olLayer.set(`${GEOSPATIAL_SDK_PREFIX}layer-id`, layerModel.id);
   }

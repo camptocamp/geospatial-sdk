@@ -43,6 +43,7 @@ function addEventListener<T extends keyof MapEventsByType>(
       ...event
     }: MapEventsByType[T] & { target: MapEvent["target"] }) =>
       // we're excluding the `target` property and renaming the `type` here
+      // @ts-expect-error TS2352 this gives an error because of legacy events SourceLoadErrorEvent and MapExtentChangeEvent, to be removed
       callback({
         ...event,
         type: eventType,
