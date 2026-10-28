@@ -5,7 +5,11 @@ import {
   toGeographic,
 } from "@geospatial-sdk/core";
 import type { Map } from "maplibre-gl";
-import { createLayer, getMapUpdatesPromise } from "./create-map.js";
+import {
+  createLayer,
+  getMapUpdatesPromise,
+  setMapPromiseChain_,
+} from "./create-map.js";
 import {
   canDoIncrementalUpdate,
   getFirstLayerIdAtPosition,
@@ -13,7 +17,6 @@ import {
   getLayersFromContextLayer,
   updateLayerProperties,
 } from "../helpers/map.helpers.js";
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 /**
  * This will either update the layers in the map or recreate them;
@@ -179,10 +182,7 @@ export function applyContextDiffToMap(
         }
       }
     });
-  map.setGlobalStateProperty(
-    `${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`,
-    newChain,
-  );
+  setMapPromiseChain_(map, newChain);
 
   return map;
 }

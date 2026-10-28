@@ -1,4 +1,9 @@
-import type { LayerSpecification, Map, StyleSpecification } from "maplibre-gl";
+import type {
+  AllPaintProperties,
+  LayerSpecification,
+  Map,
+  StyleSpecification,
+} from "maplibre-gl";
 import {
   Dataset,
   LayerContextWithStyle,
@@ -14,11 +19,23 @@ import {
 } from "@geospatial-sdk/core";
 import { openLayersStyleToMapLibreLayers } from "@geospatial-sdk/style";
 
-function getOpacityPaintPropNames(layerType: string): string[] {
+function getOpacityPaintPropNames(
+  layerType: LayerSpecification["type"],
+): (keyof AllPaintProperties)[] {
   switch (layerType) {
     case "circle":
       return ["circle-opacity", "circle-stroke-opacity"];
-    default:
+    case "symbol":
+      return ["icon-opacity", "text-opacity"];
+    case "hillshade":
+      return ["hillshade-exaggeration"];
+    case "fill":
+    case "fill-extrusion":
+    case "background":
+    case "line":
+    case "raster":
+    case "color-relief":
+    case "heatmap":
       return [`${layerType}-opacity`];
   }
 }

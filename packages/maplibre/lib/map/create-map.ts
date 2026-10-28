@@ -6,8 +6,12 @@ import {
   toGeographic,
   ViewByZoomAndCenter,
 } from "@geospatial-sdk/core";
-
-import { LayerSpecification, Map, MapOptions } from "maplibre-gl";
+import {
+  LayerSpecification,
+  Map as MlMap,
+  MapOptions,
+  StyleSpecification,
+} from "maplibre-gl";
 import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
@@ -23,7 +27,6 @@ import {
   LayerMetadataSpecification,
   PartialStyleSpecification,
 } from "../maplibre.models.js";
-import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 
 const featureCollection: FeatureCollection<Geometry | null> = {
   type: "FeatureCollection",
@@ -167,6 +170,20 @@ export async function createLayer(
   }
 }
 
+const DEFAULT_STYLE: StyleSpecification = {
+  version: 8,
+  layers: [],
+  sources: {},
+};
+
+const mapPromiseChains = new WeakMap<MlMap, Promise<void>>();
+export function setMapPromiseChain_(map: MlMap, promise: Promise<void>) {
+  mapPromiseChains.set(map, promise);
+}
+export function getMapPromiseChain_(map: MlMap): Promise<void> {
+  return mapPromiseChains.get(map) ?? Promise.resolve();
+}
+
 /**
  * Create a Maplibre map from a context; map options need to be provided.
  * The function returns synchronously; all asynchronous modifications are stacked
@@ -177,8 +194,8 @@ export async function createLayer(
 export function createMapFromContext(
   context: MapContext,
   mapOptions: MapOptions,
-): Map {
-  const map = new Map(mapOptions);
+): MlMap {
+  const map = new MlMap({ style: DEFAULT_STYLE, ...mapOptions });
   return resetMapFromContext(map, context);
 }
 
@@ -187,10 +204,8 @@ export function createMapFromContext(
  * @param map
  * @param context
  */
-export function resetMapFromContext(map: Map, context: MapContext): Map {
-  const existingChain: Promise<void> =
-    map.getGlobalState()[`${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`] ??
-    Promise.resolve();
+export function resetMapFromContext(map: MlMap, context: MapContext): MlMap {
+  const existingChain = getMapPromiseChain_(map);
   map.setZoom((context.view as ViewByZoomAndCenter).zoom);
   map.setCenter(toGeographic((context.view as ViewByZoomAndCenter).center));
 
@@ -214,10 +229,7 @@ export function resetMapFromContext(map: Map, context: MapContext): Map {
         partialMLStyle.layers.map((layer) => map.addLayer(layer));
       }
     });
-  map.setGlobalStateProperty(
-    `${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`,
-    newChain,
-  );
+  setMapPromiseChain_(map, newChain);
 
   return map;
 }
@@ -226,9 +238,6 @@ export function resetMapFromContext(map: Map, context: MapContext): Map {
  * This promise will resolve once all pending modifications are done on the map.
  * @param map
  */
-export function getMapUpdatesPromise(map: Map): Promise<void> {
-  return (
-    map.getGlobalState()[`${GEOSPATIAL_SDK_PREFIX}apply-layer-promise-chain`] ??
-    Promise.resolve()
-  );
+export function getMapUpdatesPromise(map: MlMap): Promise<void> {
+  return getMapPromiseChain_(map);
 }

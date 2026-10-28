@@ -23,7 +23,6 @@ function createMockMap(): MapLibreMap {
     layers: [] as any[],
     source: {} as any,
   };
-  const globalState: Record<string, unknown> = {};
   return {
     addLayer: vi.fn((layer, beforeId) => {
       if (beforeId) {
@@ -78,9 +77,6 @@ function createMockMap(): MapLibreMap {
     }),
     setLayoutProperty: vi.fn(),
     setPaintProperty: vi.fn(),
-    getGlobalState: () => globalState,
-    setGlobalStateProperty: (name: string, value: unknown) =>
-      (globalState[name] = value),
   } as unknown as MapLibreMap;
 }
 

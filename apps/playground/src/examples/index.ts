@@ -32,7 +32,7 @@ const geotiffHref = new URL("./geotiff.esm.js", window.location.href);
 export const DEFAULT_IMPORT_MAP = `{
   "imports": {
     "ol/": "https://unpkg.com/ol@10.10.0/",
-    "maplibre-gl": "https://unpkg.com/maplibre-gl@^5.19.0/dist/maplibre-gl.js",
+    "maplibre-gl": "https://unpkg.com/maplibre-gl@6.16.0/dist/maplibre-gl.mjs",
     "earcut": "https://unpkg.com/earcut@^3.0.0",
     "ol-mapbox-style": "https://unpkg.com/ol-mapbox-style@^12.4.0/src",
     "pbf": "https://unpkg.com/pbf@5.1.2",
