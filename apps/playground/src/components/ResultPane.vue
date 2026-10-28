@@ -24,6 +24,7 @@ function buildHtml(code: PlaygroundCode) {
       }
     </style>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/ol@10.10.0/ol.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/maplibre-gl@6.16.0/dist/maplibre-gl.css" />
     <script type="importmap">
 ${code.importMap}
     <\/script>
