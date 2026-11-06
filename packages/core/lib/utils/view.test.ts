@@ -1,9 +1,11 @@
+import proj4 from "proj4";
 import { createViewFromLayer } from "./view.js";
 import {
   MapContextLayerGeojson,
   MapContextLayerWfs,
   MapContextLayerWms,
   MapContextLayerWmts,
+  ViewByExtent,
 } from "../model/index.js";
 
 vitest.mock("@camptocamp/ogc-client", () => ({
@@ -91,6 +93,50 @@ describe("view", () => {
 
       expect(view).toEqual({
         extent: [650796.4, 7060330.6, 690891.3, 7090402.2, "EPSG:2154"],
+      });
+    });
+
+    it("should combine the extents of comma-separated WMS sublayers", async () => {
+      const layer = {
+        type: "wms",
+        name: "mock_4326, mock_other",
+        url: "http://mock/wms",
+      } as MapContextLayerWms;
+      const view = await createViewFromLayer(layer);
+
+      expect(view).toEqual({
+        extent: [1, 2.6, 3.3, 50.9],
+      });
+    });
+
+    it("should combine WMS sublayer extents in EPSG:4326 when their CRS differ", async () => {
+      proj4.defs(
+        "EPSG:2154",
+        "+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      );
+      const layer = {
+        type: "wms",
+        name: "mock_4326,mock_2154",
+        url: "http://mock/wms",
+      } as MapContextLayerWms;
+      const view = await createViewFromLayer(layer);
+      const extent = (view as ViewByExtent).extent;
+
+      expect(extent).toHaveLength(4);
+      expect(extent.slice(0, 3)).toEqual([1, 2.6, 3.3]);
+      expect(extent[3]).toBeCloseTo(50.9, 1);
+    });
+
+    it("should ignore WMS sublayers without bounding boxes", async () => {
+      const layer = {
+        type: "wms",
+        name: "mock_4326,mock_nobbox",
+        url: "http://mock/wms",
+      } as MapContextLayerWms;
+      const view = await createViewFromLayer(layer);
+
+      expect(view).toEqual({
+        extent: [1, 2.6, 3.3, 4.2],
       });
     });
 

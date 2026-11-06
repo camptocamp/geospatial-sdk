@@ -1,5 +1,5 @@
 import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
-import { LONLAT_CRS_CODES } from "../constant/projections.js";
+import { DEFAULT_CRS, LONLAT_CRS_CODES } from "../constant/projections.js";
 import GeoTIFF from "ol/source/GeoTIFF.js";
 import {
   Extent,
@@ -12,7 +12,8 @@ import {
   ViewByExtent,
 } from "../model/index.js";
 import { ensureGeojson, getExtentFromGeojson } from "./geojson.js";
-import { setCrs, transform } from "./coordinates.js";
+import { extend, getCrs, setCrs, transform } from "./coordinates.js";
+import { ensureCrsRegistered } from "./crs.js";
 
 /**
  * Creates a view from a layer by extracting its extent. The returned extent is preferably
@@ -56,28 +57,56 @@ export async function createViewFromLayer(
   }
 }
 
+/**
+ * A WMS layer name may list several comma-separated sublayers (as in a GetMap `LAYERS`
+ * parameter); the resulting extent covers all of them.
+ */
 async function getWmsLayerExtent(
   layer: MapContextLayerWms,
 ): Promise<ViewByExtent | null> {
   const endpoint = await new WmsEndpoint(layer.url).isReady();
-  const { boundingBoxes } = endpoint.getLayerByName(layer.name);
+  const extents = layer.name
+    .split(",")
+    .map((name) => getWmsSublayerExtent(endpoint, name.trim()))
+    .filter((extent): extent is Extent => extent !== null);
+  if (!extents.length) {
+    return null;
+  }
+  if (extents.length === 1) {
+    return { extent: extents[0] };
+  }
+  const crsCodes = new Set(extents.map(getCrs));
+  if (crsCodes.size > 1) {
+    await ensureCrsRegistered(crsCodes);
+  }
+  const [first, ...others] =
+    crsCodes.size > 1
+      ? extents.map((extent) => transform(extent, DEFAULT_CRS))
+      : extents;
+  return {
+    extent: others.reduce((combined, extent) => extend(combined, extent), [
+      ...first,
+    ] as Extent),
+  };
+}
+
+function getWmsSublayerExtent(
+  endpoint: WmsEndpoint,
+  name: string,
+): Extent | null {
+  const boundingBoxes = endpoint.getLayerByName(name)?.boundingBoxes ?? {};
   if (!Object.keys(boundingBoxes).length) {
     return null;
   }
   const lonLatCRS = Object.keys(boundingBoxes).find((crs) =>
     LONLAT_CRS_CODES.includes(crs),
   );
-  // give priority to lon/lat bounding boxes
+  // a lon/lat extent needs no proj4 definition to be reprojected or combined
   if (lonLatCRS) {
-    return {
-      extent: boundingBoxes[lonLatCRS],
-    };
+    return boundingBoxes[lonLatCRS];
   }
-  // otherwise take the first extent and apply its CRS
   const availableEPSGCode = Object.keys(boundingBoxes)[0];
-  return {
-    extent: [...boundingBoxes[availableEPSGCode], availableEPSGCode],
-  };
+  return [...boundingBoxes[availableEPSGCode], availableEPSGCode];
 }
 
 async function getWmtsLayerExtent(
