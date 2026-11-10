@@ -1,7 +1,23 @@
 import { MapContext, MapContextLayer } from "../model/index.js";
 import { isLayerSame, updateLayer } from "./map-context-layer.js";
 
+/**
+ * Should not be part of the API
+ * @deprecated use getLayerPositionInContext instead
+ */
 export function getLayerPosition(
+  context: MapContext,
+  layerModel: MapContextLayer,
+): number {
+  return getLayerPositionInContext(context, layerModel);
+}
+
+/**
+ * Returns the position of a layer in the context. Returns -1 if the layer is not present.
+ * @param context
+ * @param layerModel
+ */
+export function getLayerPositionInContext(
   context: MapContext,
   layerModel: MapContextLayer,
 ): number {
@@ -44,7 +60,7 @@ export function removeLayerFromContext(
   layerModel: MapContextLayer,
 ): MapContext {
   const newContext = { ...context, layers: [...context.layers] };
-  const position = getLayerPosition(context, layerModel);
+  const position = getLayerPositionInContext(context, layerModel);
   if (position >= 0) {
     newContext.layers.splice(position, 1);
   }
@@ -66,7 +82,7 @@ export function replaceLayerInContext(
   replacement: MapContextLayer,
 ): MapContext {
   const newContext = { ...context, layers: [...context.layers] };
-  const position = getLayerPosition(context, layerModel);
+  const position = getLayerPositionInContext(context, layerModel);
   if (position >= 0) {
     newContext.layers.splice(position, 1, replacement);
   }
@@ -90,7 +106,7 @@ export function updateLayerInContext(
   layerModel: MapContextLayer,
   layerUpdates: Partial<MapContextLayer>,
 ): MapContext {
-  const position = getLayerPosition(context, layerModel);
+  const position = getLayerPositionInContext(context, layerModel);
   if (position >= 0) {
     const existing = context.layers[position];
     const updated = updateLayer(existing, layerUpdates);
