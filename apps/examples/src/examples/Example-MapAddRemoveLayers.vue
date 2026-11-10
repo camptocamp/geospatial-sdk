@@ -2,7 +2,13 @@
 import { onMounted, ref } from 'vue'
 import Map from 'ol/Map'
 import { applyContextDiffToMap, createMapFromContext } from '@geospatial-sdk/openlayers'
-import { computeMapContextDiff, getLayerPosition, type MapContextLayer } from '@geospatial-sdk/core'
+import {
+  addLayerToContext,
+  computeMapContextDiff,
+  getLayerPositionInContext,
+  type MapContextLayer,
+  removeLayerFromContext
+} from '@geospatial-sdk/core'
 import ButtonSimple from '@/components/ButtonSimple.vue'
 import { DEFAULT_CONTEXT } from '@/constants'
 
@@ -23,30 +29,27 @@ const Layers: Record<string, MapContextLayer> = {
   }
 }
 
+function isLayerEnabled(layer: 'wms1' | 'wms2' | 'xyz') {
+  return getLayerPositionInContext(context, Layers[layer]) >= 0
+}
+
 const mapRoot = ref<HTMLElement>()
 let map: Map
 let context = DEFAULT_CONTEXT
-let layerStates = ref({
-  wms1: false,
-  wms2: false,
-  xyz: false
-})
 
 onMounted(async () => {
   map = await createMapFromContext(context, mapRoot.value)
 })
 
 async function toggleLayer(layer: 'wms1' | 'wms2' | 'xyz') {
-  let newContext = { ...context, layers: [...context.layers] }
-  const enabled = layerStates.value[layer]
+  const enabled = getLayerPositionInContext(context, Layers[layer]) >= 0
+  let newContext
   if (!enabled) {
-    newContext.layers.push(Layers[layer])
+    newContext = addLayerToContext(context, Layers[layer])
   } else {
-    const layerPos = getLayerPosition(context, Layers[layer])
-    newContext.layers.splice(layerPos, 1)
+    newContext = removeLayerFromContext(context, Layers[layer])
   }
   await applyContextDiffToMap(map, computeMapContextDiff(newContext, context))
-  layerStates.value[layer] = !enabled
   context = newContext
 }
 </script>
@@ -55,13 +58,13 @@ async function toggleLayer(layer: 'wms1' | 'wms2' | 'xyz') {
   <div ref="mapRoot" class="w-full h-full relative">
     <div class="absolute inset-x-4 bottom-4 flex flex-row gap-4 z-50">
       <ButtonSimple class="shadow-sm" @click="toggleLayer('wms1')">
-        {{ layerStates['wms1'] ? 'Remove' : 'Add' }} layer over France
+        {{ isLayerEnabled('wms1') ? 'Remove' : 'Add' }} layer over France
       </ButtonSimple>
       <ButtonSimple class="shadow-sm" @click="toggleLayer('wms2')">
-        {{ layerStates['wms2'] ? 'Remove' : 'Add' }} layer over Germany
+        {{ isLayerEnabled('wms2') ? 'Remove' : 'Add' }} layer over Germany
       </ButtonSimple>
       <ButtonSimple class="shadow-sm" @click="toggleLayer('xyz')">
-        {{ layerStates['xyz'] ? 'Remove' : 'Add' }} satellite layer
+        {{ isLayerEnabled('xyz') ? 'Remove' : 'Add' }} satellite layer
       </ButtonSimple>
     </div>
   </div>

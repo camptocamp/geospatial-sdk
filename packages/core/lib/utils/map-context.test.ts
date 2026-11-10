@@ -2,7 +2,7 @@ import { describe } from "vitest";
 import {
   addLayerToContext,
   changeLayerPositionInContext,
-  getLayerPosition,
+  getLayerPositionInContext,
   removeLayerFromContext,
   replaceLayerInContext,
   updateLayerInContext,
@@ -16,14 +16,14 @@ import {
 } from "../../fixtures/map-context.fixtures.js";
 
 describe("Map context utils", () => {
-  describe("getLayerPosition", () => {
+  describe("getLayerPositionInContext", () => {
     it("returns the index of the layer in the context", () => {
       const context: MapContext = {
         ...SAMPLE_CONTEXT,
         layers: [SAMPLE_LAYER1, SAMPLE_LAYER2],
       };
-      expect(getLayerPosition(context, SAMPLE_LAYER1)).toBe(0);
-      expect(getLayerPosition(context, SAMPLE_LAYER2)).toBe(1);
+      expect(getLayerPositionInContext(context, SAMPLE_LAYER1)).toBe(0);
+      expect(getLayerPositionInContext(context, SAMPLE_LAYER2)).toBe(1);
     });
   });
   describe("addLayerToContext", () => {

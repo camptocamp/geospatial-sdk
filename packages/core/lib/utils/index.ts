@@ -17,6 +17,7 @@ export {
 export { computeMapContextDiff } from "./map-context-diff.js";
 export {
   getLayerPosition,
+  getLayerPositionInContext,
   addLayerToContext,
   removeLayerFromContext,
   replaceLayerInContext,
