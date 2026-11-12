@@ -1,7 +1,6 @@
-import { WfsEndpoint, WmsEndpoint, WmtsEndpoint } from "@camptocamp/ogc-client";
 import { LONLAT_CRS_CODES } from "../constant/projections.js";
-import GeoTIFF from "ol/source/GeoTIFF.js";
 import {
+  CrsIdentifier,
   Extent,
   MapContextLayer,
   MapContextLayerGeotiff,
@@ -12,7 +11,8 @@ import {
   ViewByExtent,
 } from "../model/index.js";
 import { ensureGeojson, getExtentFromGeojson } from "./geojson.js";
-import { setCrs, transform } from "./coordinates.js";
+import { extend, setCrs, transform } from "./coordinates.js";
+import { type GeoTIFFImage } from "geotiff";
 
 /**
  * Creates a view from a layer by extracting its extent. The returned extent is preferably
@@ -59,6 +59,7 @@ export async function createViewFromLayer(
 async function getWmsLayerExtent(
   layer: MapContextLayerWms,
 ): Promise<ViewByExtent | null> {
+  const { WmsEndpoint } = await import("@camptocamp/ogc-client");
   const endpoint = await new WmsEndpoint(layer.url).isReady();
   const { boundingBoxes } = endpoint.getLayerByName(layer.name);
   if (!Object.keys(boundingBoxes).length) {
@@ -83,6 +84,7 @@ async function getWmsLayerExtent(
 async function getWmtsLayerExtent(
   layer: MapContextLayerWmts,
 ): Promise<ViewByExtent | null> {
+  const { WmtsEndpoint } = await import("@camptocamp/ogc-client");
   const endpoint = await new WmtsEndpoint(layer.url).isReady();
   const layerName = endpoint.getSingleLayerName() ?? layer.name;
   const wmtsLayer = endpoint.getLayerByName(layerName);
@@ -96,6 +98,7 @@ async function getWmtsLayerExtent(
 async function getWfsLayerExtent(
   layer: MapContextLayerWfs,
 ): Promise<ViewByExtent | null> {
+  const { WfsEndpoint } = await import("@camptocamp/ogc-client");
   const endpoint = await new WfsEndpoint(layer.url).isReady();
   const featureTypeSummary = endpoint.getFeatureTypeSummary(layer.featureType);
   const boundingBox = featureTypeSummary?.boundingBox;
@@ -107,32 +110,61 @@ async function getWfsLayerExtent(
   };
 }
 
-// TODO: DO NOT RELY ON OL FOR THIS!
 async function getGeotiffLayerExtent(
   layer: MapContextLayerGeotiff,
 ): Promise<ViewByExtent | null> {
-  const source = new GeoTIFF({
-    sources: [{ url: layer.url }],
-  });
+  const { fromUrl } = await import("geotiff");
+  async function getProjectionFromKeys(
+    geoKeys: Record<string, any>,
+    geoKey: string,
+  ) {
+    const value = geoKeys[geoKey];
+    if (value && value !== 32767) {
+      return "EPSG:" + value;
+    }
+    return null;
+  }
+  async function getProjection(
+    image: GeoTIFFImage,
+  ): Promise<CrsIdentifier | null> {
+    const geoKeys = image.getGeoKeys();
+    if (!geoKeys) {
+      return null;
+    }
+    const projection = await getProjectionFromKeys(
+      geoKeys,
+      "ProjectedCSTypeGeoKey",
+    );
+    if (projection) {
+      return projection;
+    }
+    return await getProjectionFromKeys(geoKeys, "GeographicTypeGeoKey");
+  }
 
-  return new Promise((resolve) => {
-    source.on("change", () => {
-      if (source.getState() === "ready") {
-        const tileGrid = source.getTileGrid();
-        const projection = source.getProjection();
-        if (!tileGrid || !projection) {
-          resolve(null);
-          return;
-        }
-        const projectionCode = projection.getCode();
-        const extent = transform(
-          setCrs(tileGrid.getExtent() as Extent, projectionCode),
-          "EPSG:4326",
-        );
-        resolve({ extent });
-      } else if (source.getState() === "error") {
-        resolve(null);
-      }
-    });
-  });
+  const geotiff = await fromUrl(layer.url);
+  const imageCount = await geotiff.getImageCount();
+  const totalExtent = [Infinity, Infinity, -Infinity, -Infinity] as Extent;
+  for (let i = 0; i < imageCount; i++) {
+    const image = await geotiff.getImage(i);
+    const projection = await getProjection(image);
+    if (!projection) {
+      continue;
+    }
+    let rawExtent: Extent;
+    try {
+      rawExtent = setCrs(image.getBoundingBox(true) as Extent, projection);
+    } catch {
+      rawExtent = setCrs(
+        [0, 0, image.getWidth(), image.getHeight()],
+        projection,
+      );
+    }
+    const extent = transform(rawExtent, "EPSG:4326");
+    extend(totalExtent, extent);
+  }
+  const isFinite = totalExtent.every((value) => Number.isFinite(value));
+  if (!isFinite) {
+    return null;
+  }
+  return { extent: totalExtent };
 }

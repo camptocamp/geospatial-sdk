@@ -1,6 +1,6 @@
 import { FeatureCollection, Geometry } from "geojson";
 import { VectorStyle } from "./style.js";
-import { WmsLayerDimensionValue } from "@camptocamp/ogc-client";
+import type { WmsLayerDimensionValue } from "@camptocamp/ogc-client";
 
 /**
  * @private
