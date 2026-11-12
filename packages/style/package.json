@@ -1,6 +1,6 @@
 {
   "name": "@geospatial-sdk/style",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Handle and convert styles",
   "keywords": [
     "style",
@@ -32,7 +32,7 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "@geospatial-sdk/core": "^0.1.0"
+    "@geospatial-sdk/core": "^0.1.1"
   },
   "bugs": {
     "url": "https://github.com/camptocamp/geospatial-sdk/issues"

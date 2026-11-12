@@ -1,6 +1,6 @@
 {
   "name": "@geospatial-sdk/elements",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Custom elements provided by the SDK",
   "keywords": [
     "web",
@@ -36,8 +36,8 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@geospatial-sdk/core": "^0.1.0",
-    "@geospatial-sdk/openlayers": "^0.1.0"
+    "@geospatial-sdk/core": "^0.1.1",
+    "@geospatial-sdk/openlayers": "^0.1.1"
   },
   "devDependencies": {
     "lit": "^3.2.1"
