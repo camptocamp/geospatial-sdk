@@ -1,6 +1,6 @@
 {
   "name": "@geospatial-sdk/core",
-  "version": "0.0.5-alpha.2",
+  "version": "0.1.0",
   "description": "Core functions and models for the SDK",
   "keywords": [
     "geospatial",
