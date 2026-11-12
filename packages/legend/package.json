@@ -1,6 +1,6 @@
 {
   "name": "@geospatial-sdk/legend",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Get legend graphic from the map-context",
   "keywords": [
     "legend",
@@ -32,7 +32,7 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "@geospatial-sdk/core": "^0.1.1"
+    "@geospatial-sdk/core": "^0.1.2"
   },
   "bugs": {
     "url": "https://github.com/camptocamp/geospatial-sdk/issues"
