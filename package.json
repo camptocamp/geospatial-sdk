@@ -16,7 +16,6 @@
     "@eslint/js": "~9.39.5",
     "@types/geojson": "~7946.0.16",
     "@types/node": "~22.20.2",
-    "@types/proj4": "~2.19.0",
     "@typescript-eslint/eslint-plugin": "~8.70.0",
     "@typescript-eslint/parser": "~8.70.0",
     "@vitest/coverage-v8": "^5.0.5",
@@ -44,8 +43,5 @@
     "typecheck": "tsc --noEmit",
     "build": "lerna run build",
     "prepublish": "npm run build"
-  },
-  "dependencies": {
-    "@camptocamp/ogc-client": "2.0.2"
   }
 }

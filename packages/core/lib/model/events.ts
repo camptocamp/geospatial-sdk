@@ -1,4 +1,3 @@
-import { EndpointError } from "@camptocamp/ogc-client";
 import { Feature } from "geojson";
 import {
   ResolvedMapLayerState,
@@ -81,15 +80,15 @@ export class SourceLoadErrorEvent {
   type: typeof SourceLoadErrorType;
   message: string;
   httpStatus?: number;
-  constructor(error: EndpointError | Error | Response) {
+  constructor(error: Error | Response) {
     this.type = SourceLoadErrorType;
     if (error instanceof Response) {
       this.message = error.statusText;
       this.httpStatus = error.status;
-    } else if (error instanceof EndpointError) {
-      const e = error as EndpointError;
-      this.message = e.message;
-      this.httpStatus = e.httpStatus;
+      // } else if (error instanceof EndpointError) {
+    } else if ("httpStatus" in error) {
+      this.message = error.message;
+      this.httpStatus = error.httpStatus as number;
     } else {
       this.message = error.message;
     }
