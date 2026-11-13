@@ -40,7 +40,7 @@
     "maplibre-gl": "~6.16.0"
   },
   "peerDependencies": {
-    "maplibre-gl": ">9"
+    "maplibre-gl": ">6"
   },
   "bugs": {
     "url": "https://github.com/camptocamp/geospatial-sdk/issues"
