@@ -108,6 +108,13 @@ describe("createWmsLayer", () => {
       "https://www.datagrandest.fr/geoserver/region-grand-est/ows",
     );
   });
+  it("set correct url without existing VERSION, FORMAT, STYLES and TRANSPARENT params, keeping the others", () => {
+    const source = createWmsLayer({
+      ...layerModel,
+      url: "https://example.org/wms?SERVICE=WMS&version=1.3.0&REQUEST=GetCapabilities&format=image/png&styles=&transparent=true&map=test",
+    }).getSource() as TileWMS;
+    expect(source.getUrls()).toEqual(["https://example.org/wms?map=test"]);
+  });
   it("set WMS gutter of 20px", () => {
     const source = layer.getSource() as TileWMS;
     const gutter = source["gutter_"];

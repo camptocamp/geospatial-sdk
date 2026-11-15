@@ -66,7 +66,15 @@ export function buildWmsParams(
 }
 
 export function createWmsLayer(layerModel: MapContextLayerWms): Layer {
-  const url = removeSearchParams(layerModel.url, ["request", "service"]);
+  // these params are set by OpenLayers; keeping them in the url would send them twice
+  const url = removeSearchParams(layerModel.url, [
+    "request",
+    "service",
+    "version",
+    "format",
+    "styles",
+    "transparent",
+  ]);
   const params = buildWmsParams(layerModel);
   let layer: Layer;
   if (layerModel.useTiles === false) {
