@@ -1,4 +1,4 @@
-import { DEFAULT_CRS, LONLAT_CRS_CODES } from "../constant/projections.js";
+import type { CrsCode } from "@camptocamp/ogc-client";
 import {
   CrsIdentifier,
   Extent,
@@ -65,48 +65,36 @@ async function getWmsLayerExtent(
 ): Promise<ViewByExtent | null> {
   const { WmsEndpoint } = await import("@camptocamp/ogc-client");
   const endpoint = await new WmsEndpoint(layer.url).isReady();
-  const extents = layer.name
+  const layersWithExtent = layer.name
     .split(",")
-    .map((name) => getWmsSublayerExtent(endpoint, name.trim()))
-    .filter((extent): extent is Extent => extent !== null);
-  if (!extents.length) {
-    return null;
-  }
-  if (extents.length === 1) {
-    return { extent: extents[0] };
-  }
-  const crsCodes = new Set(extents.map(getCrs));
-  if (crsCodes.size > 1) {
-    await ensureCrsRegistered(crsCodes);
-  }
-  const [first, ...others] =
-    crsCodes.size > 1
-      ? extents.map((extent) => transform(extent, DEFAULT_CRS))
-      : extents;
-  return {
-    extent: others.reduce((combined, extent) => extend(combined, extent), [
-      ...first,
-    ] as Extent),
-  };
-}
+    .map((name) => endpoint.getLayerByName(name.trim()))
+    .filter((layer) => Object.keys(layer.boundingBoxes).length > 0);
+  const commonCrs = layersWithExtent.reduce<null | CrsCode[]>((prev, layer) => {
+    const layerCrs = Object.keys(layer.boundingBoxes);
+    return prev !== null
+      ? prev.filter((crs) => layerCrs.includes(crs))
+      : layerCrs;
+  }, null);
 
-function getWmsSublayerExtent(
-  endpoint: WmsEndpoint,
-  name: string,
-): Extent | null {
-  const boundingBoxes = endpoint.getLayerByName(name)?.boundingBoxes ?? {};
-  if (!Object.keys(boundingBoxes).length) {
+  if (commonCrs === null) {
     return null;
   }
-  const lonLatCRS = Object.keys(boundingBoxes).find((crs) =>
-    LONLAT_CRS_CODES.includes(crs),
-  );
-  // a lon/lat extent needs no proj4 definition to be reprojected or combined
-  if (lonLatCRS) {
-    return boundingBoxes[lonLatCRS];
+  if (commonCrs.length === 0) {
+    throw new Error(
+      `Could not compute the combine extent of the following WMS layers: ${layer.name} (no common CRS found)`,
+    );
   }
-  const availableEPSGCode = Object.keys(boundingBoxes)[0];
-  return [...boundingBoxes[availableEPSGCode], availableEPSGCode];
+  const bestCrs = commonCrs[0];
+  const extent = layersWithExtent.reduce(
+    (prev, layer) => {
+      const layerExtent = setCrs(layer.boundingBoxes[bestCrs], bestCrs);
+      return extend(prev, layerExtent);
+    },
+    setCrs([Infinity, Infinity, -Infinity, -Infinity], bestCrs),
+  );
+  return {
+    extent,
+  };
 }
 
 async function getWmtsLayerExtent(

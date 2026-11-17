@@ -1,4 +1,3 @@
-import proj4 from "proj4";
 import { createViewFromLayer } from "./view.js";
 import {
   MapContextLayerGeojson,
@@ -17,22 +16,36 @@ vitest.mock("@camptocamp/ogc-client", () => ({
           if (name.includes("error")) {
             throw new Error("Something went wrong");
           }
-          let boundingBoxes;
-          if (name.includes("nobbox")) {
-            boundingBoxes = {};
-          } else if (name.includes("4326")) {
+          let boundingBoxes = {};
+          if (name.includes("4326a")) {
             boundingBoxes = {
+              ...boundingBoxes,
               "EPSG:4326": [1, 2.6, 3.3, 4.2],
               "CRS:84": [2.3, 50.6, 2.8, 50.9],
             };
-          } else if (name.includes("2154")) {
+          }
+          if (name.includes("4326b")) {
             boundingBoxes = {
+              ...boundingBoxes,
+              "EPSG:4326": [2.3, 50.6, 2.8, 50.9],
+            };
+          }
+          if (name.includes("2154a")) {
+            boundingBoxes = {
+              ...boundingBoxes,
               "EPSG:2154": [650796.4, 7060330.6, 690891.3, 7090402.2],
             };
-          } else {
+          }
+          if (name.includes("2154b")) {
             boundingBoxes = {
-              "CRS:84": [2.3, 50.6, 2.8, 50.9],
-              "EPSG:2154": [650796.4, 7060330.6, 690891.3, 7090402.2],
+              ...boundingBoxes,
+              "EPSG:2154": [100_000, 200_000, 400_000, 500_000],
+            };
+          }
+          if (name.includes("32631")) {
+            boundingBoxes = {
+              ...boundingBoxes,
+              "EPSG:32631": [10_000, 20_000, 40_000, 50_000],
             };
           }
           return {
@@ -74,7 +87,7 @@ describe("view", () => {
     it("should return view for WMS layer", async () => {
       const layer = {
         type: "wms",
-        name: "mock_4326",
+        name: "mock_4326a",
         url: "http://mock/wms",
       } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
@@ -86,7 +99,7 @@ describe("view", () => {
     it("should preserve the CRS when only a projected WMS bounding box is available", async () => {
       const layer = {
         type: "wms",
-        name: "mock_2154",
+        name: "mock_2154a",
         url: "http://mock/wms",
       } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
@@ -99,7 +112,7 @@ describe("view", () => {
     it("should combine the extents of comma-separated WMS sublayers", async () => {
       const layer = {
         type: "wms",
-        name: "mock_4326, mock_other",
+        name: "mock_4326a, mock_4326b",
         url: "http://mock/wms",
       } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
@@ -109,28 +122,28 @@ describe("view", () => {
       });
     });
 
-    it("should combine WMS sublayer extents in EPSG:4326 when their CRS differ", async () => {
-      proj4.defs(
-        "EPSG:2154",
-        "+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      );
+    it("should combine extents of multiple WMS layers in a common EPSG", async () => {
       const layer = {
         type: "wms",
-        name: "mock_4326,mock_2154",
+        name: " mock_4326a_2154a, mock_2154b",
         url: "http://mock/wms",
       } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
       const extent = (view as ViewByExtent).extent;
 
-      expect(extent).toHaveLength(4);
-      expect(extent.slice(0, 3)).toEqual([1, 2.6, 3.3]);
-      expect(extent[3]).toBeCloseTo(50.9, 1);
+      expect(extent).toEqual([
+        100000,
+        200000,
+        690891.3,
+        7090402.2,
+        "EPSG:2154",
+      ]);
     });
 
-    it("should ignore WMS sublayers without bounding boxes", async () => {
+    it("should ignore WMS layers without bounding boxes", async () => {
       const layer = {
         type: "wms",
-        name: "mock_4326,mock_nobbox",
+        name: "mock_4326a,mock_nobbox ",
         url: "http://mock/wms",
       } as MapContextLayerWms;
       const view = await createViewFromLayer(layer);
@@ -140,14 +153,16 @@ describe("view", () => {
       });
     });
 
-    it("should return null when the WMS layer has no bounding boxes", async () => {
+    it("throws if no common CRS found for the given layers", async () => {
       const layer = {
         type: "wms",
-        name: "mock_nobbox",
+        name: "mock_2154a, mock_nobbox,mock_32631 ",
         url: "http://mock/wms",
       } as MapContextLayerWms;
 
-      await expect(createViewFromLayer(layer)).resolves.toBeNull();
+      await expect(createViewFromLayer(layer)).rejects.toThrow(
+        "Could not compute the combine extent of the following WMS layers: mock_2154a, mock_nobbox,mock_32631",
+      );
     });
 
     it("should return view for WMTS layer", async () => {
