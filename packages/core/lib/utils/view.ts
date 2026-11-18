@@ -1,4 +1,4 @@
-import { LONLAT_CRS_CODES } from "../constant/projections.js";
+import type { CrsCode } from "@camptocamp/ogc-client";
 import {
   CrsIdentifier,
   Extent,
@@ -56,28 +56,44 @@ export async function createViewFromLayer(
   }
 }
 
+/**
+ * A WMS layer name may list several comma-separated sublayers (as in a GetMap `LAYERS`
+ * parameter); the resulting extent covers all of them.
+ */
 async function getWmsLayerExtent(
   layer: MapContextLayerWms,
 ): Promise<ViewByExtent | null> {
   const { WmsEndpoint } = await import("@camptocamp/ogc-client");
   const endpoint = await new WmsEndpoint(layer.url).isReady();
-  const { boundingBoxes } = endpoint.getLayerByName(layer.name);
-  if (!Object.keys(boundingBoxes).length) {
+  const layersWithExtent = layer.name
+    .split(",")
+    .map((name) => endpoint.getLayerByName(name.trim()))
+    .filter((layer) => Object.keys(layer.boundingBoxes).length > 0);
+  const commonCrs = layersWithExtent.reduce<null | CrsCode[]>((prev, layer) => {
+    const layerCrs = Object.keys(layer.boundingBoxes);
+    return prev !== null
+      ? prev.filter((crs) => layerCrs.includes(crs))
+      : layerCrs;
+  }, null);
+
+  if (commonCrs === null) {
     return null;
   }
-  const lonLatCRS = Object.keys(boundingBoxes).find((crs) =>
-    LONLAT_CRS_CODES.includes(crs),
-  );
-  // give priority to lon/lat bounding boxes
-  if (lonLatCRS) {
-    return {
-      extent: boundingBoxes[lonLatCRS],
-    };
+  if (commonCrs.length === 0) {
+    throw new Error(
+      `Could not compute the combine extent of the following WMS layers: ${layer.name} (no common CRS found)`,
+    );
   }
-  // otherwise take the first extent and apply its CRS
-  const availableEPSGCode = Object.keys(boundingBoxes)[0];
+  const bestCrs = commonCrs[0];
+  const extent = layersWithExtent.reduce(
+    (prev, layer) => {
+      const layerExtent = setCrs(layer.boundingBoxes[bestCrs], bestCrs);
+      return extend(prev, layerExtent);
+    },
+    setCrs([Infinity, Infinity, -Infinity, -Infinity], bestCrs),
+  );
   return {
-    extent: [...boundingBoxes[availableEPSGCode], availableEPSGCode],
+    extent,
   };
 }
 
