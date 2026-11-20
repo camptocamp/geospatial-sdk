@@ -25,7 +25,7 @@ let context = {
     {
       type: 'xyz',
       label: 'satellite layer',
-      url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=get_your_own_D6rA4zTHduk6KOKTXzGB'
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     },
     { 
       type: 'geojson',
