@@ -10,7 +10,7 @@ import {
   MapContextView,
   ViewByExtent,
 } from "../model/index.js";
-import { ensureGeojson, getExtentFromGeojson } from "./geojson.js";
+import { getExtentFromGeojson, readLayerData } from "./geojson.js";
 import { extend, setCrs, transform } from "./coordinates.js";
 import { type GeoTIFFImage } from "geotiff";
 
@@ -43,9 +43,10 @@ export async function createViewFromLayer(
     return await getWmsLayerExtent(layer);
   } else if (layer.type === "wmts") {
     return await getWmtsLayerExtent(layer);
-  } else if (layer.type === "geojson" && layer.data) {
+  } else if (layer.type === "geojson") {
+    const geojson = await readLayerData(layer);
     return {
-      extent: getExtentFromGeojson(ensureGeojson(layer.data)),
+      extent: getExtentFromGeojson(geojson),
     };
   } else if (layer.type === "wfs") {
     return await getWfsLayerExtent(layer);

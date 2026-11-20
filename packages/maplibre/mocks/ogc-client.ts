@@ -76,3 +76,7 @@ export class OgcApiEndpoint {
     return "https://demo.ldproxy.net/zoomstack/collections/airports/items?f=json";
   }
 }
+
+export const useCache = vitest.fn((fn) => fn());
+
+export const sharedFetch = vitest.fn((...args) => fetch(...args));

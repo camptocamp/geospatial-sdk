@@ -197,41 +197,39 @@ describe("MapContextService", () => {
             },
           });
         });
-        describe("with remote file url", () => {
-          beforeEach(async () => {
-            layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
-            globalThis.fetch = vi.fn(() =>
-              Promise.resolve({
-                ok: true,
-                json: () =>
-                  Promise.resolve(FEATURE_COLLECTION_POLYGON_FIXTURE_4326),
-              } as Response),
-            );
-            style = (await createLayer(layerModel))!;
-          });
-          it("create a VectorLayer", () => {
-            expect(style).toBeTruthy();
-          });
-          it("create a source", () => {
-            const sourcesIds = Object.keys(style.sources);
-            expect(sourcesIds.length).toBe(1);
-            expect(sourcesIds[0]).toBe("123456");
-          });
-          it("create 5 layers", () => {
-            expect(style.layers).toBeTruthy();
-            expect(style.layers.length).toBe(5);
-          });
+      });
+      describe("with remote file url", () => {
+        beforeEach(async () => {
+          layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
+          globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+              ok: true,
+              json: () =>
+                Promise.resolve(FEATURE_COLLECTION_POLYGON_FIXTURE_4326),
+            } as Response),
+          );
+          style = (await createLayer(layerModel))!;
+        });
+        it("create a VectorLayer", () => {
+          expect(style).toBeTruthy();
+        });
+        it("create a source", () => {
+          const sourcesIds = Object.keys(style.sources);
+          expect(sourcesIds.length).toBe(1);
+          expect(sourcesIds[0]).toBe("123456");
+        });
+        it("create 5 layers", () => {
+          expect(style.layers).toBeTruthy();
+          expect(style.layers.length).toBe(5);
+        });
 
-          it("set correct source properties", () => {
-            const sourcesIds = Object.keys(style.sources);
-            const source = style.sources[
-              sourcesIds[0]
-            ] as GeoJSONSourceSpecification;
-            expect(source.type).toBe("geojson");
-            expect(source.data).toEqual(
-              "https://my.host.com/data/regions.json",
-            );
-          });
+        it("set correct source properties", () => {
+          const sourcesIds = Object.keys(style.sources);
+          const source = style.sources[
+            sourcesIds[0]
+          ] as GeoJSONSourceSpecification;
+          expect(source.type).toBe("geojson");
+          expect(source.data).toEqual(FEATURE_COLLECTION_POLYGON_FIXTURE_4326);
         });
       });
     });

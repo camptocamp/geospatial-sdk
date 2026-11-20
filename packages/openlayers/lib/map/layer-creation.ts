@@ -2,6 +2,7 @@ import {
   CrsIdentifier,
   defaultStyle,
   MapContextLayer,
+  readLayerData,
 } from "@geospatial-sdk/core";
 import Layer from "ol/layer/Layer.js";
 import TileLayer from "ol/layer/Tile.js";
@@ -9,8 +10,6 @@ import XYZ from "ol/source/XYZ.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import GeoJSON from "ol/format/GeoJSON.js";
-import Feature from "ol/Feature.js";
-import Geometry from "ol/geom/Geometry.js";
 import { bbox as bboxStrategy } from "ol/loadingstrategy.js";
 import VectorTileLayer from "ol/layer/VectorTile.js";
 import OGCMapTile from "ol/source/OGCMapTile.js";
@@ -24,7 +23,7 @@ import {
   WmtsEndpoint,
 } from "@camptocamp/ogc-client";
 import { MapboxVectorLayer } from "ol-mapbox-style";
-import { Tile } from "ol";
+import Tile from "ol/Tile.js";
 import { tileLoadErrorCatchFunction } from "./handle-errors.js";
 import VectorTile from "ol/source/VectorTile.js";
 import GeoTIFF from "ol/source/GeoTIFF.js";
@@ -37,6 +36,8 @@ import {
 } from "./register-events.js";
 import { GEOSPATIAL_SDK_PREFIX } from "./constants.js";
 import { createWmsLayer } from "./layers/wms.js";
+import Feature from "ol/Feature.js";
+import Geometry from "ol/geom/Geometry.js";
 
 const WFS_MAX_FEATURES = 10000;
 
@@ -185,56 +186,25 @@ export async function createLayer(
       layer = new VectorLayer({
         style: layerModel.style ?? defaultStyle,
       });
-      let source: VectorSource;
       const geojsonFormat = new GeoJSON({
         featureProjection: mapProjection,
         dataProjection: "EPSG:4326",
       });
-      if (layerModel.url !== undefined) {
-        source = new VectorSource({
-          format: geojsonFormat,
-          url: layerModel.url,
-          attributions: layerModel.attributions,
-        });
-        source.once("featuresloadend", () =>
-          emitLayerLoadingStatusSuccess(layer),
-        );
-        source.once("featuresloaderror", () =>
-          emitLayerLoadingError(
-            layer,
-            new Error(
-              `GeoJSON features could not be loaded from: ${layerModel.url}`,
-            ),
-          ),
-        );
-      } else {
-        let geojson = layerModel.data;
-        try {
-          if (typeof geojson === "string") {
-            geojson = JSON.parse(geojson);
-          }
+      const source = new VectorSource<Feature>({
+        features: [],
+        attributions: layerModel.attributions,
+      });
+      readLayerData(layerModel)
+        .then((geojson) => {
           const features = geojsonFormat.readFeatures(
             geojson,
           ) as Feature<Geometry>[];
-          source = new VectorSource({
-            features,
-            attributions: layerModel.attributions,
-          });
+          source.addFeatures(features);
           defer().then(() => emitLayerLoadingStatusSuccess(layer));
-        } catch (e) {
-          console.warn(
-            "GeoJSON layer data could not be parsed/read",
-            layerModel,
-            e,
-          );
-          source = new VectorSource({
-            features: [],
-            attributions: layerModel.attributions,
-          });
-          const err = e instanceof Error ? e : new Error(String(e));
-          defer().then(() => emitLayerLoadingError(layer, err));
-        }
-      }
+        })
+        .catch((e: Error) => {
+          defer().then(() => emitLayerLoadingError(layer, e));
+        });
       layer.setSource(source);
       break;
     }

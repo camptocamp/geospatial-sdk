@@ -240,7 +240,10 @@ describe("applyContextDiffToMap (mocked Map)", () => {
         ],
         source: {
           "999002": {
-            data: JSON.parse(layer3Changed.data as string),
+            data: {
+              features: [JSON.parse(layer3Changed.data as string)],
+              type: "FeatureCollection",
+            },
             type: "geojson",
           },
           "999003": expect.objectContaining({

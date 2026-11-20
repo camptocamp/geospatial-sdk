@@ -160,3 +160,7 @@ export class OgcApiEndpoint {
     );
   }
 }
+
+export const useCache = vitest.fn((fn) => fn());
+
+export const sharedFetch = vitest.fn((...args) => fetch(...args));

@@ -2,6 +2,7 @@ import {
   ensureContextCrsReady,
   MapContext,
   MapContextLayer,
+  readLayerData,
   removeSearchParams,
   toGeographic,
   ViewByZoomAndCenter,
@@ -12,7 +13,6 @@ import {
   MapOptions,
   StyleSpecification,
 } from "maplibre-gl";
-import { FeatureCollection, Geometry } from "geojson";
 import {
   OgcApiEndpoint,
   WfsEndpoint,
@@ -27,11 +27,7 @@ import {
   LayerMetadataSpecification,
   PartialStyleSpecification,
 } from "../maplibre.models.js";
-
-const featureCollection: FeatureCollection<Geometry | null> = {
-  type: "FeatureCollection",
-  features: [],
-};
+import { FeatureCollection } from "geojson";
 
 /**
  * Create a Maplibre layer from a MapContextLayer. Returns null if the layer could not be created.
@@ -95,22 +91,13 @@ export async function createLayer(
       return createDatasetFromGeoJsonLayer(layerModel, url, metadata);
     }
     case "geojson": {
-      let geojson;
-      if (layerModel.url !== undefined) {
-        geojson = layerModel.url;
-      } else {
-        const data = layerModel.data;
-        if (typeof data === "string") {
-          try {
-            geojson = JSON.parse(data) as FeatureCollection;
-          } catch (e) {
-            console.warn("A layer could not be created", layerModel, e);
-            geojson = featureCollection;
-          }
-        } else {
-          geojson = data;
-        }
-      }
+      const geojson = await readLayerData(layerModel).catch((err) => {
+        console.warn("Error reading layer data", err);
+        return {
+          type: "FeatureCollection",
+          features: [],
+        } as FeatureCollection;
+      });
       return createDatasetFromGeoJsonLayer(layerModel, geojson, metadata);
     }
     case "ogcapi": {
