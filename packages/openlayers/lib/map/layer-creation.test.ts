@@ -320,8 +320,6 @@ describe("createLayer", () => {
     });
     describe("with invalid inline data as string", () => {
       beforeEach(async () => {
-        const spy = vi.spyOn(window.console, "warn");
-        spy.mockClear();
         layerModel = {
           ...MAP_CTX_LAYER_GEOJSON_FIXTURE,
           url: undefined,
@@ -333,9 +331,6 @@ describe("createLayer", () => {
       it("create a VectorLayer", () => {
         expect(layer).toBeTruthy();
         expect(layer).toBeInstanceOf(VectorLayer);
-      });
-      it("outputs error in the console", () => {
-        expect(window.console.warn).toHaveBeenCalled();
       });
       it("create an empty VectorSource source", () => {
         const source = layer.getSource() as VectorSource;
@@ -355,6 +350,12 @@ describe("createLayer", () => {
     });
     describe("with remote file url", () => {
       beforeEach(async () => {
+        globalThis.fetch = vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(MAP_CTX_LAYER_GEOJSON_FIXTURE.data),
+          } as Response),
+        );
         layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
         layer = await createLayer(layerModel, "EPSG:3857");
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-status`, eventCallback);
@@ -368,19 +369,21 @@ describe("createLayer", () => {
         const source = layer.getSource();
         expect(source).toBeInstanceOf(VectorSource);
       });
-      it("sets the format as GeoJSON", () => {
-        const source = layer.getSource() as VectorSource;
-        expect(source.getFormat()).toBeInstanceOf(GeoJSON);
-      });
-      it("set the url to point to the file", () => {
-        const source = layer.getSource() as VectorSource;
-        expect(source.getUrl()).toBe(
+      it("fetches the file", () => {
+        expect(globalThis.fetch).toHaveBeenCalledWith(
           (layerModel as MapContextLayerGeojson).url,
         );
       });
-      it("emits a loaded event when features load", () => {
+      it("add features once loaded", async () => {
+        await vi.runAllTimersAsync();
         const source = layer.getSource() as VectorSource;
-        source.dispatchEvent("featuresloadend");
+        expect(source.getFeatures().length).toBe(
+          (MAP_CTX_LAYER_GEOJSON_FIXTURE.data as FeatureCollection).features
+            .length,
+        );
+      });
+      it("emits a loaded event when features load", async () => {
+        await vi.runAllTimersAsync();
         expect(eventCallback).toHaveBeenCalledWith({
           layerState: { loaded: true },
           target: layer,
@@ -390,19 +393,22 @@ describe("createLayer", () => {
     });
     describe("with remote file url (failing to load)", () => {
       beforeEach(async () => {
+        globalThis.fetch = vi.fn(() =>
+          Promise.reject(new Error("Network error")),
+        );
         layerModel = MAP_CTX_LAYER_GEOJSON_REMOTE_FIXTURE;
         layer = await createLayer(layerModel, "EPSG:3857");
         layer.on(`${GEOSPATIAL_SDK_PREFIX}layer-loading-error`, eventCallback);
       });
-      it("creates a vector layer with an empty source", () => {
+      it("creates a vector layer with an empty source", async () => {
+        await vi.runAllTimersAsync();
         const source = layer.getSource() as VectorSource;
         expect(layer).toBeInstanceOf(VectorLayer);
         expect(source).toBeInstanceOf(VectorSource);
         expect(source.getFeatures().length).toBe(0);
       });
-      it("emits a loading error event when features fail to load", () => {
-        const source = layer.getSource() as VectorSource;
-        source.dispatchEvent("featuresloaderror");
+      it("emits a loading error event when features fail to load", async () => {
+        await vi.runAllTimersAsync();
         expect(eventCallback).toHaveBeenCalledWith(
           expect.objectContaining({
             type: `${GEOSPATIAL_SDK_PREFIX}layer-loading-error`,

@@ -28,8 +28,8 @@ export { updateLayer } from "./map-context-layer.js";
 export { createViewFromLayer } from "./view.js";
 export * from "./style.js";
 export {
-  ensureGeojson,
   getExtentFromGeojson,
   getExtentFromGeometry,
+  readLayerData,
 } from "./geojson.js";
 export { ensureContextCrsReady, ensureDiffCrsReady } from "./crs.js";

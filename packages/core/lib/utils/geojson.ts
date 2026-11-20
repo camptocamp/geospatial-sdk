@@ -1,19 +1,7 @@
 import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
-import { Extent } from "../model/index.js";
+import { Extent, MapContextLayerGeojson } from "../model/index.js";
 import { extend } from "./coordinates.js";
-
-export function ensureGeojson(
-  value: FeatureCollection<Geometry | null> | string,
-): FeatureCollection<Geometry | null> {
-  if (typeof value === "string") {
-    try {
-      return JSON.parse(value) as FeatureCollection;
-    } catch (e) {
-      throw new Error(`Invalid GeoJSON string: ${e}`);
-    }
-  }
-  return value;
-}
+import { sharedFetch, useCache } from "@camptocamp/ogc-client";
 
 /**
  * This assumes the geometry is in EPSG:4326
@@ -130,4 +118,67 @@ export function getExtentFromGeojson(
     }
   }
   return empty;
+}
+
+function ensureFeatureCollection(
+  value: unknown,
+): FeatureCollection<Geometry | null> {
+  const isGeojson =
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    typeof value.type === "string";
+  const isFeatureCollection =
+    isGeojson &&
+    value.type === "FeatureCollection" &&
+    Array.isArray((value as FeatureCollection).features);
+  const isFeature =
+    isGeojson &&
+    value.type === "Feature" &&
+    "properties" in value &&
+    typeof value.properties === "object";
+  if (!isFeatureCollection && !isFeature) {
+    throw new Error("GeoJSON layer data is not a valid GeoJSON object");
+  }
+  if (isFeature) {
+    return {
+      type: "FeatureCollection",
+      features: [value],
+    } as FeatureCollection<Geometry | null>;
+  }
+  return value as FeatureCollection<Geometry | null>;
+}
+
+/**
+ * This will read the layer data and keep it in cache for future calls; it will
+ * also properly report errors in case of invalid GeoJSON or network issues
+ */
+export async function readLayerData(
+  layer: MapContextLayerGeojson,
+): Promise<FeatureCollection<Geometry | null>> {
+  if ("data" in layer) {
+    if (typeof layer.data === "string") {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(layer.data);
+      } catch (e) {
+        throw new Error(`GeoJSON layer data parsing failed: ${e}`);
+      }
+      return ensureFeatureCollection(parsed);
+    }
+    return layer.data!;
+  }
+  return useCache(
+    () =>
+      sharedFetch(layer.url).then((response) =>
+        response
+          .json()
+          .catch((e: Error) => {
+            throw new Error(`GeoJSON layer data parsing failed: ${e}`);
+          })
+          .then(ensureFeatureCollection),
+      ),
+    `getGeojsonFromUrl`,
+    layer.url,
+  );
 }
