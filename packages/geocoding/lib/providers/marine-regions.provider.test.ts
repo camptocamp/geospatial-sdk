@@ -197,7 +197,7 @@ describe("queryMarineRegions", () => {
     it("rejects when the response is not a list", async () => {
       mockFetch(200, { error: "unexpected" });
       await expect(queryMarineRegions("hawa")).rejects.toThrow(
-        "Invalid response from Marine Regions API: not a list",
+        'Invalid response from Marine Regions API: {"error":"unexpected"}',
       );
     });
   });

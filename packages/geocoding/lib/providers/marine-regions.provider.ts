@@ -140,7 +140,9 @@ export async function queryMarineRegions(
   }
   const records: unknown = await response.json();
   if (!Array.isArray(records)) {
-    throw new Error("Invalid response from Marine Regions API: not a list");
+    throw new Error(
+      `Invalid response from Marine Regions API: ${JSON.stringify(records)}`,
+    );
   }
   return (records as MarineRegionsRecord[]).map(toResult);
 }
