@@ -9,7 +9,8 @@ const js = `/**
 import {
   queryGeoplateforme,
   queryGeoadmin,
-  queryGeonames
+  queryGeonames,
+  queryMarineRegions
 } from '@geospatial-sdk/geocoding'
 
 let provider = 'geonames';
@@ -29,6 +30,8 @@ async function queryResults() {
       return await queryGeoadmin(searchText);
     case 'geoplateforme':
       return await queryGeoplateforme(searchText);
+    case 'marine-regions' :
+      return await queryMarineRegions(searchText);
     case 'geonames':
     default:
       return await queryGeonames(searchText);
@@ -77,6 +80,7 @@ const html = `<div style="padding: 12px">
     <button type="button" class="provider-btn" data-provider="geonames">✅ Geonames</button>
     <button type="button" class="provider-btn" data-provider="geoadmin">Geoadmin (CH)</button>
     <button type="button" class="provider-btn" data-provider="geoplateforme">Géoplateforme (FR)</button>
+    <button type="button" class="provider-btn" data-provider="marine-regions">Marine Regions (sea) </button>
   </div>
   <p><span id="results-count">0</span> results found.</p>
   <ul id="results-list"></ul>

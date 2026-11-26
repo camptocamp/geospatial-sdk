@@ -7,3 +7,4 @@ export * from "./geoadmin.provider.js";
 export * from "./data-gouv-fr.provider.js";
 export * from "./geoplateforme.provider.js";
 export * from "./geonames.provider.js";
+export * from "./marine-regions.provider.js";
